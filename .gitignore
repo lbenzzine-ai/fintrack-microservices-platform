@@ -60,3 +60,4 @@ zookeeper-data/
 coverage/
 **/surefire-reports/
 **/failsafe-reports/
+.claude/
