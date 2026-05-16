@@ -51,6 +51,10 @@ secrets/
 
 # Docker
 docker-compose.override.yml
+docker/volumes/
+elasticsearch-data/
+kafka-data/
+zookeeper-data/
 
 # Reports
 coverage/
