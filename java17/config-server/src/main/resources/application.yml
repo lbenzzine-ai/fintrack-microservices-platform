@@ -1,0 +1,68 @@
+server:
+  port: 8888
+  shutdown: graceful
+
+spring:
+  application:
+    name: config-server
+  profiles:
+    active: native
+  cloud:
+    config:
+      server:
+        native:
+          search-locations: classpath:/config/
+        encrypt:
+          enabled: false
+  security:
+    user:
+      name: ${CONFIG_SERVER_USER:configadmin}
+      password: ${CONFIG_SERVER_PASSWORD:configpass}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_SERVER_URL:http://eurekaadmin:eurekapass@localhost:8761/eureka}
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${random.uuid}
+    metadata-map:
+      user.name: ${spring.security.user.name}
+      user.password: ${spring.security.user.password}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,refresh,busrefresh,env,metrics
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_URL:http://localhost:9411}/api/v2/spans
+
+info:
+  app:
+    name: ${spring.application.name}
+    description: FinTrack Spring Cloud Config Server
+    java-version: 17
+    features: platform-threads,lombok,interfaces
+
+logging:
+  level:
+    org.springframework.cloud.config: INFO
+    com.fintrack: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%X{traceId:-},%X{spanId:-}] %-5level %logger{36} - %msg%n"

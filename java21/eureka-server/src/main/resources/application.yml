@@ -1,0 +1,66 @@
+server:
+  port: 8761
+  shutdown: graceful
+
+spring:
+  application:
+    name: eureka-server
+  threads:
+    virtual:
+      enabled: true
+  security:
+    user:
+      name: ${EUREKA_USER:eurekaadmin}
+      password: ${EUREKA_PASSWORD:eurekapass}
+
+eureka:
+  instance:
+    hostname: ${EUREKA_HOSTNAME:localhost}
+    prefer-ip-address: false
+  client:
+    # Standalone single-node server — does not register with itself, does not fetch a registry.
+    register-with-eureka: false
+    fetch-registry: false
+    service-url:
+      defaultZone: http://${spring.security.user.name}:${spring.security.user.password}@${eureka.instance.hostname}:${server.port}/eureka/
+  server:
+    enable-self-preservation: ${EUREKA_SELF_PRESERVATION:true}
+    eviction-interval-timer-in-ms: 15000
+    response-cache-update-interval-ms: 5000
+    renewal-percent-threshold: 0.85
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics,env
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_URL:http://localhost:9411}/api/v2/spans
+
+info:
+  app:
+    name: ${spring.application.name}
+    description: FinTrack Service Discovery (Netflix Eureka)
+    java-version: 21
+    features: virtual-threads
+
+logging:
+  level:
+    com.netflix.eureka: INFO
+    com.netflix.discovery: INFO
+    com.fintrack: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%X{traceId:-},%X{spanId:-}] %-5level %logger{36} - %msg%n"

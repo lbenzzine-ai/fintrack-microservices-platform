@@ -1,0 +1,17 @@
+# Most config comes from Config Server (api-gateway.yml + application.yml).
+# This file is the minimal fallback used when running without Config Server.
+
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  application:
+    name: api-gateway
+  main:
+    web-application-type: reactive
+
+info:
+  app:
+    name: ${spring.application.name}
+    description: FinTrack Spring Cloud Gateway
+    java-version: 21

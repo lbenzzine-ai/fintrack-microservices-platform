@@ -1,0 +1,16 @@
+# Most config comes from Config Server (notification-service.yml + application.yml).
+# This file is the minimal fallback used when running without Config Server.
+
+server:
+  port: ${SERVER_PORT:8084}
+
+spring:
+  application:
+    name: notification-service
+
+info:
+  app:
+    name: ${spring.application.name}
+    description: FinTrack Notification Service (Strategy per channel: Email/SMS/Push)
+    java-version: 21
+    features: virtual-threads,records,sealed-strategy

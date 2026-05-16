@@ -1,0 +1,60 @@
+package com.fintrack.user.exception;
+
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.time.Instant;
+import java.util.List;
+
+@Slf4j
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(ApiException.class)
+    public ResponseEntity<ApiError> handleApi(ApiException ex, HttpServletRequest req) {
+        log.warn("ApiException [{}] {}: {}", ex.getStatus(), ex.getCode(), ex.getMessage());
+        return ResponseEntity.status(ex.getStatus()).body(ApiError.builder()
+                .timestamp(Instant.now())
+                .status(ex.getStatus().value())
+                .code(ex.getCode())
+                .message(ex.getMessage())
+                .path(req.getRequestURI())
+                .build());
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiError> handleValidation(MethodArgumentNotValidException ex, HttpServletRequest req) {
+        List<ApiError.FieldViolation> violations = ex.getBindingResult().getFieldErrors().stream()
+                .map(this::toViolation).toList();
+        return ResponseEntity.badRequest().body(ApiError.builder()
+                .timestamp(Instant.now())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .code("VALIDATION_FAILED")
+                .message("Request validation failed")
+                .path(req.getRequestURI())
+                .violations(violations)
+                .build());
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiError> handleAny(Exception ex, HttpServletRequest req) {
+        log.error("Unhandled exception", ex);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ApiError.builder()
+                .timestamp(Instant.now())
+                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .code("INTERNAL_ERROR")
+                .message("Unexpected error — see correlationId in logs")
+                .path(req.getRequestURI())
+                .build());
+    }
+
+    private ApiError.FieldViolation toViolation(FieldError fe) {
+        return ApiError.FieldViolation.builder().field(fe.getField()).message(fe.getDefaultMessage()).build();
+    }
+}

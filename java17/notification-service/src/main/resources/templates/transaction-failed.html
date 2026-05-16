@@ -1,0 +1,9 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>Transaction failed</title></head>
+<body>
+<h1>We couldn't complete your transaction</h1>
+<p>Amount: <span th:text="${amount}">0</span> <span th:text="${currency}">USD</span></p>
+<p>Reason: <span th:text="${reasonCode}">UNKNOWN</span> — <span th:text="${reason}">no details</span></p>
+</body>
+</html>

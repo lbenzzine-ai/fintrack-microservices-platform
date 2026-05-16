@@ -1,0 +1,15 @@
+# Most config comes from Config Server (transaction-service.yml + application.yml).
+# This file is the minimal fallback used when running without Config Server.
+
+server:
+  port: ${SERVER_PORT:8083}
+
+spring:
+  application:
+    name: transaction-service
+
+info:
+  app:
+    name: ${spring.application.name}
+    description: FinTrack Transaction Service (Saga orchestrator, Strategy pattern for fees)
+    java-version: 17

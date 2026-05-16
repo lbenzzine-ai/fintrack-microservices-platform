@@ -1,0 +1,9 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>Transaction completed</title></head>
+<body>
+<h1>Your transaction is complete</h1>
+<p>Type: <span th:text="${type}">TRANSFER</span></p>
+<p>Amount: <span th:text="${amount}">0</span> <span th:text="${currency}">USD</span> (fee <span th:text="${fee}">0</span>)</p>
+</body>
+</html>

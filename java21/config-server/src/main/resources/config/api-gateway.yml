@@ -1,0 +1,155 @@
+server:
+  port: 8080
+
+spring:
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_UNIQUE
+        - name: Retry
+          args:
+            retries: 3
+            statuses: BAD_GATEWAY, SERVICE_UNAVAILABLE, GATEWAY_TIMEOUT
+            methods: GET
+            backoff:
+              firstBackoff: 50ms
+              maxBackoff: 500ms
+              factor: 2
+              basedOnPreviousValue: false
+
+      routes:
+        # ── user-service ───────────────────────────────────────────────────
+        - id: user-service-auth
+          uri: lb://user-service
+          predicates:
+            - Path=/api/v1/auth/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: userServiceCB
+                fallbackUri: forward:/fallback/users
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 50
+                redis-rate-limiter.burstCapacity: 100
+                key-resolver: "#{@ipKeyResolver}"
+
+        - id: user-service-users
+          uri: lb://user-service
+          predicates:
+            - Path=/api/v1/users/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: userServiceCB
+                fallbackUri: forward:/fallback/users
+            - JwtAuth
+
+        # ── account-service ────────────────────────────────────────────────
+        - id: account-service
+          uri: lb://account-service
+          predicates:
+            - Path=/api/v1/accounts/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: accountServiceCB
+                fallbackUri: forward:/fallback/accounts
+            - JwtAuth
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 100
+                redis-rate-limiter.burstCapacity: 200
+                key-resolver: "#{@userKeyResolver}"
+
+        # ── transaction-service ────────────────────────────────────────────
+        - id: transaction-service
+          uri: lb://transaction-service
+          predicates:
+            - Path=/api/v1/transactions/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: transactionServiceCB
+                fallbackUri: forward:/fallback/transactions
+            - JwtAuth
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 30
+                redis-rate-limiter.burstCapacity: 60
+                key-resolver: "#{@userKeyResolver}"
+
+        # ── notification-service ───────────────────────────────────────────
+        - id: notification-service
+          uri: lb://notification-service
+          predicates:
+            - Path=/api/v1/notifications/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: notificationServiceCB
+                fallbackUri: forward:/fallback/notifications
+            - JwtAuth
+
+        # ── aggregated openapi docs (per-service) ──────────────────────────
+        - id: openapi-user
+          uri: lb://user-service
+          predicates:
+            - Path=/aggregate/user-service/v3/api-docs
+          filters:
+            - RewritePath=/aggregate/user-service/(?<segment>.*), /$\{segment}
+        - id: openapi-account
+          uri: lb://account-service
+          predicates:
+            - Path=/aggregate/account-service/v3/api-docs
+          filters:
+            - RewritePath=/aggregate/account-service/(?<segment>.*), /$\{segment}
+        - id: openapi-transaction
+          uri: lb://transaction-service
+          predicates:
+            - Path=/aggregate/transaction-service/v3/api-docs
+          filters:
+            - RewritePath=/aggregate/transaction-service/(?<segment>.*), /$\{segment}
+        - id: openapi-notification
+          uri: lb://notification-service
+          predicates:
+            - Path=/aggregate/notification-service/v3/api-docs
+          filters:
+            - RewritePath=/aggregate/notification-service/(?<segment>.*), /$\{segment}
+
+      httpclient:
+        connect-timeout: 2000
+        response-timeout: 5s
+        pool:
+          max-connections: 500
+          acquire-timeout: 3000
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      userServiceCB:
+        base-config: default
+      accountServiceCB:
+        base-config: default
+      transactionServiceCB:
+        base-config: default
+        failure-rate-threshold: 40
+      notificationServiceCB:
+        base-config: default
+
+springdoc:
+  swagger-ui:
+    urls:
+      - { name: user-service,         url: /aggregate/user-service/v3/api-docs }
+      - { name: account-service,      url: /aggregate/account-service/v3/api-docs }
+      - { name: transaction-service,  url: /aggregate/transaction-service/v3/api-docs }
+      - { name: notification-service, url: /aggregate/notification-service/v3/api-docs }

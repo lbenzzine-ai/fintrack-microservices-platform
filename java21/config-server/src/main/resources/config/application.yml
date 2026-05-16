@@ -1,0 +1,210 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# FinTrack — shared defaults served to every downstream service.
+# Each service overlays its own <service>.yml on top of this file.
+# ─────────────────────────────────────────────────────────────────────────────
+
+server:
+  shutdown: graceful
+  compression:
+    enabled: true
+  tomcat:
+    threads:
+      max: 200
+      min-spare: 25
+
+spring:
+  threads:
+    virtual:
+      enabled: true                # Java 21 — all blocking work runs on virtual threads
+  jackson:
+    default-property-inclusion: non_null
+    serialization:
+      write-dates-as-timestamps: false
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+
+# ── Service discovery ────────────────────────────────────────────────────────
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_SERVER_URL:http://localhost:8761/eureka}
+    register-with-eureka: true
+    fetch-registry: true
+    registry-fetch-interval-seconds: 10
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${random.uuid}
+    lease-renewal-interval-in-seconds: 10
+    lease-expiration-duration-in-seconds: 30
+
+# ── Observability: metrics + tracing ─────────────────────────────────────────
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics,env,refresh,busrefresh,loggers,httptrace,threaddump,heapdump,caches,circuitbreakers,circuitbreakerevents
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+      group:
+        readiness:
+          include: db,kafka,redis,diskSpace
+        liveness:
+          include: ping
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+        step: 10s
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+        resilience4j.circuitbreaker.calls: true
+    tags:
+      application: ${spring.application.name}
+  tracing:
+    sampling:
+      probability: ${TRACING_SAMPLE_RATE:1.0}
+    propagation:
+      type: B3
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_URL:http://localhost:9411}/api/v2/spans
+
+# ── Kafka (default broker) ───────────────────────────────────────────────────
+spring.kafka:
+  bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+  producer:
+    key-serializer: org.apache.kafka.common.serialization.StringSerializer
+    value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    acks: all
+    retries: 5
+    properties:
+      enable.idempotence: true
+      spring.json.add.type.headers: true
+  consumer:
+    group-id: ${spring.application.name}
+    key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+    properties:
+      spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
+      spring.json.trusted.packages: "com.fintrack.*"
+      auto.offset.reset: earliest
+      max.poll.records: 100
+  listener:
+    ack-mode: manual_immediate
+    concurrency: 3
+    missing-topics-fatal: false
+
+# ── RabbitMQ (alternative broker, selected by fintrack.messaging.broker) ─────
+spring.rabbitmq:
+  host: ${RABBITMQ_HOST:localhost}
+  port: ${RABBITMQ_PORT:5672}
+  username: ${RABBITMQ_USER:guest}
+  password: ${RABBITMQ_PASS:guest}
+  listener:
+    simple:
+      acknowledge-mode: manual
+      prefetch: 50
+      retry:
+        enabled: true
+        initial-interval: 2s
+        max-attempts: 5
+        multiplier: 2
+
+# ── FinTrack platform settings ───────────────────────────────────────────────
+fintrack:
+  messaging:
+    broker: ${FINTRACK_BROKER:kafka}                 # kafka | rabbitmq — selected at runtime by MessagingStrategy
+    kafka:
+      topics:
+        user-registered: fintrack.user.registered
+        account-created: fintrack.account.created
+        transaction-initiated: fintrack.tx.initiated
+        account-debited: fintrack.account.debited
+        account-credited: fintrack.account.credited
+        transaction-completed: fintrack.tx.completed
+        transaction-failed: fintrack.tx.failed
+        notification-requested: fintrack.notification.requested
+      dlq-suffix: .DLT
+    rabbitmq:
+      exchange: fintrack.events
+      queues:
+        user-registered: fintrack.q.user.registered
+        account-created: fintrack.q.account.created
+        transaction-initiated: fintrack.q.tx.initiated
+        account-debited: fintrack.q.account.debited
+        account-credited: fintrack.q.account.credited
+        transaction-completed: fintrack.q.tx.completed
+        transaction-failed: fintrack.q.tx.failed
+        notification-requested: fintrack.q.notification.requested
+  security:
+    jwt:
+      secret: ${JWT_SECRET:Y2hhbmdlLW1lLXVzZS1hLXNlY3VyZS0yNTYtYml0LXNlY3JldC1pbi1wcm9kdWN0aW9u}  # base64-encoded HS256 key
+      issuer: fintrack
+      access-token-ttl-minutes: 30
+      refresh-token-ttl-days: 7
+
+# ── Resilience4j defaults (each service refines via its own yml) ─────────────
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        register-health-indicator: true
+        sliding-window-type: COUNT_BASED
+        sliding-window-size: 20
+        minimum-number-of-calls: 10
+        failure-rate-threshold: 50
+        slow-call-rate-threshold: 80
+        slow-call-duration-threshold: 2s
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 5
+        automatic-transition-from-open-to-half-open-enabled: true
+  retry:
+    configs:
+      default:
+        max-attempts: 3
+        wait-duration: 500ms
+        exponential-backoff-multiplier: 2
+        retry-exceptions:
+          - org.springframework.web.client.ResourceAccessException
+          - java.io.IOException
+          - java.util.concurrent.TimeoutException
+  timelimiter:
+    configs:
+      default:
+        timeout-duration: 3s
+        cancel-running-future: true
+  bulkhead:
+    configs:
+      default:
+        max-concurrent-calls: 50
+        max-wait-duration: 100ms
+
+# ── OpenAPI / Swagger (every service exposes the same shape) ─────────────────
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+    tagsSorter: alpha
+    disable-swagger-default-url: true
+  packages-to-scan: com.fintrack
+  show-actuator: false
+
+# ── Logging ──────────────────────────────────────────────────────────────────
+logging:
+  level:
+    root: INFO
+    com.fintrack: ${FINTRACK_LOG_LEVEL:DEBUG}
+    org.hibernate.SQL: WARN
+    org.hibernate.orm.jdbc.bind: WARN
+    org.springframework.kafka: INFO
+    org.springframework.cloud.gateway: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%X{traceId:-},%X{spanId:-}] %-5level %logger{36} - %msg%n"

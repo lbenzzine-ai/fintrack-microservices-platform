@@ -1,0 +1,15 @@
+# Most config comes from Config Server (account-service.yml + application.yml).
+# This file is the minimal fallback used when running without Config Server.
+
+server:
+  port: ${SERVER_PORT:8082}
+
+spring:
+  application:
+    name: account-service
+
+info:
+  app:
+    name: ${spring.application.name}
+    description: FinTrack Account Service (Saga participant, EHCache L2, Strategy interest)
+    java-version: 17

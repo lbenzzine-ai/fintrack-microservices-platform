@@ -1,0 +1,16 @@
+# Most config arrives from Config Server (user-service.yml + application.yml).
+# This file is the minimal fallback used when running without Config Server.
+
+server:
+  port: ${SERVER_PORT:8081}
+
+spring:
+  application:
+    name: user-service
+
+info:
+  app:
+    name: ${spring.application.name}
+    description: FinTrack User Service
+    java-version: 21
+    features: virtual-threads,records,sealed-strategy,pattern-matching

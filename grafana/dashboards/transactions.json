@@ -1,0 +1,42 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "graphTooltip": 1,
+  "title": "FinTrack Transactions",
+  "uid": "fintrack-transactions",
+  "tags": ["fintrack","business","transactions"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "time": { "from": "now-1h", "to": "now" },
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Transactions / sec",
+      "datasource": "Prometheus",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "targets": [
+        { "expr": "sum(rate(http_server_requests_seconds_count{application=\"transaction-service\", uri=\"/api/v1/transactions\", method=\"POST\"}[1m]))" }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Saga failures / sec",
+      "datasource": "Prometheus",
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "targets": [
+        { "expr": "sum(rate(http_server_requests_seconds_count{application=\"transaction-service\", status=~\"5..\"}[5m]))" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Fee Strategy calls",
+      "datasource": "Prometheus",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "targets": [
+        { "expr": "sum by (method) (rate(fintrack_service_method_seconds_count{method=~\".*Strategy.*\"}[1m]))", "legendFormat": "{{method}}" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,348 @@
+# FinTrack — one-shot dev stack
+#
+# Brings up the full platform: 4 dedicated MySQL DBs, Kafka + Zookeeper + Kafdrop, RabbitMQ,
+# Redis, Zipkin, the ELK trio, Prometheus + Grafana, the four infra services, the four business
+# services. Defaults to the Java 21 builds; override with JAVA_FLAVOR=java17 to use the LTS stack.
+#
+# Usage:
+#   docker compose --profile core up -d                  # platform + infra services only
+#   docker compose up -d                                  # everything (default profile)
+#   JAVA_FLAVOR=java17 docker compose up -d --build       # use the Java 17 builds
+#
+name: fintrack
+
+x-business-env: &business-env
+  CONFIG_SERVER_URL: http://config-server:8888
+  CONFIG_SERVER_USER: configadmin
+  CONFIG_SERVER_PASSWORD: configpass
+  EUREKA_SERVER_URL: http://eurekaadmin:eurekapass@eureka-server:8761/eureka
+  SPRING_PROFILES_ACTIVE: docker
+  SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+  SPRING_DATA_REDIS_HOST: redis
+  SPRING_RABBITMQ_HOST: rabbitmq
+  MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: http://zipkin:9411/api/v2/spans
+  LOGSTASH_HOST: logstash
+  LOGSTASH_PORT: "5044"
+
+x-restart: &restart
+  restart: unless-stopped
+
+services:
+
+  # ---------- Databases (one per bounded context) ----------
+  mysql-users:
+    image: mysql:8.0
+    container_name: fintrack-mysql-users
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: fintrack_users
+      MYSQL_USER: fintrack
+      MYSQL_PASSWORD: fintrack
+    ports: ["3307:3306"]
+    volumes: [mysql-users-data:/var/lib/mysql]
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpass"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    <<: *restart
+
+  mysql-accounts:
+    image: mysql:8.0
+    container_name: fintrack-mysql-accounts
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: fintrack_accounts
+      MYSQL_USER: fintrack
+      MYSQL_PASSWORD: fintrack
+    ports: ["3308:3306"]
+    volumes: [mysql-accounts-data:/var/lib/mysql]
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpass"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    <<: *restart
+
+  mysql-transactions:
+    image: mysql:8.0
+    container_name: fintrack-mysql-transactions
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: fintrack_transactions
+      MYSQL_USER: fintrack
+      MYSQL_PASSWORD: fintrack
+    ports: ["3309:3306"]
+    volumes: [mysql-transactions-data:/var/lib/mysql]
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpass"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    <<: *restart
+
+  mysql-notifications:
+    image: mysql:8.0
+    container_name: fintrack-mysql-notifications
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: fintrack_notifications
+      MYSQL_USER: fintrack
+      MYSQL_PASSWORD: fintrack
+    ports: ["3310:3306"]
+    volumes: [mysql-notifications-data:/var/lib/mysql]
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpass"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    <<: *restart
+
+  # ---------- Messaging ----------
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.3
+    container_name: fintrack-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports: ["2181:2181"]
+    <<: *restart
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.3
+    container_name: fintrack-kafka
+    depends_on: [zookeeper]
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_LISTENERS: INTERNAL://:9092,EXTERNAL://:29092
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,EXTERNAL://localhost:29092
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    ports: ["29092:29092"]
+    healthcheck:
+      test: ["CMD", "bash", "-lc", "kafka-topics --bootstrap-server localhost:9092 --list >/dev/null"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+    <<: *restart
+
+  kafdrop:
+    image: obsidiandynamics/kafdrop:4.0.1
+    container_name: fintrack-kafdrop
+    depends_on: [kafka]
+    environment:
+      KAFKA_BROKERCONNECT: kafka:9092
+      JVM_OPTS: -Xms64M -Xmx128M
+    ports: ["8090:9000"]
+    <<: *restart
+
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: fintrack-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: fintrack
+      RABBITMQ_DEFAULT_PASS: fintrack
+    ports: ["5672:5672", "15672:15672"]
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+    <<: *restart
+
+  mailhog:
+    image: mailhog/mailhog
+    container_name: fintrack-mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    <<: *restart
+
+  # ---------- Caches & tracing ----------
+  redis:
+    image: redis:7.2-alpine
+    container_name: fintrack-redis
+    ports: ["6379:6379"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    <<: *restart
+
+  zipkin:
+    image: openzipkin/zipkin:3
+    container_name: fintrack-zipkin
+    ports: ["9411:9411"]
+    <<: *restart
+
+  # ---------- Observability (Prom + Grafana) ----------
+  prometheus:
+    image: prom/prometheus:v2.55.0
+    container_name: fintrack-prometheus
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports: ["9090:9090"]
+    <<: *restart
+
+  grafana:
+    image: grafana/grafana:11.3.0
+    container_name: fintrack-grafana
+    depends_on: [prometheus]
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+    ports: ["3000:3000"]
+    <<: *restart
+
+  # ---------- ELK ----------
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
+    container_name: fintrack-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ports: ["9200:9200"]
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:9200/_cluster/health"]
+      interval: 20s
+      timeout: 10s
+      retries: 10
+    <<: *restart
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.13.4
+    container_name: fintrack-logstash
+    depends_on: [elasticsearch]
+    volumes:
+      - ./grafana/logstash/pipeline:/usr/share/logstash/pipeline:ro
+    ports: ["5044:5044"]
+    <<: *restart
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.13.4
+    container_name: fintrack-kibana
+    depends_on: [elasticsearch]
+    environment:
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+    ports: ["5601:5601"]
+    <<: *restart
+
+  # ---------- FinTrack microservices ----------
+  config-server:
+    build:
+      context: ./${JAVA_FLAVOR:-java21}/config-server
+    container_name: fintrack-config-server
+    environment:
+      <<: *business-env
+      SERVER_PORT: "8888"
+    ports: ["8888:8888"]
+    <<: *restart
+
+  eureka-server:
+    build:
+      context: ./${JAVA_FLAVOR:-java21}/eureka-server
+    container_name: fintrack-eureka-server
+    depends_on: [config-server]
+    environment:
+      <<: *business-env
+      SERVER_PORT: "8761"
+    ports: ["8761:8761"]
+    <<: *restart
+
+  api-gateway:
+    build:
+      context: ./${JAVA_FLAVOR:-java21}/api-gateway
+    container_name: fintrack-api-gateway
+    depends_on: [eureka-server]
+    environment:
+      <<: *business-env
+      SERVER_PORT: "8080"
+    ports: ["8080:8080"]
+    <<: *restart
+
+  user-service:
+    build:
+      context: ./${JAVA_FLAVOR:-java21}/user-service
+    container_name: fintrack-user-service
+    depends_on:
+      mysql-users: { condition: service_healthy }
+      kafka:        { condition: service_healthy }
+      eureka-server: { condition: service_started }
+      redis:        { condition: service_healthy }
+    environment:
+      <<: *business-env
+      SERVER_PORT: "8081"
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-users:3306/fintrack_users
+      SPRING_DATASOURCE_USERNAME: fintrack
+      SPRING_DATASOURCE_PASSWORD: fintrack
+    ports: ["8081:8081"]
+    <<: *restart
+
+  account-service:
+    build:
+      context: ./${JAVA_FLAVOR:-java21}/account-service
+    container_name: fintrack-account-service
+    depends_on:
+      mysql-accounts: { condition: service_healthy }
+      kafka:          { condition: service_healthy }
+      eureka-server:  { condition: service_started }
+      redis:          { condition: service_healthy }
+    environment:
+      <<: *business-env
+      SERVER_PORT: "8082"
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-accounts:3306/fintrack_accounts
+      SPRING_DATASOURCE_USERNAME: fintrack
+      SPRING_DATASOURCE_PASSWORD: fintrack
+    ports: ["8082:8082"]
+    <<: *restart
+
+  transaction-service:
+    build:
+      context: ./${JAVA_FLAVOR:-java21}/transaction-service
+    container_name: fintrack-transaction-service
+    depends_on:
+      mysql-transactions: { condition: service_healthy }
+      kafka:              { condition: service_healthy }
+      eureka-server:      { condition: service_started }
+      redis:              { condition: service_healthy }
+      account-service:    { condition: service_started }
+    environment:
+      <<: *business-env
+      SERVER_PORT: "8083"
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-transactions:3306/fintrack_transactions
+      SPRING_DATASOURCE_USERNAME: fintrack
+      SPRING_DATASOURCE_PASSWORD: fintrack
+    ports: ["8083:8083"]
+    <<: *restart
+
+  notification-service:
+    build:
+      context: ./${JAVA_FLAVOR:-java21}/notification-service
+    container_name: fintrack-notification-service
+    depends_on:
+      mysql-notifications: { condition: service_healthy }
+      kafka:               { condition: service_healthy }
+      eureka-server:       { condition: service_started }
+    environment:
+      <<: *business-env
+      SERVER_PORT: "8084"
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-notifications:3306/fintrack_notifications
+      SPRING_DATASOURCE_USERNAME: fintrack
+      SPRING_DATASOURCE_PASSWORD: fintrack
+    ports: ["8084:8084"]
+    <<: *restart
+
+volumes:
+  mysql-users-data:
+  mysql-accounts-data:
+  mysql-transactions-data:
+  mysql-notifications-data:

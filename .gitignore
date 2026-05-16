@@ -1,0 +1,58 @@
+# Maven
+target/
+**/target/
+*.class
+*.jar
+*.war
+*.ear
+dependency-reduced-pom.xml
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+
+# Spring Boot
+HELP.md
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# IDEs
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+.classpath
+.project
+.settings/
+.factorypath
+.metadata
+.recommenders
+
+# Build / log
+build/
+out/
+logs/
+*.log
+*.tmp
+*.pid
+
+# OS
+.DS_Store
+Thumbs.db
+ehthumbs.db
+
+# Env / secrets
+.env
+.env.local
+*.local.yml
+*.local.yaml
+secrets/
+
+# Docker
+docker-compose.override.yml
+
+# Reports
+coverage/
+**/surefire-reports/
+**/failsafe-reports/

@@ -1,0 +1,30 @@
+package com.fintrack.transaction.saga;
+
+import com.fintrack.transaction.event.TransactionInitiatedEvent;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.stereotype.Component;
+
+/**
+ * Self-consume of {@code transaction-initiated} purely for trace/observability. The actual
+ * downstream effect (debit) happens in account-service; this listener simply records that the
+ * saga has officially begun. Wiring the orchestrator to its own initiation event makes the
+ * audit story symmetric — every saga step is observable through Kafka.
+ */
+@Slf4j
+@Component
+@RequiredArgsConstructor
+public class TransactionInitiatedConsumer {
+
+    @KafkaListener(
+        topics = "${fintrack.messaging.kafka.topics.transaction-initiated}",
+        groupId = "${spring.application.name}-orchestrator-init",
+        containerFactory = "kafkaListenerContainerFactory"
+    )
+    public void onTransactionInitiated(@Payload TransactionInitiatedEvent event) {
+        log.info("[SAGA] orchestrator-trace tx-initiated tx={} from={} amount={}",
+                event.getTransactionUuid(), event.getFromAccountUuid(), event.getAmount());
+    }
+}

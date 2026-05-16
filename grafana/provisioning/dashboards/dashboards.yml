@@ -1,0 +1,11 @@
+apiVersion: 1
+
+providers:
+  - name: "fintrack-default"
+    orgId: 1
+    folder: "FinTrack"
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /var/lib/grafana/dashboards

@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: notification-service
+  cloud:
+    config:
+      uri: ${CONFIG_SERVER_URL:http://localhost:8888}
+      username: ${CONFIG_SERVER_USER:configadmin}
+      password: ${CONFIG_SERVER_PASSWORD:configpass}
+      fail-fast: true
+      retry:
+        initial-interval: 2000
+        max-attempts: 10
+        multiplier: 1.5
+        max-interval: 10000
+  config:
+    import: "optional:configserver:${spring.cloud.config.uri}"
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_SERVER_URL:http://eurekaadmin:eurekapass@localhost:8761/eureka}
