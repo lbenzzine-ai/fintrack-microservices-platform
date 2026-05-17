@@ -204,7 +204,7 @@ services:
 
   # ---------- ELK ----------
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.15
     container_name: fintrack-elasticsearch
     environment:
       - discovery.type=single-node
@@ -219,7 +219,7 @@ services:
     <<: *restart
 
   logstash:
-    image: docker.elastic.co/logstash/logstash:8.13.4
+    image: docker.elastic.co/logstash/logstash:7.17.15
     container_name: fintrack-logstash
     depends_on: [elasticsearch]
     volumes:
@@ -228,7 +228,7 @@ services:
     <<: *restart
 
   kibana:
-    image: docker.elastic.co/kibana/kibana:8.13.4
+    image: docker.elastic.co/kibana/kibana:7.17.15
     container_name: fintrack-kibana
     depends_on: [elasticsearch]
     environment:
