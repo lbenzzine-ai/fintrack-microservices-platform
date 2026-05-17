@@ -24,7 +24,7 @@ spring:
 eureka:
   client:
     service-url:
-      defaultZone: ${EUREKA_SERVER_URL:http://eurekaadmin:eurekapass@localhost:8761/eureka}
+      defaultZone: ${EUREKA_SERVER_URL}
     register-with-eureka: true
     fetch-registry: true
     registry-fetch-interval-seconds: 10
@@ -101,8 +101,8 @@ spring.kafka:
 spring.rabbitmq:
   host: ${RABBITMQ_HOST:localhost}
   port: ${RABBITMQ_PORT:5672}
-  username: ${RABBITMQ_USER:fintrack}
-  password: ${RABBITMQ_PASS:fintrack}
+  username: ${RABBITMQ_USER}
+  password: ${RABBITMQ_PASS}
   listener:
     simple:
       acknowledge-mode: manual

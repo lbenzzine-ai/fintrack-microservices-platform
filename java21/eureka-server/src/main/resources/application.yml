@@ -10,8 +10,8 @@ spring:
       enabled: true
   security:
     user:
-      name: ${EUREKA_USER:eurekaadmin}
-      password: ${EUREKA_PASSWORD:eurekapass}
+      name: ${EUREKA_USER}
+      password: ${EUREKA_PASSWORD}
 
 eureka:
   instance:

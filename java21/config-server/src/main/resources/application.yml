@@ -19,8 +19,8 @@ spring:
           enabled: false
   security:
     user:
-      name: ${CONFIG_SERVER_USER:configadmin}
-      password: ${CONFIG_SERVER_PASSWORD:configpass}
+      name: ${CONFIG_SERVER_USER}
+      password: ${CONFIG_SERVER_PASSWORD}
 
 eureka:
   client:

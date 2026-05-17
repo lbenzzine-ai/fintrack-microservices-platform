@@ -4,8 +4,8 @@ server:
 spring:
   datasource:
     url: jdbc:mysql://${MYSQL_ACCOUNTS_HOST:localhost}:${MYSQL_ACCOUNTS_PORT:3308}/fintrack_accounts?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&createDatabaseIfNotExist=true
-    username: ${MYSQL_ACCOUNTS_USER:fintrack}
-    password: ${MYSQL_ACCOUNTS_PASSWORD:fintrack}
+    username: ${MYSQL_ACCOUNTS_USER}
+    password: ${MYSQL_ACCOUNTS_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       maximum-pool-size: 30

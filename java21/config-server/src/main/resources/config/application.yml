@@ -103,8 +103,8 @@ spring.kafka:
 spring.rabbitmq:
   host: ${RABBITMQ_HOST:localhost}
   port: ${RABBITMQ_PORT:5672}
-  username: ${RABBITMQ_USER:guest}
-  password: ${RABBITMQ_PASS:guest}
+  username: ${RABBITMQ_USER}
+  password: ${RABBITMQ_PASS}
   listener:
     simple:
       acknowledge-mode: manual

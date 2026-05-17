@@ -4,8 +4,8 @@ server:
 spring:
   datasource:
     url: jdbc:mysql://${MYSQL_NOTIFICATIONS_HOST:localhost}:${MYSQL_NOTIFICATIONS_PORT:3310}/fintrack_notifications?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&createDatabaseIfNotExist=true
-    username: ${MYSQL_NOTIFICATIONS_USER:fintrack}
-    password: ${MYSQL_NOTIFICATIONS_PASSWORD:fintrack}
+    username: ${MYSQL_NOTIFICATIONS_USER}
+    password: ${MYSQL_NOTIFICATIONS_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       maximum-pool-size: 15
