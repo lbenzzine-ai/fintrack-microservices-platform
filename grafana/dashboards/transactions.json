@@ -7,26 +7,28 @@
   "tags": ["fintrack","business","transactions"],
   "timezone": "browser",
   "schemaVersion": 39,
-  "version": 1,
+  "version": 2,
   "refresh": "30s",
   "time": { "from": "now-1h", "to": "now" },
   "panels": [
     {
       "type": "stat",
-      "title": "Transactions / sec",
+      "title": "Transactions processed / sec",
+      "description": "Rate of TransactionService.markDebited invocations (saga step that completes a transfer).",
       "datasource": "Prometheus",
       "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
       "targets": [
-        { "expr": "sum(rate(http_server_requests_seconds_count{application=\"transaction-service\", uri=\"/api/v1/transactions\", method=\"POST\"}[1m]))" }
+        { "expr": "sum(rate(fintrack_service_method_seconds_count{method=\"TransactionService.markDebited\"}[1m]))" }
       ]
     },
     {
       "type": "stat",
       "title": "Saga failures / sec",
+      "description": "Rate of TransactionService.markFailed invocations (compensation path).",
       "datasource": "Prometheus",
       "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
       "targets": [
-        { "expr": "sum(rate(http_server_requests_seconds_count{application=\"transaction-service\", status=~\"5..\"}[5m]))" }
+        { "expr": "sum(rate(fintrack_service_method_seconds_count{method=\"TransactionService.markFailed\"}[5m]))" }
       ]
     },
     {
@@ -35,7 +37,35 @@
       "datasource": "Prometheus",
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
       "targets": [
-        { "expr": "sum by (method) (rate(fintrack_service_method_seconds_count{method=~\".*Strategy.*\"}[1m]))", "legendFormat": "{{method}}" }
+        { "expr": "sum by (method) (rate(fintrack_service_method_seconds_count{method=\"FeeService.computeAndAudit\"}[1m]))", "legendFormat": "{{method}}" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Transaction processing latency p95",
+      "description": "TransactionService.markDebited duration p95 (rolling 5m).",
+      "datasource": "Prometheus",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "targets": [
+        { "expr": "histogram_quantile(0.95, sum by (le) (rate(fintrack_service_method_seconds_bucket{method=\"TransactionService.markDebited\"}[5m])))", "legendFormat": "p95" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Kafka messages sent / sec (fintrack topics)",
+      "datasource": "Prometheus",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
+      "targets": [
+        { "expr": "sum by (topic) (rate(kafka_producer_topic_record_send_total{topic=~\"fintrack\\\\..*\"}[1m]))", "legendFormat": "{{topic}}" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Kafka consumer lag (records)",
+      "datasource": "Prometheus",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
+      "targets": [
+        { "expr": "sum by (client_id, topic) (kafka_consumer_fetch_manager_records_lag)", "legendFormat": "{{client_id}} / {{topic}}" }
       ]
     }
   ]
