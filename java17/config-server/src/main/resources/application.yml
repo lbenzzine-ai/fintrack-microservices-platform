@@ -33,6 +33,10 @@ eureka:
       user.password: ${spring.security.user.password}
 
 management:
+  # Separate management port so /actuator/* isn't shadowed by Config Server's
+  # {application}/{profile}[/{label}] catch-all route on the main port.
+  server:
+    port: 8889
   endpoints:
     web:
       exposure:

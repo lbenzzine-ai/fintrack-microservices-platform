@@ -6,40 +6,62 @@ global:
 
 scrape_configs:
   # FinTrack microservices — Spring Boot Actuator's /actuator/prometheus endpoint.
+  # Targets use host.docker.internal so Prometheus (in docker) can reach services
+  # whether they run on the host (make run-17/21) or in docker-compose (ports exposed to host).
   - job_name: "config-server"
     metrics_path: /actuator/prometheus
+    basic_auth:
+      username: configadmin
+      password: configpass
     static_configs:
-      - targets: ["config-server:8888"]
+      - targets: ["host.docker.internal:8889"]
+        labels:
+          service: "config-server"
 
   - job_name: "eureka-server"
     metrics_path: /actuator/prometheus
+    basic_auth:
+      username: eurekaadmin
+      password: eurekapass
     static_configs:
-      - targets: ["eureka-server:8761"]
+      - targets: ["host.docker.internal:8761"]
+        labels:
+          service: "eureka-server"
 
   - job_name: "api-gateway"
     metrics_path: /actuator/prometheus
     static_configs:
-      - targets: ["api-gateway:8080"]
+      - targets: ["host.docker.internal:8080"]
+        labels:
+          service: "api-gateway"
 
   - job_name: "user-service"
     metrics_path: /actuator/prometheus
     static_configs:
-      - targets: ["user-service:8081"]
+      - targets: ["host.docker.internal:8081"]
+        labels:
+          service: "user-service"
 
   - job_name: "account-service"
     metrics_path: /actuator/prometheus
     static_configs:
-      - targets: ["account-service:8082"]
+      - targets: ["host.docker.internal:8082"]
+        labels:
+          service: "account-service"
 
   - job_name: "transaction-service"
     metrics_path: /actuator/prometheus
     static_configs:
-      - targets: ["transaction-service:8083"]
+      - targets: ["host.docker.internal:8083"]
+        labels:
+          service: "transaction-service"
 
   - job_name: "notification-service"
     metrics_path: /actuator/prometheus
     static_configs:
-      - targets: ["notification-service:8084"]
+      - targets: ["host.docker.internal:8084"]
+        labels:
+          service: "notification-service"
 
   # Prometheus itself
   - job_name: "prometheus"
