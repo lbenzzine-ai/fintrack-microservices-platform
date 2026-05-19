@@ -54,13 +54,13 @@ class TransactionControllerSecurityTest {
     @Test
     void shouldRejectUnauthenticatedGet() throws Exception {
         mockMvc.perform(get("/api/v1/transactions/tx-1"))
-                .andExpect(status().is4xxClientError());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
     void shouldRejectUnauthenticatedByAccount() throws Exception {
         mockMvc.perform(get("/api/v1/transactions/by-account/acc-1"))
-                .andExpect(status().is4xxClientError());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -68,7 +68,7 @@ class TransactionControllerSecurityTest {
         mockMvc.perform(get("/api/v1/transactions/fee/quote")
                         .param("type", "DOMESTIC_TRANSFER")
                         .param("amount", "100"))
-                .andExpect(status().is4xxClientError());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
