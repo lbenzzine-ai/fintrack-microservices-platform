@@ -250,6 +250,30 @@ class AccountServiceTest {
     }
 
     @Test
+    void debit_exactBalanceMatchesAmountPlusFee_succeeds() {
+        // Boundary: balance == amount+fee. Insufficient check uses compareTo < 0.
+        Account a = account("acc-1", "user-1", new BigDecimal("105"), AccountStatus.ACTIVE);
+        when(accountRepository.findByUuidForUpdate("acc-1")).thenReturn(Optional.of(a));
+        when(accountRepository.save(a)).thenReturn(a);
+        when(messaging.active()).thenReturn(messagingStrategy);
+
+        service.debit("acc-1", "tx-edge", new BigDecimal("100"), new BigDecimal("5"));
+
+        assertThat(a.getBalance()).isEqualByComparingTo("0");
+        verify(accountRepository).save(a);
+    }
+
+    @Test
+    void debit_balanceJustBelowAmountPlusFee_throws() {
+        Account a = account("acc-1", "user-1", new BigDecimal("104.99"), AccountStatus.ACTIVE);
+        when(accountRepository.findByUuidForUpdate("acc-1")).thenReturn(Optional.of(a));
+
+        assertThatThrownBy(() -> service.debit("acc-1", "tx-edge",
+                new BigDecimal("100"), new BigDecimal("5")))
+                .isInstanceOf(com.fintrack.account.exception.InsufficientFundsException.class);
+    }
+
+    @Test
     void debit_insufficient_funds_throws_and_no_publish() {
         Account a = account("acc-1", "user-1", new BigDecimal("10"), AccountStatus.ACTIVE);
         when(accountRepository.findByUuidForUpdate("acc-1")).thenReturn(Optional.of(a));

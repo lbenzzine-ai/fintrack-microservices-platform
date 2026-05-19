@@ -104,6 +104,19 @@ class RiskScoreTest {
     }
 
     @Test
+    void fromFindings_scoreReachesHighThresholdButLevelLower_stillRequiresReview() {
+        // 2×MEDIUM(30) + 1×LOW(10) = score 70, level=MEDIUM. Kills boundary mutation on
+        // (score >= HIGH.weight()) at the second OR branch — the first branch (level==HIGH)
+        // short-circuits when level is HIGH, so a level-MEDIUM case is required to force
+        // evaluation of the score-boundary check.
+        RiskScore s = RiskScore.from("tx-mid70",
+                List.of(finding(RiskLevel.MEDIUM), finding(RiskLevel.MEDIUM), finding(RiskLevel.LOW)));
+        assertThat(s.getScore()).isEqualTo(70);
+        assertThat(s.getLevel()).isEqualTo(RiskLevel.MEDIUM);
+        assertThat(s.isRequiresReview()).isTrue();
+    }
+
+    @Test
     void riskLevel_isAtLeastByWeight() {
         assertThat(RiskLevel.CRITICAL.isAtLeast(RiskLevel.LOW)).isTrue();
         assertThat(RiskLevel.CRITICAL.isAtLeast(RiskLevel.CRITICAL)).isTrue();

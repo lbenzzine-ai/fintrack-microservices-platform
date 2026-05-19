@@ -65,6 +65,15 @@ class RiskScoreTest {
         }
     }
 
+    @Test
+    void fromFindings_scoreReachesHighThresholdButLevelLower_stillRequiresReview() {
+        RiskScore s = RiskScore.from("tx-mid70",
+                List.of(finding(RiskLevel.MEDIUM), finding(RiskLevel.MEDIUM), finding(RiskLevel.LOW)));
+        assertThat(s.getScore()).isEqualTo(70);
+        assertThat(s.getLevel()).isEqualTo(RiskLevel.MEDIUM);
+        assertThat(s.isRequiresReview()).isTrue();
+    }
+
     @ParameterizedTest
     @EnumSource(value = RiskLevel.class, names = {"HIGH", "CRITICAL"})
     void shouldAlert_trueForHighOrCritical(RiskLevel level) {

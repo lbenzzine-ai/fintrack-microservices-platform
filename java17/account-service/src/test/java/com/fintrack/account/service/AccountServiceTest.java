@@ -242,6 +242,32 @@ class AccountServiceTest {
     }
 
     @Test
+    void debit_exactBalanceMatchesAmountPlusFee_succeeds() {
+        // Boundary: balance == amount+fee. Production uses compareTo(total) < 0 to reject.
+        // Original returns false at equal → succeeds. Mutation flipping to <= 0 would reject.
+        Account a = account("acc-1", "user-1", new BigDecimal("105"), AccountStatus.ACTIVE);
+        when(accountRepository.findByUuidForUpdate("acc-1")).thenReturn(Optional.of(a));
+        when(accountRepository.save(a)).thenReturn(a);
+        when(messaging.active()).thenReturn(messagingStrategy);
+
+        service.debit("acc-1", null, "tx-edge", new BigDecimal("100"), new BigDecimal("5"));
+
+        assertThat(a.getBalance()).isEqualByComparingTo("0");
+        verify(accountRepository).save(a);
+    }
+
+    @Test
+    void debit_balanceJustBelowAmountPlusFee_throws() {
+        // Boundary the other side: balance == amount+fee - 0.01 — should reject.
+        Account a = account("acc-1", "user-1", new BigDecimal("104.99"), AccountStatus.ACTIVE);
+        when(accountRepository.findByUuidForUpdate("acc-1")).thenReturn(Optional.of(a));
+
+        assertThatThrownBy(() -> service.debit("acc-1", null, "tx-edge",
+                new BigDecimal("100"), new BigDecimal("5")))
+                .isInstanceOf(InsufficientFundsException.class);
+    }
+
+    @Test
     void debit_insufficient_funds_throws_and_no_publish() {
         Account a = account("acc-1", "user-1", new BigDecimal("10"), AccountStatus.ACTIVE);
         when(accountRepository.findByUuidForUpdate("acc-1")).thenReturn(Optional.of(a));

@@ -138,6 +138,57 @@ class NotificationServiceTest {
     }
 
     @Test
+    void create_renderedBody_isSavedOnNotification() {
+        when(repository.save(any(Notification.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(templateEngine.process(eq("welcome"), any(IContext.class))).thenReturn("<html>RENDERED</html>");
+        when(strategyContext.strategyFor(NotificationChannel.EMAIL)).thenReturn(strategy);
+        when(strategy.send(any(Notification.class)))
+                .thenReturn(DispatchResult.builder().delivered(true).provider("p").build());
+        when(mapper.toResponse(any(Notification.class))).thenReturn(NotificationResponse.builder().build());
+
+        service.create(req);
+
+        ArgumentCaptor<Notification> captor = ArgumentCaptor.forClass(Notification.class);
+        verify(repository, times(2)).save(captor.capture());
+        assertThat(captor.getAllValues().get(0).getBody()).isEqualTo("<html>RENDERED</html>");
+    }
+
+    @Test
+    void create_nullPayload_doesNotNpeAndRendersWithEmptyContext() {
+        SendNotificationRequest noPayload = new SendNotificationRequest();
+        noPayload.setRecipient("to@x");
+        noPayload.setChannel(NotificationChannel.EMAIL);
+        noPayload.setTemplate("welcome");
+        // payload, subject, accountUuid, transactionUuid intentionally left null
+        when(repository.save(any(Notification.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(templateEngine.process(eq("welcome"), any(IContext.class))).thenReturn("body");
+        when(strategyContext.strategyFor(NotificationChannel.EMAIL)).thenReturn(strategy);
+        when(strategy.send(any(Notification.class)))
+                .thenReturn(DispatchResult.builder().delivered(true).provider("p").build());
+        when(mapper.toResponse(any(Notification.class))).thenReturn(NotificationResponse.builder().build());
+
+        service.create(noPayload);
+
+        verify(templateEngine).process(eq("welcome"), any(IContext.class));
+    }
+
+    @Test
+    void upsertPreference_existing_appliesAllBooleanFlagsFromPatch() {
+        NotificationPreference existing = NotificationPreference.builder()
+                .userUuid("u1").emailEnabled(false).smsEnabled(false).pushEnabled(false).build();
+        NotificationPreference patch = NotificationPreference.builder()
+                .emailEnabled(true).smsEnabled(true).pushEnabled(true).build();
+        when(preferenceRepository.findByUserUuid("u1")).thenReturn(Optional.of(existing));
+        when(preferenceRepository.save(existing)).thenReturn(existing);
+
+        service.upsertPreference("u1", patch);
+
+        assertThat(existing.isEmailEnabled()).isTrue();
+        assertThat(existing.isSmsEnabled()).isTrue();
+        assertThat(existing.isPushEnabled()).isTrue();
+    }
+
+    @Test
     void create_blankTemplate_skipsRendering() {
         req.setTemplate(""); // blank
         // @NotBlank is at the validation layer; the renderer guards with isBlank() too.
