@@ -11,7 +11,7 @@ import com.fintrack.user.exception.EmailAlreadyExistsException;
 import com.fintrack.user.exception.InvalidCredentialsException;
 import com.fintrack.user.exception.UsernameAlreadyExistsException;
 import com.fintrack.user.mapper.UserMapper;
-import com.fintrack.user.messaging.MessagingStrategy;
+import com.fintrack.user.messaging.KafkaMessagingStrategy;
 import com.fintrack.user.messaging.MessagingStrategyRegistry;
 import com.fintrack.user.repository.RoleRepository;
 import com.fintrack.user.repository.UserRepository;
@@ -44,7 +44,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-@org.junit.jupiter.api.Disabled("Blocker (java21 only): MessagingStrategy is a sealed interface — Mockito 5 cannot mock sealed types. Would need rewrite using a real KafkaMessagingStrategy with a mocked KafkaTemplate; java17 stack covers the same logic.")
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
 
@@ -54,7 +53,9 @@ class AuthServiceTest {
     @Mock UserMapper userMapper;
     @Mock JwtTokenProvider tokenProvider;
     @Mock MessagingStrategyRegistry messaging;
-    @Mock MessagingStrategy strategy;
+    // MessagingStrategy is a sealed interface in java21 — Mockito can't proxy it.
+    // Mock the permitted concrete impl instead; it still satisfies messaging.active()'s return type.
+    @Mock KafkaMessagingStrategy strategy;
 
     @InjectMocks AuthService authService;
 

@@ -11,7 +11,7 @@ import com.fintrack.notification.mapper.NotificationMapper;
 import com.fintrack.notification.repository.NotificationPreferenceRepository;
 import com.fintrack.notification.repository.NotificationRepository;
 import com.fintrack.notification.strategy.channel.DispatchResult;
-import com.fintrack.notification.strategy.channel.NotificationStrategy;
+import com.fintrack.notification.strategy.channel.EmailNotificationStrategy;
 import com.fintrack.notification.strategy.channel.NotificationStrategyContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,10 +44,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * NotificationStrategy is a {@code sealed interface} on java21 — Mockito's inline mock maker
- * (default in Mockito 5 bundled with Spring Boot 3.x) handles sealed types out of the box.
+ * {@code NotificationStrategy} is a {@code sealed interface} on java21 — Mockito 5's
+ * inline mock-maker cannot synthesize a proxy that implements a sealed type whose
+ * permits clause excludes the proxy. Mock a permitted concrete impl ({@link
+ * EmailNotificationStrategy}) instead; it satisfies the {@code NotificationStrategy}
+ * contract that {@link NotificationStrategyContext#strategyFor} returns.
  */
-@org.junit.jupiter.api.Disabled("Blocker (java21 only): NotificationStrategy is a sealed interface — Mockito 5 / ByteBuddy cannot create a proxy that implements a sealed type whose permits clause excludes the proxy. Would need rewrite using real Email/SMS/Push strategy impls; java17 stack covers the same logic with mocks.")
 @ExtendWith(MockitoExtension.class)
 class NotificationServiceTest {
 
@@ -56,7 +58,7 @@ class NotificationServiceTest {
     @Mock NotificationMapper mapper;
     @Mock NotificationStrategyContext strategyContext;
     @Mock TemplateEngine templateEngine;
-    @Mock NotificationStrategy strategy;
+    @Mock EmailNotificationStrategy strategy;
 
     @InjectMocks NotificationService service;
 
