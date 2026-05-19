@@ -7,6 +7,7 @@ import com.fintrack.transaction.entity.Transaction;
 import com.fintrack.transaction.entity.TransactionStatus;
 import com.fintrack.transaction.entity.TransactionType;
 import com.fintrack.transaction.event.NotificationRequestedEvent;
+import com.fintrack.transaction.event.RiskAssessedEvent;
 import com.fintrack.transaction.event.TransactionCompletedEvent;
 import com.fintrack.transaction.event.TransactionFailedEvent;
 import com.fintrack.transaction.event.TransactionInitiatedEvent;
@@ -15,20 +16,28 @@ import com.fintrack.transaction.exception.TransactionNotFoundException;
 import com.fintrack.transaction.mapper.TransactionMapper;
 import com.fintrack.transaction.messaging.MessagingStrategyRegistry;
 import com.fintrack.transaction.repository.TransactionRepository;
+import com.fintrack.transaction.risk.RiskEngine;
+import com.fintrack.transaction.risk.RiskFinding;
+import com.fintrack.transaction.risk.RiskScore;
 import com.fintrack.transaction.strategy.fee.FeeCalculationContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * Saga orchestrator — Java 21 stack uses pattern-matching switch in {@link #validate} to enforce
@@ -43,6 +52,12 @@ public class TransactionService {
     private final TransactionMapper mapper;
     private final FeeService feeService;
     private final MessagingStrategyRegistry messaging;
+    private final RiskEngine riskEngine;
+
+    /** Self-reference via the Spring proxy so internal calls to public @Transactional /
+     *  @CacheEvict methods go through the AOP interceptor chain instead of bypassing it. */
+    @Autowired @Lazy
+    private TransactionService self;
 
     @Value("${fintrack.messaging.kafka.topics.transaction-initiated:fintrack.tx.initiated}")
     private String txInitiatedTopic;
@@ -55,6 +70,9 @@ public class TransactionService {
 
     @Value("${fintrack.messaging.kafka.topics.notification-requested:fintrack.notification.requested}")
     private String notificationRequestedTopic;
+
+    @Value("${fintrack.messaging.kafka.topics.risk-assessed:fintrack.risk-assessed}")
+    private String riskAssessedTopic;
 
     @Transactional
     @CacheEvict(value = "transactions:byUuid", allEntries = true)
@@ -115,13 +133,27 @@ public class TransactionService {
         }
         t.setStatus(TransactionStatus.DEBITED);
         transactionRepository.save(t);
-        complete(t);
+        self.complete(t);
     }
 
     @Transactional
     public void complete(Transaction t) {
+        // Tx is DEBITED on entry (set by markDebited). Assess risk BEFORE flipping to
+        // COMPLETED so a blocked tx still satisfies markFailed's non-terminal guard.
+        RiskScore score = riskEngine.assess(t);
+        if (score.isBlocked()) {
+            String topReason = topFindingReason(score);
+            self.markFailed(t.getUuid(), "RISK_BLOCKED",
+                    "Blocked by Risk Engine: " + topReason, true);
+            return;
+        }
+
         t.setStatus(TransactionStatus.COMPLETED);
         transactionRepository.save(t);
+
+        if (score.isRequiresReview()) {
+            publishRiskAssessed(t, score);
+        }
 
         TransactionCompletedEvent completed = new TransactionCompletedEvent(
                 UUID.randomUUID().toString(),
@@ -191,6 +223,33 @@ public class TransactionService {
     private Transaction lookup(String uuid) {
         return transactionRepository.findByUuid(uuid)
                 .orElseThrow(() -> new TransactionNotFoundException(uuid));
+    }
+
+    private void publishRiskAssessed(Transaction t, RiskScore score) {
+        List<String> triggered = score.getFindings().stream()
+                .map(RiskFinding::getRuleName)
+                .collect(Collectors.toList());
+        RiskAssessedEvent event = RiskAssessedEvent.builder()
+                .eventId(UUID.randomUUID().toString())
+                .transactionUuid(t.getUuid())
+                .level(score.getLevel().name())
+                .score(score.getScore())
+                .blocked(score.isBlocked())
+                .requiresReview(score.isRequiresReview())
+                .triggeredRules(triggered)
+                .assessedAt(score.getAssessedAt())
+                .occurredAt(Instant.now())
+                .build();
+        messaging.active().publish(riskAssessedTopic, t.getUuid(), event);
+        log.info("[RISK] tx={} REVIEW level={} score={} rules={}",
+                t.getUuid(), score.getLevel(), score.getScore(), triggered);
+    }
+
+    private static String topFindingReason(RiskScore score) {
+        return score.getFindings().stream()
+                .max(Comparator.comparingInt(f -> f.getLevel().weight()))
+                .map(RiskFinding::getReason)
+                .orElse("unspecified");
     }
 
     private void publishInitiated(Transaction t) {
