@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -18,6 +19,29 @@ public class RiskScore {
     private boolean requiresReview;
     private Instant assessedAt;
     private String transactionUuid;
+
+    /** No findings — used when a tx passes every rule. */
+    public static RiskScore clean(String transactionUuid) {
+        return RiskScore.builder()
+                .transactionUuid(transactionUuid)
+                .level(RiskLevel.LOW)
+                .score(0)
+                .findings(Collections.emptyList())
+                .blocked(false)
+                .requiresReview(false)
+                .assessedAt(Instant.now())
+                .build();
+    }
+
+    /** Returns true only when the overall level is CRITICAL (i.e. the saga must abort). */
+    public boolean shouldBlock() {
+        return level == RiskLevel.CRITICAL;
+    }
+
+    /** Returns true when reviewers should be alerted — HIGH or CRITICAL. */
+    public boolean shouldAlert() {
+        return level != null && level.isAtLeast(RiskLevel.HIGH);
+    }
 
     public static RiskScore from(String transactionUuid, List<RiskFinding> findings) {
         RiskLevel level = findings.stream()

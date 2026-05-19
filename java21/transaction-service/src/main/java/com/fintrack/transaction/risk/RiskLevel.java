@@ -15,4 +15,9 @@ public enum RiskLevel {
     public int weight() {
         return weight;
     }
+
+    /** True if this level is at least as severe as {@code other} (by weight). */
+    public boolean isAtLeast(RiskLevel other) {
+        return this.weight >= other.weight;
+    }
 }
