@@ -1,0 +1,247 @@
+name: FinTrack CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, dev ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ghcr.io/${{ github.repository_owner }}/fintrack
+
+jobs:
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # JOB 1 — Build & Test Java 17 services (parallel matrix)
+  # ─────────────────────────────────────────────────────────────────────────
+  build-java17:
+    name: Build & Test (Java 17) — ${{ matrix.service }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false   # don't cancel other services if one fails
+      matrix:
+        service:
+          - account-service
+          - transaction-service
+          - notification-service
+          - user-service
+          - api-gateway
+          - config-server
+          - eureka-server
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-java17-${{ matrix.service }}-${{ hashFiles(format('java17/{0}/pom.xml', matrix.service)) }}
+          restore-keys: |
+            ${{ runner.os }}-maven-java17-${{ matrix.service }}-
+            ${{ runner.os }}-maven-java17-
+
+      - name: Build & Test ${{ matrix.service }}
+        working-directory: java17/${{ matrix.service }}
+        run: mvn clean verify --no-transfer-progress -B
+
+      - name: Upload test reports
+        if: always()   # upload even if tests fail
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports-java17-${{ matrix.service }}
+          path: java17/${{ matrix.service }}/target/surefire-reports/
+          retention-days: 7
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # JOB 2 — Build & Test Java 21 services (parallel matrix)
+  # ─────────────────────────────────────────────────────────────────────────
+  build-java21:
+    name: Build & Test (Java 21) — ${{ matrix.service }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        service:
+          - account-service
+          - transaction-service
+          - notification-service
+          - user-service
+          - api-gateway
+          - config-server
+          - eureka-server
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-java21-${{ matrix.service }}-${{ hashFiles(format('java21/{0}/pom.xml', matrix.service)) }}
+          restore-keys: |
+            ${{ runner.os }}-maven-java21-${{ matrix.service }}-
+            ${{ runner.os }}-maven-java21-
+
+      - name: Build & Test ${{ matrix.service }}
+        working-directory: java21/${{ matrix.service }}
+        run: mvn clean verify --no-transfer-progress -B
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports-java21-${{ matrix.service }}
+          path: java21/${{ matrix.service }}/target/surefire-reports/
+          retention-days: 7
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # JOB 3 — Code quality gate (runs after both build jobs pass)
+  # ─────────────────────────────────────────────────────────────────────────
+  quality-gate:
+    name: Code Quality Gate
+    runs-on: ubuntu-latest
+    needs: [ build-java17, build-java21 ]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Check for TODO / FIXME / HACK in production code
+        run: |
+          echo "Scanning for unresolved markers..."
+          count=$(grep -r "TODO\|FIXME\|HACK" \
+            --include="*.java" \
+            --exclude-dir=test \
+            java17/ java21/ | wc -l)
+          echo "Found $count markers"
+          # Warn but don't fail — informational only
+          if [ "$count" -gt "20" ]; then
+            echo "::warning::$count TODO/FIXME markers found in production code"
+          fi
+
+      - name: Verify no System.out.println in production code
+        run: |
+          echo "Checking for System.out.println..."
+          found=$(grep -r "System\.out\.println" \
+            --include="*.java" \
+            java17/transaction-service/src/main \
+            java17/account-service/src/main \
+            java17/notification-service/src/main \
+            java17/user-service/src/main || true)
+          if [ -n "$found" ]; then
+            echo "::warning::System.out.println found — use SLF4J logger instead"
+            echo "$found"
+          fi
+          echo "Quality check complete"
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # JOB 4 — Docker build (main branch only, after all tests pass)
+  # ─────────────────────────────────────────────────────────────────────────
+  docker-build:
+    name: Docker Build — ${{ matrix.service }}
+    runs-on: ubuntu-latest
+    needs: [ build-java17, build-java21, quality-gate ]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    strategy:
+      fail-fast: false
+      matrix:
+        service:
+          - account-service
+          - transaction-service
+          - notification-service
+          - user-service
+          - api-gateway
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build JAR (Java 21 — production image)
+        working-directory: java21/${{ matrix.service }}
+        run: mvn clean package -DskipTests --no-transfer-progress -B
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Extract metadata for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_PREFIX }}-${{ matrix.service }}
+          tags: |
+            type=sha,prefix=sha-
+            type=ref,event=branch
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: java21/${{ matrix.service }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # JOB 5 — Summary (always runs — shows overall pipeline status)
+  # ─────────────────────────────────────────────────────────────────────────
+  pipeline-summary:
+    name: Pipeline Summary
+    runs-on: ubuntu-latest
+    needs: [ build-java17, build-java21, quality-gate ]
+    if: always()
+
+    steps:
+      - name: Print summary
+        run: |
+          echo "## FinTrack CI/CD Pipeline Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Job | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Build Java 17 | ${{ needs.build-java17.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Build Java 21 | ${{ needs.build-java21.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Quality Gate  | ${{ needs.quality-gate.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Commit: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "Branch: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "Triggered by: ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
