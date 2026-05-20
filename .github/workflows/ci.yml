@@ -200,14 +200,36 @@ jobs:
         working-directory: java17
         run: mvn jacoco:report-aggregate -pl coverage-report --no-transfer-progress -B
 
-      # ── PIT ───────────────────────────────────────────────────────────
-      - name: Run PIT mutation tests (Java 17)
-        working-directory: java17
-        run: |
-          mvn org.pitest:pitest-maven:mutationCoverage \
-            -pl account-service,transaction-service,user-service,notification-service,api-gateway \
-            --no-transfer-progress -B
+      # ── PIT (per service, individual timeouts) ────────────────────────
+      - name: Run PIT mutation tests — api-gateway
+        working-directory: java17/api-gateway
+        timeout-minutes: 15
         continue-on-error: true
+        run: mvn org.pitest:pitest-maven:mutationCoverage --no-transfer-progress -B
+
+      - name: Run PIT mutation tests — user-service
+        working-directory: java17/user-service
+        timeout-minutes: 15
+        continue-on-error: true
+        run: mvn org.pitest:pitest-maven:mutationCoverage --no-transfer-progress -B
+
+      - name: Run PIT mutation tests — account-service
+        working-directory: java17/account-service
+        timeout-minutes: 20
+        continue-on-error: true
+        run: mvn org.pitest:pitest-maven:mutationCoverage --no-transfer-progress -B
+
+      - name: Run PIT mutation tests — notification-service
+        working-directory: java17/notification-service
+        timeout-minutes: 20
+        continue-on-error: true
+        run: mvn org.pitest:pitest-maven:mutationCoverage --no-transfer-progress -B
+
+      - name: Run PIT mutation tests — transaction-service
+        working-directory: java17/transaction-service
+        timeout-minutes: 30
+        continue-on-error: true
+        run: mvn org.pitest:pitest-maven:mutationCoverage --no-transfer-progress -B
 
       # ── Assemble site ─────────────────────────────────────────────────
       - name: Assemble coverage site
