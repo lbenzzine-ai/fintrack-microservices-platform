@@ -85,10 +85,16 @@ class JwtTokenProviderTest {
     }
 
     @Test
-    void parse_returnsEmptyForTamperedSignature() {
-        String t = validToken();
-        String tampered = t.substring(0, t.length() - 1)
-                + (t.charAt(t.length() - 1) == 'A' ? 'B' : 'A');
+    void parse_tamperedSignature_returnsEmpty() {
+        String token = Jwts.builder()
+                .issuer(ISSUER)
+                .subject("user-1")
+                .expiration(Date.from(Instant.now().plusSeconds(600)))
+                .signWith(key)
+                .compact();
+        int lastDot = token.lastIndexOf('.');
+        String tampered = token.substring(0, lastDot + 1)
+                + "invalidsignatureXXXXXXXXXXXXXXXX";
         assertThat(provider.parse(tampered)).isEmpty();
     }
 
