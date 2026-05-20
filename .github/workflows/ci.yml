@@ -19,7 +19,7 @@ jobs:
     name: Build & Test (Java 17) — ${{ matrix.service }}
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false   # don't cancel other services if one fails
+      fail-fast: false
       matrix:
         service:
           - account-service
@@ -45,7 +45,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-java17-${{ matrix.service }}-${{ hashFiles(format('java17/{0}/pom.xml', matrix.service)) }}
+          key: ${{ runner.os }}-maven-java17-${{ matrix.service }}-${{ hashFiles('java17/${{ matrix.service }}/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-java17-${{ matrix.service }}-
             ${{ runner.os }}-maven-java17-
@@ -55,7 +55,7 @@ jobs:
         run: mvn clean verify --no-transfer-progress -B
 
       - name: Upload test reports
-        if: always()   # upload even if tests fail
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: test-reports-java17-${{ matrix.service }}
@@ -95,7 +95,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-java21-${{ matrix.service }}-${{ hashFiles(format('java21/{0}/pom.xml', matrix.service)) }}
+          key: ${{ runner.os }}-maven-java21-${{ matrix.service }}-${{ hashFiles('java21/${{ matrix.service }}/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-java21-${{ matrix.service }}-
             ${{ runner.os }}-maven-java21-
@@ -113,7 +113,7 @@ jobs:
           retention-days: 7
 
   # ─────────────────────────────────────────────────────────────────────────
-  # JOB 3 — Code quality gate (runs after both build jobs pass)
+  # JOB 3 — Code quality gate
   # ─────────────────────────────────────────────────────────────────────────
   quality-gate:
     name: Code Quality Gate
@@ -124,10 +124,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Java 21
+      - name: Set up Java 17
         uses: actions/setup-java@v4
         with:
-          java-version: '21'
+          java-version: '17'
           distribution: 'temurin'
           cache: maven
 
@@ -139,14 +139,12 @@ jobs:
             --exclude-dir=test \
             java17/ java21/ | wc -l)
           echo "Found $count markers"
-          # Warn but don't fail — informational only
           if [ "$count" -gt "20" ]; then
             echo "::warning::$count TODO/FIXME markers found in production code"
           fi
 
       - name: Verify no System.out.println in production code
         run: |
-          echo "Checking for System.out.println..."
           found=$(grep -r "System\.out\.println" \
             --include="*.java" \
             java17/transaction-service/src/main \
@@ -160,7 +158,360 @@ jobs:
           echo "Quality check complete"
 
   # ─────────────────────────────────────────────────────────────────────────
-  # JOB 4 — Docker build (main branch only, after all tests pass)
+  # JOB 4 — Coverage reports (both main AND dev branches)
+  # Publishes to GitHub Pages under /main/ or /dev/ subfolder
+  # ─────────────────────────────────────────────────────────────────────────
+  coverage-reports:
+    name: Coverage & Mutation Reports (${{ github.ref_name }})
+    runs-on: ubuntu-latest
+    needs: [ build-java17, build-java21, quality-gate ]
+    if: github.event_name == 'push'
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-coverage-${{ github.ref_name }}-${{ hashFiles('java17/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-coverage-${{ github.ref_name }}-
+            ${{ runner.os }}-maven-coverage-
+
+      # ── JaCoCo ────────────────────────────────────────────────────────
+      - name: Run tests + JaCoCo (Java 17)
+        working-directory: java17
+        run: mvn verify -T 1C --no-transfer-progress -B
+
+      - name: Generate JaCoCo aggregate report
+        working-directory: java17
+        run: mvn jacoco:report-aggregate -pl coverage-report --no-transfer-progress -B
+
+      # ── PIT ───────────────────────────────────────────────────────────
+      - name: Run PIT mutation tests (Java 17)
+        working-directory: java17
+        run: |
+          mvn org.pitest:pitest-maven:mutationCoverage \
+            -pl account-service,transaction-service,user-service,notification-service,api-gateway \
+            --no-transfer-progress -B
+        continue-on-error: true
+
+      # ── Assemble site ─────────────────────────────────────────────────
+      - name: Assemble coverage site
+        run: |
+          BRANCH=${{ github.ref_name }}
+          mkdir -p gh-pages/$BRANCH/jacoco
+          mkdir -p gh-pages/$BRANCH/pit/account-service
+          mkdir -p gh-pages/$BRANCH/pit/transaction-service
+          mkdir -p gh-pages/$BRANCH/pit/user-service
+          mkdir -p gh-pages/$BRANCH/pit/notification-service
+          mkdir -p gh-pages/$BRANCH/pit/api-gateway
+
+          # JaCoCo aggregate
+          cp -r java17/coverage-report/target/site/jacoco-aggregate/. \
+            gh-pages/$BRANCH/jacoco/ 2>/dev/null || echo "JaCoCo aggregate not found"
+
+          # PIT per service — copy both HTML and XML
+          for svc in account-service transaction-service user-service notification-service api-gateway; do
+            latest=$(ls java17/$svc/target/pit-reports/ 2>/dev/null | tail -1)
+            if [ -n "$latest" ]; then
+              cp -r java17/$svc/target/pit-reports/$latest/. \
+                gh-pages/$BRANCH/pit/$svc/ 2>/dev/null || true
+              # Also copy XML to pit root for dashboard to read
+              cp java17/$svc/target/pit-reports/$latest/mutations.xml \
+                gh-pages/$BRANCH/pit/$svc/mutations.xml 2>/dev/null || true
+            fi
+          done
+
+      # ── PIT aggregate dashboard ────────────────────────────────────────
+      - name: Generate PIT aggregate dashboard
+        run: |
+          BRANCH=${{ github.ref_name }}
+          BADGE_COLOR=$([ "$BRANCH" = "main" ] && echo "238636" || echo "1f6feb")
+          cat > gh-pages/$BRANCH/pit/index.html << DASHBOARD
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>FinTrack — Mutation Coverage · ${BRANCH}</title>
+            <style>
+              * { box-sizing: border-box; margin: 0; padding: 0; }
+              body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #e6edf3; padding: 2rem; }
+              .header { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem; }
+              h1 { font-size: 1.5rem; }
+              .branch { background: #${BADGE_COLOR}22; color: #${BADGE_COLOR}; border: 1px solid #${BADGE_COLOR}44; border-radius: 99px; padding: 2px 12px; font-size: 0.75rem; font-weight: 600; }
+              .sub { color: #8b949e; font-size: 0.875rem; margin-bottom: 2rem; }
+              .back { color: #58a6ff; text-decoration: none; font-size: 0.875rem; display: inline-block; margin-bottom: 1.5rem; }
+              table { width: 100%; border-collapse: collapse; background: #161b22; border-radius: 8px; overflow: hidden; }
+              th { background: #21262d; padding: 0.75rem 1rem; text-align: left; font-size: 0.75rem; letter-spacing: 0.05em; text-transform: uppercase; color: #8b949e; }
+              td { padding: 0.75rem 1rem; border-top: 1px solid #30363d; font-size: 0.875rem; }
+              .bar-wrap { background: #30363d; border-radius: 99px; height: 6px; width: 120px; overflow: hidden; display: inline-block; vertical-align: middle; margin-right: 8px; }
+              .bar { height: 100%; border-radius: 99px; }
+              .score { font-weight: 600; }
+              a { color: #58a6ff; text-decoration: none; }
+              a:hover { text-decoration: underline; }
+              .total-row td { background: #21262d; font-weight: 600; border-top: 2px solid #30363d; }
+              .timestamp { color: #8b949e; font-size: 0.75rem; margin-top: 1rem; }
+            </style>
+          </head>
+          <body>
+          <a class="back" href="../">← Back to reports</a>
+          <div class="header">
+            <h1>Mutation Coverage Dashboard</h1>
+            <span class="branch">${BRANCH}</span>
+          </div>
+          <p class="sub">PIT mutation testing · Java 17 stack · Auto-generated by CI</p>
+          <table>
+            <thead>
+              <tr>
+                <th>Service</th>
+                <th>Mutations</th>
+                <th>Killed</th>
+                <th>Survived</th>
+                <th>Score</th>
+                <th>Visual</th>
+                <th>Report</th>
+              </tr>
+            </thead>
+            <tbody id="tbody">
+              <tr><td colspan="7" style="text-align:center;color:#8b949e;padding:2rem">Loading mutation data...</td></tr>
+            </tbody>
+          </table>
+          <p class="timestamp" id="ts"></p>
+          <script>
+          const services = ['account-service','transaction-service','user-service','notification-service','api-gateway'];
+
+          function color(score) {
+            return score >= 75 ? '#3fb950' : score >= 50 ? '#d29922' : '#f85149';
+          }
+
+          async function loadData() {
+            const tbody = document.getElementById('tbody');
+            tbody.innerHTML = '';
+            let totalMutations = 0, totalKilled = 0;
+
+            for (const svc of services) {
+              try {
+                const res = await fetch(svc + '/mutations.xml');
+                if (!res.ok) throw new Error('not found');
+                const text = await res.text();
+                const parser = new DOMParser();
+                const xml = parser.parseFromString(text, 'text/xml');
+                const mutations = xml.querySelectorAll('mutation');
+                const total = mutations.length;
+                const killed = [...mutations].filter(m => m.getAttribute('status') === 'KILLED').length;
+                const survived = total - killed;
+                const score = total > 0 ? Math.round((killed / total) * 100) : 0;
+                totalMutations += total;
+                totalKilled += killed;
+                const c = color(score);
+                const tr = document.createElement('tr');
+                tr.innerHTML = '<td>' + svc + '</td>' +
+                  '<td>' + total + '</td>' +
+                  '<td>' + killed + '</td>' +
+                  '<td>' + survived + '</td>' +
+                  '<td class="score" style="color:' + c + '">' + score + '%</td>' +
+                  '<td><div class="bar-wrap"><div class="bar" style="width:' + score + '%;background:' + c + '"></div></div></td>' +
+                  '<td><a href="' + svc + '/index.html">View →</a></td>';
+                tbody.appendChild(tr);
+              } catch(e) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = '<td>' + svc + '</td><td colspan="6" style="color:#8b949e">Report not available</td>';
+                tbody.appendChild(tr);
+              }
+            }
+
+            const totalScore = totalMutations > 0 ? Math.round((totalKilled / totalMutations) * 100) : 0;
+            const c = color(totalScore);
+            const totalRow = document.createElement('tr');
+            totalRow.className = 'total-row';
+            totalRow.innerHTML = '<td>TOTAL</td>' +
+              '<td>' + totalMutations + '</td>' +
+              '<td>' + totalKilled + '</td>' +
+              '<td>' + (totalMutations - totalKilled) + '</td>' +
+              '<td class="score" style="color:' + c + '">' + totalScore + '%</td>' +
+              '<td><div class="bar-wrap"><div class="bar" style="width:' + totalScore + '%;background:' + c + '"></div></div></td>' +
+              '<td></td>';
+            tbody.appendChild(totalRow);
+
+            document.getElementById('ts').textContent = 'Generated: ' + new Date().toUTCString();
+          }
+
+          loadData();
+          </script>
+          </body>
+          </html>
+          DASHBOARD
+
+      # ── Branch index page ──────────────────────────────────────────────
+      - name: Generate branch index page
+        run: |
+          BRANCH=${{ github.ref_name }}
+          BADGE_COLOR=$([ "$BRANCH" = "main" ] && echo "238636" || echo "1f6feb")
+          cat > gh-pages/$BRANCH/index.html << BRANCHINDEX
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <title>FinTrack — Quality Reports · ${BRANCH}</title>
+            <style>
+              * { box-sizing: border-box; margin: 0; padding: 0; }
+              body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #e6edf3; padding: 3rem; }
+              .back { color: #58a6ff; text-decoration: none; font-size: 0.875rem; display: inline-block; margin-bottom: 1.5rem; }
+              .header { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem; }
+              h1 { font-size: 1.75rem; }
+              .branch { background: #${BADGE_COLOR}22; color: #${BADGE_COLOR}; border: 1px solid #${BADGE_COLOR}44; border-radius: 99px; padding: 2px 12px; font-size: 0.875rem; font-weight: 600; }
+              .sub { color: #8b949e; margin-bottom: 2.5rem; font-size: 0.875rem; }
+              .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+              .card { background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 1.5rem; transition: border-color .2s; }
+              .card:hover { border-color: #58a6ff; }
+              .card h2 { font-size: 1rem; margin-bottom: 0.5rem; }
+              .card p { color: #8b949e; font-size: 0.8125rem; line-height: 1.6; margin-bottom: 1rem; }
+              .btn { display: inline-block; padding: 0.5rem 1rem; border-radius: 6px; text-decoration: none; font-size: 0.8125rem; font-weight: 500; }
+              .btn-green { background: #238636; color: white; }
+              .btn-blue { background: #1f6feb; color: white; }
+              .btn:hover { opacity: 0.85; }
+            </style>
+          </head>
+          <body>
+            <a class="back" href="../">← All branches</a>
+            <div class="header">
+              <h1>Quality Reports</h1>
+              <span class="branch">${BRANCH}</span>
+            </div>
+            <p class="sub">Auto-generated on every push · Java 17 stack</p>
+            <div class="cards">
+              <div class="card">
+                <h2>📊 JaCoCo Line Coverage</h2>
+                <p>Aggregate line and branch coverage across all business services. Excludes infrastructure, DTOs, entities, and aspects.</p>
+                <a href="jacoco/index.html" class="btn btn-blue">View Coverage →</a>
+              </div>
+              <div class="card">
+                <h2>🧬 PIT Mutation Testing</h2>
+                <p>Mutation scores per service showing whether tests actually catch bugs — not just execute lines of code.</p>
+                <a href="pit/index.html" class="btn btn-green">View Mutations →</a>
+              </div>
+            </div>
+          </body>
+          </html>
+          BRANCHINDEX
+
+      # ── Root landing page (lists all branches) ─────────────────────────
+      - name: Generate root landing page
+        run: |
+          cat > gh-pages/index.html << 'ROOTINDEX'
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <title>FinTrack — Quality Reports</title>
+            <style>
+              * { box-sizing: border-box; margin: 0; padding: 0; }
+              body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #e6edf3; padding: 3rem; max-width: 800px; margin: 0 auto; }
+              h1 { font-size: 2rem; margin-bottom: 0.25rem; }
+              .sub { color: #8b949e; margin-bottom: 3rem; }
+              .branch-section { margin-bottom: 2rem; }
+              .branch-title { font-size: 1rem; font-weight: 600; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px; }
+              .badge { border-radius: 99px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
+              .badge-main { background: #23863622; color: #3fb950; border: 1px solid #23863644; }
+              .badge-dev { background: #1f6feb22; color: #58a6ff; border: 1px solid #1f6feb44; }
+              .links { display: flex; gap: 1rem; flex-wrap: wrap; }
+              .link-card { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 0.875rem 1.25rem; text-decoration: none; color: #e6edf3; transition: border-color .2s; min-width: 180px; }
+              .link-card:hover { border-color: #58a6ff; }
+              .link-card .icon { font-size: 1.25rem; margin-bottom: 4px; }
+              .link-card .name { font-size: 0.875rem; font-weight: 500; }
+              .link-card .desc { font-size: 0.75rem; color: #8b949e; margin-top: 2px; }
+              .divider { border: none; border-top: 1px solid #30363d; margin: 2rem 0; }
+              .repo-link { color: #58a6ff; text-decoration: none; font-size: 0.875rem; }
+            </style>
+          </head>
+          <body>
+            <h1>FinTrack</h1>
+            <p class="sub">Quality reports — auto-generated by CI on every push</p>
+
+            <div class="branch-section">
+              <div class="branch-title">
+                <span class="badge badge-main">main</span>
+                Production branch
+              </div>
+              <div class="links">
+                <a href="main/" class="link-card">
+                  <div class="icon">📊</div>
+                  <div class="name">All Reports</div>
+                  <div class="desc">JaCoCo + PIT</div>
+                </a>
+                <a href="main/jacoco/index.html" class="link-card">
+                  <div class="icon">📈</div>
+                  <div class="name">Line Coverage</div>
+                  <div class="desc">JaCoCo aggregate</div>
+                </a>
+                <a href="main/pit/index.html" class="link-card">
+                  <div class="icon">🧬</div>
+                  <div class="name">Mutation Score</div>
+                  <div class="desc">PIT dashboard</div>
+                </a>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="branch-section">
+              <div class="branch-title">
+                <span class="badge badge-dev">dev</span>
+                Development branch — work in progress
+              </div>
+              <div class="links">
+                <a href="dev/" class="link-card">
+                  <div class="icon">📊</div>
+                  <div class="name">All Reports</div>
+                  <div class="desc">JaCoCo + PIT</div>
+                </a>
+                <a href="dev/jacoco/index.html" class="link-card">
+                  <div class="icon">📈</div>
+                  <div class="name">Line Coverage</div>
+                  <div class="desc">JaCoCo aggregate</div>
+                </a>
+                <a href="dev/pit/index.html" class="link-card">
+                  <div class="icon">🧬</div>
+                  <div class="name">Mutation Score</div>
+                  <div class="desc">PIT dashboard</div>
+                </a>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+            <a class="repo-link" href="https://github.com/lbenzzine-ai/fintrack-microservices-platform">
+              → View source on GitHub
+            </a>
+          </body>
+          </html>
+          ROOTINDEX
+
+      # ── Deploy to GitHub Pages ─────────────────────────────────────────
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./gh-pages
+          keep_files: true
+          commit_message: "ci: update ${{ github.ref_name }} coverage reports [skip ci]"
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # JOB 5 — Docker build (main branch only)
   # ─────────────────────────────────────────────────────────────────────────
   docker-build:
     name: Docker Build — ${{ matrix.service }}
@@ -223,7 +574,7 @@ jobs:
           cache-to: type=gha,mode=max
 
   # ─────────────────────────────────────────────────────────────────────────
-  # JOB 5 — Summary (always runs — shows overall pipeline status)
+  # JOB 6 — Pipeline summary
   # ─────────────────────────────────────────────────────────────────────────
   pipeline-summary:
     name: Pipeline Summary
@@ -241,6 +592,11 @@ jobs:
           echo "| Build Java 17 | ${{ needs.build-java17.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Build Java 21 | ${{ needs.build-java21.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Quality Gate  | ${{ needs.quality-gate.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Quality Reports" >> $GITHUB_STEP_SUMMARY
+          echo "📊 [All Reports](https://lbenzzine-ai.github.io/fintrack-microservices-platform/)" >> $GITHUB_STEP_SUMMARY
+          echo "📈 [JaCoCo — ${{ github.ref_name }}](https://lbenzzine-ai.github.io/fintrack-microservices-platform/${{ github.ref_name }}/jacoco/index.html)" >> $GITHUB_STEP_SUMMARY
+          echo "🧬 [PIT Mutations — ${{ github.ref_name }}](https://lbenzzine-ai.github.io/fintrack-microservices-platform/${{ github.ref_name }}/pit/index.html)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Commit: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
           echo "Branch: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
