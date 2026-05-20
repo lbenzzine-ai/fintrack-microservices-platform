@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">user-service</a> &gt; <a href="index.source.html" class="el_package">com.fintrack.user.service</a> &gt; <span class="el_source">UserService.java</span></div><h1>UserService.java</h1><pre class="source lang-java linenums">package com.fintrack.user.service;
+
+import com.fintrack.user.dto.UpdateUserRequest;
+import com.fintrack.user.dto.UserResponse;
+import com.fintrack.user.entity.User;
+import com.fintrack.user.exception.UserNotFoundException;
+import com.fintrack.user.mapper.UserMapper;
+import com.fintrack.user.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+<span class="fc" id="L20">@Slf4j</span>
+@Service
+@RequiredArgsConstructor
+public class UserService {
+
+    private final UserRepository userRepository;
+    private final UserMapper userMapper;
+
+    @Transactional(readOnly = true)
+    @Cacheable(value = &quot;users:byId&quot;, key = &quot;#uuid&quot;)
+    public UserResponse findByUuid(String uuid) {
+<span class="fc" id="L31">        User user = userRepository.findByUuidWithRoles(uuid).orElseThrow(() -&gt; new UserNotFoundException(uuid));</span>
+<span class="fc" id="L32">        log.debug(&quot;DB hit for user uuid={}&quot;, uuid);</span>
+<span class="fc" id="L33">        return userMapper.toResponse(user);</span>
+    }
+
+    @Transactional(readOnly = true)
+    public Page&lt;UserResponse&gt; list(Pageable pageable) {
+<span class="fc" id="L38">        return userRepository.findAll(pageable).map(userMapper::toResponse);</span>
+    }
+
+    @Transactional
+    @Caching(put  = { @CachePut (value = &quot;users:byId&quot;, key = &quot;#uuid&quot;) },
+             evict = { @CacheEvict(value = &quot;users:byEmail&quot;, allEntries = true) })
+    public UserResponse update(String uuid, UpdateUserRequest req) {
+<span class="fc" id="L45">        User user = userRepository.findByUuidWithRoles(uuid).orElseThrow(() -&gt; new UserNotFoundException(uuid));</span>
+<span class="fc bfc" id="L46" title="All 2 branches covered.">        if (req.getFirstName() != null) user.setFirstName(req.getFirstName());</span>
+<span class="fc bfc" id="L47" title="All 2 branches covered.">        if (req.getLastName() != null)  user.setLastName(req.getLastName());</span>
+<span class="fc" id="L48">        return userMapper.toResponse(userRepository.save(user));</span>
+    }
+
+    @Transactional
+    @CacheEvict(value = {&quot;users:byId&quot;,&quot;users:byEmail&quot;}, key = &quot;#uuid&quot;)
+    public void delete(String uuid) {
+<span class="fc" id="L54">        User user = userRepository.findByUuidWithRoles(uuid).orElseThrow(() -&gt; new UserNotFoundException(uuid));</span>
+<span class="fc" id="L55">        userRepository.delete(user);</span>
+<span class="fc" id="L56">        log.info(&quot;Deleted user uuid={}&quot;, uuid);</span>
+<span class="fc" id="L57">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

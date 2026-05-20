@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RiskScore.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">transaction-service</a> &gt; <a href="index.source.html" class="el_package">com.fintrack.transaction.risk</a> &gt; <span class="el_source">RiskScore.java</span></div><h1>RiskScore.java</h1><pre class="source lang-java linenums">package com.fintrack.transaction.risk;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.Instant;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
+@Data @Builder @NoArgsConstructor @AllArgsConstructor
+public class RiskScore {
+    private RiskLevel level;
+    private int score;
+    private List&lt;RiskFinding&gt; findings;
+    private boolean blocked;
+    private boolean requiresReview;
+    private Instant assessedAt;
+    private String transactionUuid;
+
+    /** No findings — used when a tx passes every rule. */
+    public static RiskScore clean(String transactionUuid) {
+<span class="fc" id="L25">        return RiskScore.builder()</span>
+<span class="fc" id="L26">                .transactionUuid(transactionUuid)</span>
+<span class="fc" id="L27">                .level(RiskLevel.LOW)</span>
+<span class="fc" id="L28">                .score(0)</span>
+<span class="fc" id="L29">                .findings(Collections.emptyList())</span>
+<span class="fc" id="L30">                .blocked(false)</span>
+<span class="fc" id="L31">                .requiresReview(false)</span>
+<span class="fc" id="L32">                .assessedAt(Instant.now())</span>
+<span class="fc" id="L33">                .build();</span>
+    }
+
+    /** Returns true only when the overall level is CRITICAL (i.e. the saga must abort). */
+    public boolean shouldBlock() {
+<span class="fc bfc" id="L38" title="All 2 branches covered.">        return level == RiskLevel.CRITICAL;</span>
+    }
+
+    /** Returns true when reviewers should be alerted — HIGH or CRITICAL. */
+    public boolean shouldAlert() {
+<span class="fc bfc" id="L43" title="All 4 branches covered.">        return level != null &amp;&amp; level.isAtLeast(RiskLevel.HIGH);</span>
+    }
+
+    public static RiskScore from(String transactionUuid, List&lt;RiskFinding&gt; findings) {
+<span class="fc" id="L47">        RiskLevel level = findings.stream()</span>
+<span class="fc" id="L48">                .map(RiskFinding::getLevel)</span>
+<span class="fc" id="L49">                .max(Comparator.comparingInt(RiskLevel::weight))</span>
+<span class="fc" id="L50">                .orElse(RiskLevel.LOW);</span>
+<span class="fc" id="L51">        int score = findings.stream().mapToInt(f -&gt; f.getLevel().weight()).sum();</span>
+<span class="fc bfc" id="L52" title="All 2 branches covered.">        boolean blocked = findings.stream().anyMatch(f -&gt; f.getLevel() == RiskLevel.CRITICAL);</span>
+<span class="fc bfc" id="L53" title="All 4 branches covered.">        boolean requiresReview = !blocked &amp;&amp;</span>
+<span class="fc bfc" id="L54" title="All 2 branches covered.">                (level == RiskLevel.HIGH || score &gt;= RiskLevel.HIGH.weight());</span>
+<span class="fc" id="L55">        return RiskScore.builder()</span>
+<span class="fc" id="L56">                .transactionUuid(transactionUuid)</span>
+<span class="fc" id="L57">                .level(level)</span>
+<span class="fc" id="L58">                .score(score)</span>
+<span class="fc" id="L59">                .findings(findings)</span>
+<span class="fc" id="L60">                .blocked(blocked)</span>
+<span class="fc" id="L61">                .requiresReview(requiresReview)</span>
+<span class="fc" id="L62">                .assessedAt(Instant.now())</span>
+<span class="fc" id="L63">                .build();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

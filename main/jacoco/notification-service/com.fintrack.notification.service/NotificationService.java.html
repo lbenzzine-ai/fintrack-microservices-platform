@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NotificationService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">notification-service</a> &gt; <a href="index.source.html" class="el_package">com.fintrack.notification.service</a> &gt; <span class="el_source">NotificationService.java</span></div><h1>NotificationService.java</h1><pre class="source lang-java linenums">package com.fintrack.notification.service;
+
+import com.fintrack.notification.dto.NotificationResponse;
+import com.fintrack.notification.dto.SendNotificationRequest;
+import com.fintrack.notification.entity.Notification;
+import com.fintrack.notification.entity.NotificationChannel;
+import com.fintrack.notification.entity.NotificationPreference;
+import com.fintrack.notification.entity.NotificationStatus;
+import com.fintrack.notification.exception.NotificationNotFoundException;
+import com.fintrack.notification.mapper.NotificationMapper;
+import com.fintrack.notification.repository.NotificationPreferenceRepository;
+import com.fintrack.notification.repository.NotificationRepository;
+import com.fintrack.notification.strategy.channel.DispatchResult;
+import com.fintrack.notification.strategy.channel.NotificationStrategyContext;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
+
+import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+
+/**
+ * Orchestrates notification persistence + delivery. Templates are rendered via Thymeleaf so
+ * marketing can iterate without redeploying; the dispatcher picks a {@link NotificationStrategyContext}
+ * Strategy for the requested channel.
+ */
+<span class="fc" id="L36">@Slf4j</span>
+@Service
+@RequiredArgsConstructor
+public class NotificationService {
+
+    private final NotificationRepository repository;
+    private final NotificationPreferenceRepository preferenceRepository;
+    private final NotificationMapper mapper;
+    private final NotificationStrategyContext strategyContext;
+    private final TemplateEngine templateEngine;
+
+    /** Persist + dispatch synchronously. Returns the row with terminal status set. */
+    @Transactional
+    public NotificationResponse create(SendNotificationRequest req) {
+<span class="fc" id="L50">        Notification n = Notification.builder()</span>
+<span class="fc" id="L51">                .uuid(UUID.randomUUID().toString())</span>
+<span class="fc" id="L52">                .accountUuid(req.getAccountUuid())</span>
+<span class="fc" id="L53">                .transactionUuid(req.getTransactionUuid())</span>
+<span class="fc" id="L54">                .recipient(req.getRecipient())</span>
+<span class="fc" id="L55">                .channel(req.getChannel())</span>
+<span class="fc" id="L56">                .template(req.getTemplate())</span>
+<span class="fc" id="L57">                .subject(req.getSubject())</span>
+<span class="fc" id="L58">                .body(renderBody(req.getTemplate(), req.getPayload()))</span>
+<span class="fc" id="L59">                .status(NotificationStatus.PENDING)</span>
+<span class="fc" id="L60">                .build();</span>
+<span class="fc" id="L61">        n = repository.save(n);</span>
+<span class="fc" id="L62">        dispatch(n);</span>
+<span class="fc" id="L63">        return mapper.toResponse(n);</span>
+    }
+
+    /** Async path — Kafka consumers use this so the listener thread isn't blocked on SMTP. */
+    @Async
+    @Transactional
+    public void createAsync(SendNotificationRequest req) {
+<span class="fc" id="L70">        create(req);</span>
+<span class="fc" id="L71">    }</span>
+
+    @Transactional(readOnly = true)
+    public NotificationResponse findByUuid(String uuid) {
+<span class="fc" id="L75">        return repository.findByUuid(uuid).map(mapper::toResponse)</span>
+<span class="fc" id="L76">                .orElseThrow(() -&gt; new NotificationNotFoundException(uuid));</span>
+    }
+
+    @Transactional(readOnly = true)
+    public Page&lt;NotificationResponse&gt; findByAccount(String accountUuid, Pageable pageable) {
+<span class="fc" id="L81">        return repository.findByAccountUuid(accountUuid, pageable).map(mapper::toResponse);</span>
+    }
+
+    @Transactional
+    public NotificationPreference upsertPreference(String userUuid, NotificationPreference incoming) {
+<span class="fc" id="L86">        return preferenceRepository.findByUserUuid(userUuid)</span>
+<span class="fc" id="L87">                .map(existing -&gt; mergeAndSave(existing, incoming))</span>
+<span class="fc" id="L88">                .orElseGet(() -&gt; {</span>
+<span class="fc" id="L89">                    incoming.setUserUuid(userUuid);</span>
+<span class="fc" id="L90">                    return preferenceRepository.save(incoming);</span>
+                });
+    }
+
+    public Optional&lt;NotificationPreference&gt; findPreference(String userUuid) {
+<span class="fc" id="L95">        return preferenceRepository.findByUserUuid(userUuid);</span>
+    }
+
+    /** Test the user's opt-in flags before dispatch. */
+    public boolean isOptedIn(String userUuid, NotificationChannel channel) {
+<span class="fc" id="L100">        return preferenceRepository.findByUserUuid(userUuid)</span>
+<span class="fc bfc" id="L101" title="All 3 branches covered.">                .map(p -&gt; switch (channel) {</span>
+<span class="fc" id="L102">                    case EMAIL -&gt; p.isEmailEnabled();</span>
+<span class="fc" id="L103">                    case SMS -&gt; p.isSmsEnabled();</span>
+<span class="fc" id="L104">                    case PUSH -&gt; p.isPushEnabled();</span>
+                })
+<span class="fc" id="L106">                .orElse(true);</span>
+    }
+
+    private void dispatch(Notification n) {
+<span class="fc" id="L110">        DispatchResult result = strategyContext.strategyFor(n.getChannel()).send(n);</span>
+<span class="fc" id="L111">        n.setDeliveryProvider(result.getProvider());</span>
+<span class="fc bfc" id="L112" title="All 2 branches covered.">        if (result.isDelivered()) {</span>
+<span class="fc" id="L113">            n.setStatus(NotificationStatus.SENT);</span>
+<span class="fc" id="L114">            n.setSentAt(Instant.now());</span>
+<span class="fc" id="L115">            log.info(&quot;Notification {} delivered via {}&quot;, n.getUuid(), n.getChannel());</span>
+        } else {
+<span class="fc" id="L117">            n.setStatus(NotificationStatus.FAILED);</span>
+<span class="fc" id="L118">            n.setFailureReason(result.getFailureReason());</span>
+<span class="fc" id="L119">            log.warn(&quot;Notification {} failed via {}: {}&quot;, n.getUuid(), n.getChannel(), result.getFailureReason());</span>
+        }
+<span class="fc" id="L121">        repository.save(n);</span>
+<span class="fc" id="L122">    }</span>
+
+    private String renderBody(String template, Map&lt;String, Object&gt; payload) {
+<span class="pc bpc" id="L125" title="1 of 4 branches missed.">        if (template == null || template.isBlank()) return null;</span>
+<span class="fc" id="L126">        Context ctx = new Context();</span>
+<span class="fc bfc" id="L127" title="All 2 branches covered.">        if (payload != null) payload.forEach(ctx::setVariable);</span>
+        try {
+<span class="fc" id="L129">            return templateEngine.process(template, ctx);</span>
+<span class="fc" id="L130">        } catch (Exception ex) {</span>
+            // If template missing, fall back to inline rendering so the user still gets *something*.
+<span class="fc" id="L132">            log.warn(&quot;Template '{}' render failed, falling back to inline body: {}&quot;, template, ex.getMessage());</span>
+<span class="fc" id="L133">            return fallback(template, payload);</span>
+        }
+    }
+
+    private String fallback(String template, Map&lt;String, Object&gt; payload) {
+<span class="pc bpc" id="L138" title="1 of 2 branches missed.">        Map&lt;String, Object&gt; safe = payload == null ? new HashMap&lt;&gt;() : payload;</span>
+<span class="fc" id="L139">        return &quot;[&quot; + template + &quot;] &quot; + safe;</span>
+    }
+
+    private NotificationPreference mergeAndSave(NotificationPreference existing, NotificationPreference patch) {
+<span class="fc bfc" id="L143" title="All 2 branches covered.">        if (patch.getEmailAddress() != null) existing.setEmailAddress(patch.getEmailAddress());</span>
+<span class="fc bfc" id="L144" title="All 2 branches covered.">        if (patch.getPhoneNumber()  != null) existing.setPhoneNumber(patch.getPhoneNumber());</span>
+<span class="pc bpc" id="L145" title="1 of 2 branches missed.">        if (patch.getPushToken()    != null) existing.setPushToken(patch.getPushToken());</span>
+<span class="fc" id="L146">        existing.setEmailEnabled(patch.isEmailEnabled());</span>
+<span class="fc" id="L147">        existing.setSmsEnabled(patch.isSmsEnabled());</span>
+<span class="fc" id="L148">        existing.setPushEnabled(patch.isPushEnabled());</span>
+<span class="fc" id="L149">        return preferenceRepository.save(existing);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

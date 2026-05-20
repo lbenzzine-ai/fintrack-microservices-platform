@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CorrelationIdGlobalFilter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">api-gateway</a> &gt; <a href="index.source.html" class="el_package">com.fintrack.gateway.filter</a> &gt; <span class="el_source">CorrelationIdGlobalFilter.java</span></div><h1>CorrelationIdGlobalFilter.java</h1><pre class="source lang-java linenums">package com.fintrack.gateway.filter;
+
+import org.slf4j.MDC;
+import org.springframework.cloud.gateway.filter.GatewayFilterChain;
+import org.springframework.cloud.gateway.filter.GlobalFilter;
+import org.springframework.core.Ordered;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.stereotype.Component;
+import org.springframework.web.server.ServerWebExchange;
+import reactor.core.publisher.Mono;
+
+import java.util.UUID;
+
+/**
+ * Global filter — ensures every request carries an {@code X-Correlation-Id} header.
+ * Generates one if missing, exposes it on the response, and stores it in MDC so it
+ * appears in JSON logs alongside Brave's traceId/spanId.
+ */
+@Component
+<span class="fc" id="L20">public class CorrelationIdGlobalFilter implements GlobalFilter, Ordered {</span>
+
+    public static final String HEADER = &quot;X-Correlation-Id&quot;;
+    public static final String MDC_KEY = &quot;correlationId&quot;;
+
+    @Override
+    public Mono&lt;Void&gt; filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+<span class="fc" id="L27">        ServerHttpRequest request = exchange.getRequest();</span>
+<span class="fc" id="L28">        String correlationId = request.getHeaders().getFirst(HEADER);</span>
+<span class="fc bfc" id="L29" title="All 4 branches covered.">        if (correlationId == null || correlationId.isBlank()) {</span>
+<span class="fc" id="L30">            correlationId = UUID.randomUUID().toString();</span>
+        }
+<span class="fc" id="L32">        final String id = correlationId;</span>
+
+<span class="fc" id="L34">        ServerHttpRequest mutated = request.mutate().header(HEADER, id).build();</span>
+<span class="fc" id="L35">        exchange.getResponse().getHeaders().set(HEADER, id);</span>
+<span class="fc" id="L36">        MDC.put(MDC_KEY, id);</span>
+
+<span class="fc" id="L38">        return chain.filter(exchange.mutate().request(mutated).build())</span>
+<span class="fc" id="L39">                .doFinally(sig -&gt; MDC.remove(MDC_KEY));</span>
+    }
+
+    @Override
+    public int getOrder() {
+<span class="fc" id="L44">        return Ordered.HIGHEST_PRECEDENCE;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

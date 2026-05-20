@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AccountController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">account-service</a> &gt; <a href="index.source.html" class="el_package">com.fintrack.account.controller</a> &gt; <span class="el_source">AccountController.java</span></div><h1>AccountController.java</h1><pre class="source lang-java linenums">package com.fintrack.account.controller;
+
+import com.fintrack.account.dto.AccountResponse;
+import com.fintrack.account.dto.BalanceResponse;
+import com.fintrack.account.dto.CreateAccountRequest;
+import com.fintrack.account.dto.InterestPreview;
+import com.fintrack.account.service.AccountService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.math.BigDecimal;
+
+@Tag(name = &quot;Accounts&quot;, description = &quot;User wallets, balances and interest previews&quot;)
+@SecurityRequirement(name = &quot;bearer-jwt&quot;)
+@RestController
+@RequestMapping(&quot;/api/v1/accounts&quot;)
+@RequiredArgsConstructor
+public class AccountController {
+
+    private final AccountService accountService;
+
+    @Operation(summary = &quot;Open a wallet for the authenticated user (idempotent on userUuid)&quot;)
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public AccountResponse open(@RequestHeader(value = &quot;X-User-Id&quot;) String userUuid,
+                                @Valid @RequestBody CreateAccountRequest req) {
+<span class="nc" id="L41">        return accountService.createForUser(userUuid, req.getCurrencyCode());</span>
+    }
+
+    @Operation(summary = &quot;Get an account by its UUID&quot;)
+    @GetMapping(&quot;/{uuid}&quot;)
+    public AccountResponse get(@PathVariable String uuid) {
+<span class="fc" id="L47">        return accountService.findByUuid(uuid);</span>
+    }
+
+    @Operation(summary = &quot;Get the wallet of the authenticated user&quot;)
+    @GetMapping(&quot;/me&quot;)
+    public AccountResponse mine(@RequestHeader(&quot;X-User-Id&quot;) String userUuid) {
+<span class="nc" id="L53">        return accountService.findByUserUuid(userUuid);</span>
+    }
+
+    @Operation(summary = &quot;Balance only — cached aggressively&quot;)
+    @GetMapping(&quot;/{uuid}/balance&quot;)
+    public BalanceResponse balance(@PathVariable String uuid) {
+<span class="nc" id="L59">        return accountService.balance(uuid);</span>
+    }
+
+    @Operation(summary = &quot;Preview interest using a chosen Strategy (defaults to fintrack.account.interest.strategy)&quot;)
+    @GetMapping(&quot;/{uuid}/interest/preview&quot;)
+    public InterestPreview interestPreview(@PathVariable String uuid,
+                                           @RequestParam(defaultValue = &quot;0.025&quot;) BigDecimal annualRate,
+                                           @RequestParam(defaultValue = &quot;12&quot;) int months,
+                                           @RequestParam(required = false) String strategy) {
+<span class="nc" id="L68">        return accountService.previewInterest(uuid, annualRate, months, strategy);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

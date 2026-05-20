@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>FinTrack — Quality Reports · main</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #e6edf3; padding: 3rem; }
+    .back { color: #58a6ff; text-decoration: none; font-size: 0.875rem; display: inline-block; margin-bottom: 1.5rem; }
+    .header { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem; }
+    h1 { font-size: 1.75rem; }
+    .branch { background: #23863622; color: #238636; border: 1px solid #23863644; border-radius: 99px; padding: 2px 12px; font-size: 0.875rem; font-weight: 600; }
+    .sub { color: #8b949e; margin-bottom: 2.5rem; font-size: 0.875rem; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+    .card { background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 1.5rem; transition: border-color .2s; }
+    .card:hover { border-color: #58a6ff; }
+    .card h2 { font-size: 1rem; margin-bottom: 0.5rem; }
+    .card p { color: #8b949e; font-size: 0.8125rem; line-height: 1.6; margin-bottom: 1rem; }
+    .btn { display: inline-block; padding: 0.5rem 1rem; border-radius: 6px; text-decoration: none; font-size: 0.8125rem; font-weight: 500; }
+    .btn-green { background: #238636; color: white; }
+    .btn-blue { background: #1f6feb; color: white; }
+    .btn:hover { opacity: 0.85; }
+  </style>
+</head>
+<body>
+  <a class="back" href="../">← All branches</a>
+  <div class="header">
+    <h1>Quality Reports</h1>
+    <span class="branch">main</span>
+  </div>
+  <p class="sub">Auto-generated on every push · Java 17 stack</p>
+  <div class="cards">
+    <div class="card">
+      <h2>📊 JaCoCo Line Coverage</h2>
+      <p>Aggregate line and branch coverage across all business services. Excludes infrastructure, DTOs, entities, and aspects.</p>
+      <a href="jacoco/index.html" class="btn btn-blue">View Coverage →</a>
+    </div>
+    <div class="card">
+      <h2>🧬 PIT Mutation Testing</h2>
+      <p>Mutation scores per service showing whether tests actually catch bugs — not just execute lines of code.</p>
+      <a href="pit/index.html" class="btn btn-green">View Mutations →</a>
+    </div>
+  </div>
+</body>
+</html>

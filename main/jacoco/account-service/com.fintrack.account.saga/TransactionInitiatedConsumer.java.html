@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TransactionInitiatedConsumer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">account-service</a> &gt; <a href="index.source.html" class="el_package">com.fintrack.account.saga</a> &gt; <span class="el_source">TransactionInitiatedConsumer.java</span></div><h1>TransactionInitiatedConsumer.java</h1><pre class="source lang-java linenums">package com.fintrack.account.saga;
+
+import com.fintrack.account.event.TransactionFailedEvent;
+import com.fintrack.account.event.TransactionInitiatedEvent;
+import com.fintrack.account.exception.AccountFrozenException;
+import com.fintrack.account.exception.AccountNotFoundException;
+import com.fintrack.account.exception.InsufficientFundsException;
+import com.fintrack.account.messaging.MessagingStrategyRegistry;
+import com.fintrack.account.service.AccountService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.stereotype.Component;
+
+import java.time.Instant;
+import java.util.UUID;
+
+/**
+ * Saga step 4 — on {@code transaction-initiated}, attempt to debit the source account.
+ * On success, {@link AccountService#debit} publishes {@code account-debited}.
+ * On business failure (insufficient funds / frozen / unknown), we publish {@code transaction-failed}
+ * with {@code alreadyDebited=false} so transaction-service marks the tx as FAILED without compensation.
+ */
+<span class="fc" id="L26">@Slf4j</span>
+@Component
+@RequiredArgsConstructor
+public class TransactionInitiatedConsumer {
+
+    private final AccountService accountService;
+    private final MessagingStrategyRegistry messaging;
+
+    @Value(&quot;${fintrack.messaging.kafka.topics.transaction-failed:fintrack.tx.failed}&quot;)
+    private String txFailedTopic;
+
+    @KafkaListener(
+        topics = &quot;${fintrack.messaging.kafka.topics.transaction-initiated}&quot;,
+        groupId = &quot;${spring.application.name}&quot;,
+        containerFactory = &quot;kafkaListenerContainerFactory&quot;
+    )
+    public void onTransactionInitiated(@Payload TransactionInitiatedEvent event) {
+<span class="fc" id="L43">        log.info(&quot;[SAGA] transaction-initiated tx={} from={} amount={}&quot;,</span>
+<span class="fc" id="L44">                event.getTransactionUuid(), event.getFromAccountUuid(), event.getAmount());</span>
+        try {
+<span class="fc" id="L46">            accountService.debit(event.getFromAccountUuid(), event.getToAccountUuid(),</span>
+<span class="fc" id="L47">                    event.getTransactionUuid(), event.getAmount(), event.getFee());</span>
+<span class="fc" id="L48">        } catch (InsufficientFundsException ex) {</span>
+<span class="fc" id="L49">            publishFailure(event, &quot;INSUFFICIENT_FUNDS&quot;, ex.getMessage(), false);</span>
+<span class="fc" id="L50">        } catch (AccountFrozenException ex) {</span>
+<span class="fc" id="L51">            publishFailure(event, &quot;ACCOUNT_FROZEN&quot;, ex.getMessage(), false);</span>
+<span class="fc" id="L52">        } catch (AccountNotFoundException ex) {</span>
+<span class="fc" id="L53">            publishFailure(event, &quot;ACCOUNT_NOT_FOUND&quot;, ex.getMessage(), false);</span>
+<span class="fc" id="L54">        } catch (Exception ex) {</span>
+<span class="fc" id="L55">            log.error(&quot;Unexpected error processing tx-initiated for tx={}&quot;, event.getTransactionUuid(), ex);</span>
+<span class="fc" id="L56">            publishFailure(event, &quot;DOWNSTREAM&quot;, ex.getMessage(), false);</span>
+<span class="fc" id="L57">        }</span>
+<span class="fc" id="L58">    }</span>
+
+    private void publishFailure(TransactionInitiatedEvent in, String code, String reason, boolean alreadyDebited) {
+<span class="fc" id="L61">        TransactionFailedEvent out = TransactionFailedEvent.builder()</span>
+<span class="fc" id="L62">                .eventId(UUID.randomUUID().toString())</span>
+<span class="fc" id="L63">                .transactionUuid(in.getTransactionUuid())</span>
+<span class="fc" id="L64">                .fromAccountUuid(in.getFromAccountUuid())</span>
+<span class="fc" id="L65">                .toAccountUuid(in.getToAccountUuid())</span>
+<span class="fc" id="L66">                .amount(in.getAmount())</span>
+<span class="fc" id="L67">                .fee(in.getFee())</span>
+<span class="fc" id="L68">                .currencyCode(in.getCurrencyCode())</span>
+<span class="fc" id="L69">                .reasonCode(code)</span>
+<span class="fc" id="L70">                .reason(reason)</span>
+<span class="fc" id="L71">                .alreadyDebited(alreadyDebited)</span>
+<span class="fc" id="L72">                .occurredAt(Instant.now())</span>
+<span class="fc" id="L73">                .build();</span>
+<span class="fc" id="L74">        messaging.active().publish(txFailedTopic, in.getTransactionUuid(), out);</span>
+<span class="fc" id="L75">        log.warn(&quot;[SAGA] published transaction-failed tx={} reason={}&quot;, in.getTransactionUuid(), code);</span>
+<span class="fc" id="L76">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
