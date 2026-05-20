@@ -13,9 +13,9 @@ name: fintrack
 
 x-business-env: &business-env
   CONFIG_SERVER_URL: http://config-server:8888
-  CONFIG_SERVER_USER: configadmin
-  CONFIG_SERVER_PASSWORD: configpass
-  EUREKA_SERVER_URL: http://eurekaadmin:eurekapass@eureka-server:8761/eureka
+  CONFIG_SERVER_USER: ${CONFIG_SERVER_USER}
+  CONFIG_SERVER_PASSWORD: ${CONFIG_SERVER_PASSWORD}
+  EUREKA_SERVER_URL: http://${EUREKA_USER}:${EUREKA_PASSWORD}@eureka-server:8761/eureka
   SPRING_PROFILES_ACTIVE: docker
   SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
   SPRING_DATA_REDIS_HOST: redis
@@ -34,14 +34,14 @@ services:
     image: mysql:8.0
     container_name: fintrack-mysql-users
     environment:
-      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: fintrack_users
-      MYSQL_USER: fintrack
-      MYSQL_PASSWORD: fintrack
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports: ["3307:3306"]
     volumes: [mysql-users-data:/var/lib/mysql]
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpass"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -51,14 +51,14 @@ services:
     image: mysql:8.0
     container_name: fintrack-mysql-accounts
     environment:
-      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: fintrack_accounts
-      MYSQL_USER: fintrack
-      MYSQL_PASSWORD: fintrack
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports: ["3308:3306"]
     volumes: [mysql-accounts-data:/var/lib/mysql]
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpass"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -68,14 +68,14 @@ services:
     image: mysql:8.0
     container_name: fintrack-mysql-transactions
     environment:
-      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: fintrack_transactions
-      MYSQL_USER: fintrack
-      MYSQL_PASSWORD: fintrack
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports: ["3309:3306"]
     volumes: [mysql-transactions-data:/var/lib/mysql]
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpass"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -85,14 +85,14 @@ services:
     image: mysql:8.0
     container_name: fintrack-mysql-notifications
     environment:
-      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: fintrack_notifications
-      MYSQL_USER: fintrack
-      MYSQL_PASSWORD: fintrack
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports: ["3310:3306"]
     volumes: [mysql-notifications-data:/var/lib/mysql]
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpass"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -143,8 +143,8 @@ services:
     image: rabbitmq:3.13-management
     container_name: fintrack-rabbitmq
     environment:
-      RABBITMQ_DEFAULT_USER: fintrack
-      RABBITMQ_DEFAULT_PASS: fintrack
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
     ports: ["5672:5672", "15672:15672"]
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "ping"]
@@ -193,8 +193,8 @@ services:
     container_name: fintrack-grafana
     depends_on: [prometheus]
     environment:
-      GF_SECURITY_ADMIN_USER: admin
-      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_USER}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD}
       GF_USERS_ALLOW_SIGN_UP: "false"
     volumes:
       - ./grafana/provisioning:/etc/grafana/provisioning:ro
@@ -204,7 +204,7 @@ services:
 
   # ---------- ELK ----------
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.15
     container_name: fintrack-elasticsearch
     environment:
       - discovery.type=single-node
@@ -219,7 +219,7 @@ services:
     <<: *restart
 
   logstash:
-    image: docker.elastic.co/logstash/logstash:8.13.4
+    image: docker.elastic.co/logstash/logstash:7.17.15
     container_name: fintrack-logstash
     depends_on: [elasticsearch]
     volumes:
@@ -228,7 +228,7 @@ services:
     <<: *restart
 
   kibana:
-    image: docker.elastic.co/kibana/kibana:8.13.4
+    image: docker.elastic.co/kibana/kibana:7.17.15
     container_name: fintrack-kibana
     depends_on: [elasticsearch]
     environment:
@@ -282,8 +282,8 @@ services:
       <<: *business-env
       SERVER_PORT: "8081"
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql-users:3306/fintrack_users
-      SPRING_DATASOURCE_USERNAME: fintrack
-      SPRING_DATASOURCE_PASSWORD: fintrack
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
     ports: ["8081:8081"]
     <<: *restart
 
@@ -300,8 +300,8 @@ services:
       <<: *business-env
       SERVER_PORT: "8082"
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql-accounts:3306/fintrack_accounts
-      SPRING_DATASOURCE_USERNAME: fintrack
-      SPRING_DATASOURCE_PASSWORD: fintrack
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
     ports: ["8082:8082"]
     <<: *restart
 
@@ -319,8 +319,8 @@ services:
       <<: *business-env
       SERVER_PORT: "8083"
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql-transactions:3306/fintrack_transactions
-      SPRING_DATASOURCE_USERNAME: fintrack
-      SPRING_DATASOURCE_PASSWORD: fintrack
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
     ports: ["8083:8083"]
     <<: *restart
 
@@ -336,8 +336,8 @@ services:
       <<: *business-env
       SERVER_PORT: "8084"
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql-notifications:3306/fintrack_notifications
-      SPRING_DATASOURCE_USERNAME: fintrack
-      SPRING_DATASOURCE_PASSWORD: fintrack
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
     ports: ["8084:8084"]
     <<: *restart
 

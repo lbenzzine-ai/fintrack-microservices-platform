@@ -60,3 +60,7 @@ zookeeper-data/
 coverage/
 **/surefire-reports/
 **/failsafe-reports/
+.claude/
+
+# Local stack runner state (pid files)
+.run-stack/

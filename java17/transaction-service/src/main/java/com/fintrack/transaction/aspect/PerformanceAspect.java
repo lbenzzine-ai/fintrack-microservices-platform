@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class PerformanceAspect {
 
+
     private final MeterRegistry meterRegistry;
 
     @Value("${fintrack.aspect.performance.slo-ms:500}")

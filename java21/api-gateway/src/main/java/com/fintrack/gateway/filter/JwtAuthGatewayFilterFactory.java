@@ -9,6 +9,7 @@ import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFac
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpRequestDecorator;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -51,10 +52,16 @@ public class JwtAuthGatewayFilterFactory
             String userId = tokenProvider.userId(claims);
             List<String> roles = tokenProvider.roles(claims);
 
-            ServerHttpRequest mutated = request.mutate()
-                    .header("X-User-Id", userId)
-                    .header("X-User-Roles", String.join(",", roles))
-                    .build();
+            HttpHeaders newHeaders = new HttpHeaders();
+            newHeaders.addAll(request.getHeaders());
+            newHeaders.set("X-User-Id", userId);
+            newHeaders.set("X-User-Roles", String.join(",", roles));
+            ServerHttpRequest mutated = new ServerHttpRequestDecorator(request) {
+                @Override
+                public HttpHeaders getHeaders() {
+                    return newHeaders;
+                }
+            };
 
             return chain.filter(exchange.mutate().request(mutated).build());
         };

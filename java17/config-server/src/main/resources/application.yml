@@ -16,13 +16,13 @@ spring:
           enabled: false
   security:
     user:
-      name: ${CONFIG_SERVER_USER:configadmin}
-      password: ${CONFIG_SERVER_PASSWORD:configpass}
+      name: ${CONFIG_SERVER_USER}
+      password: ${CONFIG_SERVER_PASSWORD}
 
 eureka:
   client:
     service-url:
-      defaultZone: ${EUREKA_SERVER_URL:http://eurekaadmin:eurekapass@localhost:8761/eureka}
+      defaultZone: ${EUREKA_SERVER_URL}
     register-with-eureka: true
     fetch-registry: true
   instance:
@@ -33,6 +33,10 @@ eureka:
       user.password: ${spring.security.user.password}
 
 management:
+  # Separate management port so /actuator/* isn't shadowed by Config Server's
+  # {application}/{profile}[/{label}] catch-all route on the main port.
+  server:
+    port: 8889
   endpoints:
     web:
       exposure:

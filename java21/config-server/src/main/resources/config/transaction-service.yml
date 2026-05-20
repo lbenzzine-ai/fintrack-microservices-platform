@@ -4,8 +4,8 @@ server:
 spring:
   datasource:
     url: jdbc:mysql://${MYSQL_TRANSACTIONS_HOST:localhost}:${MYSQL_TRANSACTIONS_PORT:3309}/fintrack_transactions?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&createDatabaseIfNotExist=true&rewriteBatchedStatements=true
-    username: ${MYSQL_TRANSACTIONS_USER:fintrack}
-    password: ${MYSQL_TRANSACTIONS_PASSWORD:fintrack}
+    username: ${MYSQL_TRANSACTIONS_USER}
+    password: ${MYSQL_TRANSACTIONS_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       maximum-pool-size: 40
@@ -15,7 +15,7 @@ spring:
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: validate
+      ddl-auto: none
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
@@ -44,6 +44,14 @@ spring:
     type: redis
     redis:
       time-to-live: 120000
+
+  kafka:
+    producer:
+      properties:
+        spring.json.type.mapping: "transactionInitiatedEvent:com.fintrack.transaction.event.TransactionInitiatedEvent,transactionCompletedEvent:com.fintrack.transaction.event.TransactionCompletedEvent,transactionFailedEvent:com.fintrack.transaction.event.TransactionFailedEvent,notificationRequestedEvent:com.fintrack.transaction.event.NotificationRequestedEvent,accountDebitedEvent:com.fintrack.transaction.event.AccountDebitedEvent"
+    consumer:
+      properties:
+        spring.json.type.mapping: "transactionInitiatedEvent:com.fintrack.transaction.event.TransactionInitiatedEvent,transactionCompletedEvent:com.fintrack.transaction.event.TransactionCompletedEvent,transactionFailedEvent:com.fintrack.transaction.event.TransactionFailedEvent,notificationRequestedEvent:com.fintrack.transaction.event.NotificationRequestedEvent,accountDebitedEvent:com.fintrack.transaction.event.AccountDebitedEvent"
 
 fintrack:
   transaction:

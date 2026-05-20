@@ -4,10 +4,12 @@ import com.fintrack.transaction.security.JwtAuthFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
@@ -28,6 +30,10 @@ public class SecurityConfig {
                     "/actuator/health/**", "/actuator/info", "/actuator/prometheus"
                 ).permitAll()
                 .anyRequest().authenticated())
+            // Stateless JWT — return 401 (not 403) for missing/invalid credentials so
+            // clients can distinguish "authenticate" from "you are authenticated but lack permission".
+            .exceptionHandling(eh -> eh.authenticationEntryPoint(
+                    new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }

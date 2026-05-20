@@ -31,11 +31,10 @@ public class CorrelationIdGlobalFilter implements GlobalFilter, Ordered {
         }
         final String id = correlationId;
 
-        ServerHttpRequest mutated = request.mutate().header(HEADER, id).build();
         exchange.getResponse().getHeaders().set(HEADER, id);
         MDC.put(MDC_KEY, id);
 
-        return chain.filter(exchange.mutate().request(mutated).build())
+        return chain.filter(exchange)
                 .doFinally(sig -> MDC.remove(MDC_KEY));
     }
 

@@ -46,6 +46,7 @@ management:
   endpoint:
     health:
       show-details: always
+      validate-group-membership: false
       probes:
         enabled: true
       group:
@@ -76,7 +77,7 @@ management:
 
 # ── Kafka (default broker) ───────────────────────────────────────────────────
 spring.kafka:
-  bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+  bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:29092}
   producer:
     key-serializer: org.apache.kafka.common.serialization.StringSerializer
     value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
@@ -103,8 +104,8 @@ spring.kafka:
 spring.rabbitmq:
   host: ${RABBITMQ_HOST:localhost}
   port: ${RABBITMQ_PORT:5672}
-  username: ${RABBITMQ_USER:guest}
-  password: ${RABBITMQ_PASS:guest}
+  username: ${RABBITMQ_USER}
+  password: ${RABBITMQ_PASS}
   listener:
     simple:
       acknowledge-mode: manual

@@ -96,8 +96,8 @@ Every web UI / health endpoint exposed by the stack once `make infra-up` and `ma
 |----------------------|-------------------------------------------|------|----------------------------|-----------------------------------------------------------------------------|
 | API Gateway          | http://localhost:8080                     | 8080 | JWT (per user)             | Reactive Spring Cloud Gateway. Front door for all `/api/**` traffic.        |
 | Swagger UI           | http://localhost:8080/swagger-ui.html     | 8080 | none                       | Aggregated OpenAPI 3 spec across every downstream service.                  |
-| Eureka Dashboard     | http://localhost:8761                     | 8761 | `eurekaadmin` / `eurekapass` | Netflix Eureka registry — see every registered instance and its status.   |
-| Config Server health | http://localhost:8888/actuator/health     | 8888 | `configadmin` / `configpass` | Spring Cloud Config Server health + served-repo info.                     |
+| Eureka Dashboard     | http://localhost:8761                     | 8761 | `${EUREKA_USER}` / `${EUREKA_PASSWORD}` | Netflix Eureka registry — see every registered instance and its status.   |
+| Config Server health | http://localhost:8888/actuator/health     | 8888 | `${CONFIG_SERVER_USER}` / `${CONFIG_SERVER_PASSWORD}` | Spring Cloud Config Server health + served-repo info.                     |
 | User Service         | http://localhost:8081/actuator/health     | 8081 | none                       | Users / auth bounded context. JWT issuer.                                   |
 | Account Service      | http://localhost:8082/actuator/health     | 8082 | none                       | Balances, EHCache L2, saga participant.                                     |
 | Transaction Service  | http://localhost:8083/actuator/health     | 8083 | none                       | Saga orchestrator with fee Strategy.                                        |
@@ -108,12 +108,12 @@ Every web UI / health endpoint exposed by the stack once `make infra-up` and `ma
 | Tool         | URL                          | Port  | Credentials             | Description                                                          |
 |--------------|------------------------------|-------|-------------------------|----------------------------------------------------------------------|
 | Kafdrop      | http://localhost:8090        | 8090  | none                    | Kafka cluster UI — browse topics, partitions, consumer groups, messages. |
-| RabbitMQ     | http://localhost:15672       | 15672 | `fintrack` / `fintrack` | Management console for AMQP queues, exchanges, bindings.             |
+| RabbitMQ     | http://localhost:15672       | 15672 | `${RABBITMQ_USER}` / `${RABBITMQ_PASSWORD}` | Management console for AMQP queues, exchanges, bindings.             |
 | MailHog      | http://localhost:8025        | 8025  | none                    | Fake SMTP inbox (SMTP on :1025) — every notification email lands here. |
-| MySQL users  | jdbc://localhost:3307        | 3307  | `fintrack` / `fintrack` | `fintrack_users` schema for user-service.                            |
-| MySQL acct.  | jdbc://localhost:3308        | 3308  | `fintrack` / `fintrack` | `fintrack_accounts` schema for account-service.                      |
-| MySQL tx     | jdbc://localhost:3309        | 3309  | `fintrack` / `fintrack` | `fintrack_transactions` schema for transaction-service.              |
-| MySQL notif. | jdbc://localhost:3310        | 3310  | `fintrack` / `fintrack` | `fintrack_notifications` schema for notification-service.            |
+| MySQL users  | jdbc://localhost:3307        | 3307  | `${MYSQL_USER}` / `${MYSQL_PASSWORD}` | `fintrack_users` schema for user-service.                            |
+| MySQL acct.  | jdbc://localhost:3308        | 3308  | `${MYSQL_USER}` / `${MYSQL_PASSWORD}` | `fintrack_accounts` schema for account-service.                      |
+| MySQL tx     | jdbc://localhost:3309        | 3309  | `${MYSQL_USER}` / `${MYSQL_PASSWORD}` | `fintrack_transactions` schema for transaction-service.              |
+| MySQL notif. | jdbc://localhost:3310        | 3310  | `${MYSQL_USER}` / `${MYSQL_PASSWORD}` | `fintrack_notifications` schema for notification-service.            |
 | Redis        | redis://localhost:6379       | 6379  | none                    | Cache for user-service `@Cacheable` and gateway rate-limit.          |
 
 ### Observability stack
@@ -122,7 +122,7 @@ Every web UI / health endpoint exposed by the stack once `make infra-up` and `ma
 |--------------|-------------------------------------------|------|-------------------|------------------------------------------------------------------------------|
 | Zipkin       | http://localhost:9411                     | 9411 | none              | Distributed-trace UI for B3-propagated requests across all services.         |
 | Prometheus   | http://localhost:9090                     | 9090 | none              | Metrics scrape & PromQL UI. Targets every Micrometer endpoint.               |
-| Grafana      | http://localhost:3000                     | 3000 | `admin` / `admin` | Dashboards (latency, R4J circuit-breaker, JVM, Kafka lag).                   |
+| Grafana      | http://localhost:3000                     | 3000 | `${GRAFANA_USER}` / `${GRAFANA_PASSWORD}` | Dashboards (latency, R4J circuit-breaker, JVM, Kafka lag).                   |
 | Elasticsearch| http://localhost:9200/_cluster/health     | 9200 | none              | ELK storage — log index lives here.                                          |
 | Logstash     | tcp://localhost:5044                      | 5044 | none              | Beats/JSON log ingestion endpoint.                                           |
 | Kibana       | http://localhost:5601                     | 5601 | none              | Log search/visualisation UI for the `fintrack-*` indices.                    |
