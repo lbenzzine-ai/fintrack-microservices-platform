@@ -38,7 +38,7 @@ help:
 	@echo "  clean-17 / clean-21 / clean-all  mvn clean"
 
 # ── infrastructure ────────────────────────────────────────────────────────────
-infra-up:
+infra-up: build-21
 	$(COMPOSE) up -d
 
 infra-down:
