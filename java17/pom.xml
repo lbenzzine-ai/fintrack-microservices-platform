@@ -275,6 +275,9 @@
                             <param>equals</param>
                         </excludedMethods>
                         <failWhenNoMutations>true</failWhenNoMutations>
+                        <timeoutConstant>120000</timeoutConstant>
+                        <timeoutFactor>4.0</timeoutFactor>
+                        <threads>1</threads>
                     </configuration>
                 </plugin>
             </plugins>
