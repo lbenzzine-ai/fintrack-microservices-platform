@@ -11,6 +11,6 @@ spring:
 info:
   app:
     name: ${spring.application.name}
-    description: FinTrack Notification Service (Strategy per channel: Email/SMS/Push)
+    description: "FinTrack Notification Service (Strategy per channel: Email/SMS/Push)"
     java-version: 21
     features: virtual-threads,records,sealed-strategy
