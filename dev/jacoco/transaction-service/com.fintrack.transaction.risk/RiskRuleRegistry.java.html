@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>RiskRuleRegistry.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">FinTrack Coverage Report</a> &gt; <a href="../index.html" class="el_bundle">transaction-service</a> &gt; <a href="index.source.html" class="el_package">com.fintrack.transaction.risk</a> &gt; <span class="el_source">RiskRuleRegistry.java</span></div><h1>RiskRuleRegistry.java</h1><pre class="source lang-java linenums">package com.fintrack.transaction.risk;
+
+import com.fintrack.transaction.entity.Transaction;
+import com.fintrack.transaction.entity.TransactionType;
+import org.springframework.stereotype.Component;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Predicate;
+
+@Component
+<span class="fc" id="L15">public class RiskRuleRegistry {</span>
+
+<span class="fc" id="L17">    private static final BigDecimal LARGE_THRESHOLD = new BigDecimal(&quot;10000&quot;);</span>
+<span class="fc" id="L18">    private static final BigDecimal INTL_HIGH_VALUE_THRESHOLD = new BigDecimal(&quot;5000&quot;);</span>
+<span class="fc" id="L19">    private static final BigDecimal ATM_HIGH_VALUE_THRESHOLD = new BigDecimal(&quot;1000&quot;);</span>
+<span class="fc" id="L20">    private static final BigDecimal STRUCTURING_BUCKET = new BigDecimal(&quot;1000&quot;);</span>
+<span class="fc" id="L21">    private static final BigDecimal MISSING_DESC_THRESHOLD = new BigDecimal(&quot;5000&quot;);</span>
+
+<span class="fc" id="L23">    private final Map&lt;String, RiskRule&gt; rules = Map.ofEntries(</span>
+<span class="fc" id="L24">            entry(&quot;SELF_TRANSFER&quot;, RiskLevel.CRITICAL,</span>
+                    &quot;Source and destination wallets are identical&quot;,
+<span class="fc bfc" id="L26" title="All 2 branches covered.">                    tx -&gt; tx.getToAccountUuid() != null</span>
+<span class="fc bfc" id="L27" title="All 2 branches covered.">                            &amp;&amp; Objects.equals(tx.getFromAccountUuid(), tx.getToAccountUuid())),</span>
+
+<span class="fc" id="L29">            entry(&quot;LARGE_AMOUNT&quot;, RiskLevel.HIGH,</span>
+                    &quot;Amount exceeds large-transfer threshold (10,000)&quot;,
+<span class="pc bpc" id="L31" title="1 of 4 branches missed.">                    tx -&gt; tx.getAmount() != null &amp;&amp; tx.getAmount().compareTo(LARGE_THRESHOLD) &gt;= 0),</span>
+
+<span class="fc" id="L33">            entry(&quot;STRUCTURING_PATTERN&quot;, RiskLevel.MEDIUM,</span>
+                    &quot;Round-thousand amount — possible structuring&quot;,
+<span class="pc bpc" id="L35" title="1 of 2 branches missed.">                    tx -&gt; tx.getAmount() != null</span>
+<span class="fc bfc" id="L36" title="All 2 branches covered.">                            &amp;&amp; tx.getAmount().compareTo(STRUCTURING_BUCKET) &gt;= 0</span>
+<span class="fc bfc" id="L37" title="All 2 branches covered.">                            &amp;&amp; tx.getAmount().remainder(STRUCTURING_BUCKET).signum() == 0),</span>
+
+<span class="fc" id="L39">            entry(&quot;HIGH_VALUE_INTERNATIONAL&quot;, RiskLevel.HIGH,</span>
+                    &quot;International transfer above review threshold (5,000)&quot;,
+<span class="fc bfc" id="L41" title="All 2 branches covered.">                    tx -&gt; tx.getType() == TransactionType.INTERNATIONAL_TRANSFER</span>
+<span class="pc bpc" id="L42" title="1 of 2 branches missed.">                            &amp;&amp; tx.getAmount() != null</span>
+<span class="fc bfc" id="L43" title="All 2 branches covered.">                            &amp;&amp; tx.getAmount().compareTo(INTL_HIGH_VALUE_THRESHOLD) &gt;= 0),</span>
+
+<span class="fc" id="L45">            entry(&quot;ATM_HIGH_VALUE&quot;, RiskLevel.MEDIUM,</span>
+                    &quot;ATM withdrawal above per-tx limit (1,000)&quot;,
+<span class="fc bfc" id="L47" title="All 2 branches covered.">                    tx -&gt; tx.getType() == TransactionType.ATM_WITHDRAWAL</span>
+<span class="pc bpc" id="L48" title="1 of 2 branches missed.">                            &amp;&amp; tx.getAmount() != null</span>
+<span class="fc bfc" id="L49" title="All 2 branches covered.">                            &amp;&amp; tx.getAmount().compareTo(ATM_HIGH_VALUE_THRESHOLD) &gt; 0),</span>
+
+<span class="fc" id="L51">            entry(&quot;MISSING_DESCRIPTION&quot;, RiskLevel.LOW,</span>
+                    &quot;Large transfer without description&quot;,
+<span class="pc bpc" id="L53" title="1 of 2 branches missed.">                    tx -&gt; tx.getAmount() != null</span>
+<span class="fc bfc" id="L54" title="All 2 branches covered.">                            &amp;&amp; tx.getAmount().compareTo(MISSING_DESC_THRESHOLD) &gt;= 0</span>
+<span class="fc bfc" id="L55" title="All 4 branches covered.">                            &amp;&amp; (tx.getDescription() == null || tx.getDescription().isBlank())),</span>
+
+<span class="fc" id="L57">            entry(&quot;UNKNOWN_DESTINATION&quot;, RiskLevel.HIGH,</span>
+                    &quot;Transfer-type transaction missing destination wallet&quot;,
+<span class="fc bfc" id="L59" title="All 2 branches covered.">                    tx -&gt; (tx.getType() == TransactionType.DOMESTIC_TRANSFER</span>
+<span class="fc bfc" id="L60" title="All 2 branches covered.">                            || tx.getType() == TransactionType.INTERNATIONAL_TRANSFER</span>
+<span class="pc bpc" id="L61" title="1 of 2 branches missed.">                            || tx.getType() == TransactionType.INTERNAL_TRANSFER)</span>
+<span class="fc bfc" id="L62" title="All 4 branches covered.">                            &amp;&amp; (tx.getToAccountUuid() == null || tx.getToAccountUuid().isBlank()))</span>
+    );
+
+    public List&lt;RiskRule&gt; all() {
+<span class="fc" id="L66">        return List.copyOf(rules.values());</span>
+    }
+
+    public Map&lt;String, RiskRule&gt; byName() {
+<span class="fc" id="L70">        return rules;</span>
+    }
+
+    private static Map.Entry&lt;String, RiskRule&gt; entry(String name, RiskLevel level,
+                                                     String reason, Predicate&lt;Transaction&gt; when) {
+<span class="fc bfc" id="L75" title="All 2 branches covered.">        RiskRule rule = tx -&gt; when.test(tx)</span>
+<span class="fc" id="L76">                ? Optional.of(RiskFinding.builder()</span>
+<span class="fc" id="L77">                        .level(level)</span>
+<span class="fc" id="L78">                        .reason(reason)</span>
+<span class="fc" id="L79">                        .ruleName(name)</span>
+<span class="fc" id="L80">                        .build())</span>
+<span class="fc" id="L81">                : Optional.empty();</span>
+<span class="fc" id="L82">        return Map.entry(name, rule);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

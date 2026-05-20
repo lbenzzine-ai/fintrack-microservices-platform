@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>AccountDebitedConsumer.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">FinTrack Coverage Report</a> &gt; <a href="../index.html" class="el_bundle">transaction-service</a> &gt; <a href="index.source.html" class="el_package">com.fintrack.transaction.saga</a> &gt; <span class="el_source">AccountDebitedConsumer.java</span></div><h1>AccountDebitedConsumer.java</h1><pre class="source lang-java linenums">package com.fintrack.transaction.saga;
+
+import com.fintrack.transaction.event.AccountDebitedEvent;
+import com.fintrack.transaction.service.TransactionService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.stereotype.Component;
+
+/**
+ * Saga step — on {@code account-debited}, advance the transaction to DEBITED and trigger the
+ * COMPLETED transition. Any failure to advance is caught here so we can publish a tx-failed
+ * with {@code alreadyDebited=true}, allowing account-service to compensate.
+ */
+<span class="nc" id="L16">@Slf4j</span>
+@Component
+@RequiredArgsConstructor
+public class AccountDebitedConsumer {
+
+    private final TransactionService transactionService;
+
+    @KafkaListener(
+        topics = &quot;${fintrack.messaging.kafka.topics.account-debited}&quot;,
+        groupId = &quot;${spring.application.name}&quot;,
+        containerFactory = &quot;kafkaListenerContainerFactory&quot;
+    )
+    public void onAccountDebited(@Payload AccountDebitedEvent event) {
+<span class="nc" id="L29">        log.info(&quot;[SAGA] account-debited tx={} account={} newBalance={}&quot;,</span>
+<span class="nc" id="L30">                event.getTransactionUuid(), event.getAccountUuid(), event.getNewBalance());</span>
+        try {
+<span class="nc" id="L32">            transactionService.markDebited(event.getTransactionUuid());</span>
+<span class="nc" id="L33">        } catch (Exception ex) {</span>
+<span class="nc" id="L34">            log.error(&quot;[SAGA] failed to advance tx={} after debit — compensating&quot;, event.getTransactionUuid(), ex);</span>
+<span class="nc" id="L35">            transactionService.markFailed(event.getTransactionUuid(),</span>
+<span class="nc" id="L36">                    &quot;ORCHESTRATOR_ERROR&quot;, ex.getMessage(), true);</span>
+<span class="nc" id="L37">        }</span>
+<span class="nc" id="L38">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

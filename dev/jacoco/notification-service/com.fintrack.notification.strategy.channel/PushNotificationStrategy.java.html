@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>PushNotificationStrategy.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">FinTrack Coverage Report</a> &gt; <a href="../index.html" class="el_bundle">notification-service</a> &gt; <a href="index.source.html" class="el_package">com.fintrack.notification.strategy.channel</a> &gt; <span class="el_source">PushNotificationStrategy.java</span></div><h1>PushNotificationStrategy.java</h1><pre class="source lang-java linenums">package com.fintrack.notification.strategy.channel;
+
+import com.fintrack.notification.entity.Notification;
+import com.fintrack.notification.entity.NotificationChannel;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+/**
+ * Push (mobile) — stubbed against FCM/APNs. The {@code recipient} field is expected to hold the
+ * device token; the {@code payload} dictionary on the source request becomes the data payload.
+ */
+<span class="fc" id="L13">@Slf4j</span>
+@Component
+public class PushNotificationStrategy implements NotificationStrategy {
+
+    public static final String PROVIDER = &quot;fcm-stub&quot;;
+
+    private final String fcmEndpoint;
+    private final String apiKey;
+
+    public PushNotificationStrategy(
+            @Value(&quot;${fintrack.notification.push.fcm-endpoint:https://fcm.googleapis.com/fcm/send}&quot;) String fcmEndpoint,
+<span class="fc" id="L24">            @Value(&quot;${fintrack.notification.push.api-key:}&quot;) String apiKey) {</span>
+<span class="fc" id="L25">        this.fcmEndpoint = fcmEndpoint;</span>
+<span class="fc" id="L26">        this.apiKey = apiKey;</span>
+<span class="fc" id="L27">    }</span>
+
+    @Override
+<span class="fc" id="L30">    public NotificationChannel channel() { return NotificationChannel.PUSH; }</span>
+
+    @Override
+    public DispatchResult send(Notification n) {
+<span class="fc" id="L34">        log.info(&quot;[STUB] Push to deviceToken={} via {} (apiKey set: {})&quot;,</span>
+<span class="fc bfc" id="L35" title="All 2 branches covered.">                mask(n.getRecipient()), fcmEndpoint, !apiKey.isBlank());</span>
+<span class="fc" id="L36">        return DispatchResult.builder().delivered(true).provider(PROVIDER).build();</span>
+    }
+
+    private String mask(String token) {
+<span class="fc bfc" id="L40" title="All 4 branches covered.">        if (token == null || token.length() &lt; 8) return &quot;****&quot;;</span>
+<span class="fc" id="L41">        return token.substring(0, 4) + &quot;…&quot; + token.substring(token.length() - 4);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
