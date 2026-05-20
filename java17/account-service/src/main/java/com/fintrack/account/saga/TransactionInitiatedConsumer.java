@@ -43,8 +43,8 @@ public class TransactionInitiatedConsumer {
         log.info("[SAGA] transaction-initiated tx={} from={} amount={}",
                 event.getTransactionUuid(), event.getFromAccountUuid(), event.getAmount());
         try {
-            accountService.debit(event.getFromAccountUuid(), event.getTransactionUuid(),
-                    event.getAmount(), event.getFee());
+            accountService.debit(event.getFromAccountUuid(), event.getToAccountUuid(),
+                    event.getTransactionUuid(), event.getAmount(), event.getFee());
         } catch (InsufficientFundsException ex) {
             publishFailure(event, "INSUFFICIENT_FUNDS", ex.getMessage(), false);
         } catch (AccountFrozenException ex) {

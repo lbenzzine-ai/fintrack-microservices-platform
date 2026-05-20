@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Discovers all {@link FeeStrategy} beans and indexes them by the {@link TransactionType}s
@@ -15,13 +16,14 @@ import java.util.Map;
  */
 @Slf4j
 @Component
-public class FeeStrategyRegistry {
+public class
+FeeStrategyRegistry {
 
     private final Map<TransactionType, FeeStrategy> byType = new EnumMap<>(TransactionType.class);
     private final Map<String, FeeStrategy> byName;
 
     public FeeStrategyRegistry(List<FeeStrategy> strategies) {
-        this.byName = strategies.stream().collect(java.util.stream.Collectors.toUnmodifiableMap(
+        this.byName = strategies.stream().collect(Collectors.toUnmodifiableMap(
                 FeeStrategy::name, s -> s));
         for (FeeStrategy s : strategies) {
             for (TransactionType t : s.supports()) {

@@ -82,10 +82,9 @@ class JwtTokenProviderTest {
     @Test
     void parse_tampered_signature_returns_empty() {
         String token = tokenWith(ISSUER, 60_000, "u", List.of("USER"));
-        // Flip the last char of the signature segment.
-        char last = token.charAt(token.length() - 1);
-        char swap = last == 'A' ? 'B' : 'A';
-        String tampered = token.substring(0, token.length() - 1) + swap;
+        String[] parts = token.split("\\.");
+        // Replace entire signature with garbage — guaranteed invalid
+        String tampered = parts[0] + "." + parts[1] + ".invalidsignatureXXXXXXXXXXXXXXXX";
         assertThat(provider.parse(tampered)).isEmpty();
     }
 

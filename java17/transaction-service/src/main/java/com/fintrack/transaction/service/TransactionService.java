@@ -5,6 +5,7 @@ import com.fintrack.transaction.dto.FeeQuote;
 import com.fintrack.transaction.dto.TransactionResponse;
 import com.fintrack.transaction.entity.Transaction;
 import com.fintrack.transaction.entity.TransactionStatus;
+import com.fintrack.transaction.entity.TransactionType;
 import com.fintrack.transaction.event.NotificationRequestedEvent;
 import com.fintrack.transaction.event.RiskAssessedEvent;
 import com.fintrack.transaction.event.TransactionCompletedEvent;
@@ -31,7 +32,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -96,7 +99,8 @@ public class TransactionService {
                 .currencyCode(req.getCurrencyCode())
                 .fromAccountUuid(req.getFromAccountUuid())
                 .toAccountUuid(req.getToAccountUuid())
-                .crossBorder(req.getType() == com.fintrack.transaction.entity.TransactionType.INTERNATIONAL_TRANSFER)
+                .crossBorder(req.getType() == TransactionType.INTERNATIONAL_TRANSFER)
+                .weekend(isWeekend())  // ← add this
                 .build();
 
         String uuid = UUID.randomUUID().toString();
@@ -297,5 +301,10 @@ public class TransactionService {
             }
             case ATM_WITHDRAWAL, BILL_PAYMENT -> { /* no destination needed */ }
         }
+    }
+
+    private boolean isWeekend() {
+        DayOfWeek day = LocalDate.now().getDayOfWeek();
+        return day == DayOfWeek.SATURDAY || day == DayOfWeek.SUNDAY;
     }
 }

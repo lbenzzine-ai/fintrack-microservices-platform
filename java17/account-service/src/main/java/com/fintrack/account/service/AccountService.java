@@ -6,6 +6,7 @@ import com.fintrack.account.dto.InterestPreview;
 import com.fintrack.account.entity.Account;
 import com.fintrack.account.entity.AccountStatus;
 import com.fintrack.account.event.AccountCreatedEvent;
+import com.fintrack.account.event.AccountCreditedEvent;
 import com.fintrack.account.event.AccountDebitedEvent;
 import com.fintrack.account.exception.AccountFrozenException;
 import com.fintrack.account.exception.AccountNotFoundException;
@@ -45,6 +46,9 @@ public class AccountService {
 
     @Value("${fintrack.messaging.kafka.topics.account-debited:fintrack.account.debited}")
     private String accountDebitedTopic;
+
+    @Value("${fintrack.messaging.kafka.topics.account-credited:fintrack.account.credited}")
+    private String accountCreditedTopic;
 
     /** Auto-create a wallet — called from the user-registered saga consumer (idempotent on userUuid). */
     @Transactional
@@ -86,37 +90,83 @@ public class AccountService {
     }
 
     /**
-     * Debit the source account. Called from the transaction-initiated saga consumer. Uses the
-     * pessimistic-write repository lookup so concurrent debits against the same account serialise.
-     * On success emits {@code account-debited}; throws on insufficient funds / frozen account so
-     * the saga consumer can publish a {@code transaction-failed} event.
+     * Debit the source account and, when {@code toAccountUuid} is non-null, credit the destination
+     * in the same DB transaction. Called from the transaction-initiated saga consumer.
+     *
+     * <p>Both rows are locked via {@code findByUuidForUpdate}; the lock order is sorted by UUID to
+     * avoid trivial A→B / B→A deadlocks under concurrent transfers.
+     *
+     * <p>On success emits {@code account-debited} and, when applicable, {@code account-credited}.
+     * Throws on insufficient funds / frozen / unknown so the saga consumer can publish
+     * {@code transaction-failed}.
      */
     @Transactional
     @CacheEvict(value = {"accounts:byId","accounts:byUser","accounts:balance"}, allEntries = true)
-    public AccountDebitedEvent debit(String accountUuid, String transactionUuid, BigDecimal amount, BigDecimal fee) {
-        Account a = accountRepository.findByUuidForUpdate(accountUuid)
-                .orElseThrow(() -> new AccountNotFoundException(accountUuid));
-        if (a.getStatus() != AccountStatus.ACTIVE) throw new AccountFrozenException(accountUuid);
+    public AccountDebitedEvent debit(String accountUuid, String toAccountUuid, String transactionUuid,
+                                     BigDecimal amount, BigDecimal fee) {
+        // Lock both accounts in UUID order to avoid deadlock when two transfers cross.
+        Account source;
+        Account destination = null;
+        if (toAccountUuid != null && toAccountUuid.compareTo(accountUuid) < 0) {
+            destination = accountRepository.findByUuidForUpdate(toAccountUuid)
+                    .orElseThrow(() -> new AccountNotFoundException(toAccountUuid));
+            source = accountRepository.findByUuidForUpdate(accountUuid)
+                    .orElseThrow(() -> new AccountNotFoundException(accountUuid));
+        } else {
+            source = accountRepository.findByUuidForUpdate(accountUuid)
+                    .orElseThrow(() -> new AccountNotFoundException(accountUuid));
+            if (toAccountUuid != null) {
+                destination = accountRepository.findByUuidForUpdate(toAccountUuid)
+                        .orElseThrow(() -> new AccountNotFoundException(toAccountUuid));
+            }
+        }
+
+        if (source.getStatus() != AccountStatus.ACTIVE) throw new AccountFrozenException(accountUuid);
+        if (destination != null && destination.getStatus() != AccountStatus.ACTIVE) {
+            throw new AccountFrozenException(toAccountUuid);
+        }
 
         BigDecimal total = amount.add(fee == null ? BigDecimal.ZERO : fee);
-        if (a.getBalance().compareTo(total) < 0) throw new InsufficientFundsException(accountUuid);
+        if (source.getBalance().compareTo(total) < 0) throw new InsufficientFundsException(accountUuid);
 
-        a.setBalance(a.getBalance().subtract(total));
-        Account saved = accountRepository.save(a);
+        source.setBalance(source.getBalance().subtract(total));
+        Account savedSource = accountRepository.save(source);
         log.info("Debited account={} amount={} fee={} newBalance={} txId={}",
-                accountUuid, amount, fee, saved.getBalance(), transactionUuid);
+                accountUuid, amount, fee, savedSource.getBalance(), transactionUuid);
+
+        Account savedDestination = null;
+        if (destination != null) {
+            destination.setBalance(destination.getBalance().add(amount));
+            savedDestination = accountRepository.save(destination);
+            log.info("Credited account={} amount={} newBalance={} txId={}",
+                    toAccountUuid, amount, savedDestination.getBalance(), transactionUuid);
+        }
 
         AccountDebitedEvent event = AccountDebitedEvent.builder()
                 .eventId(UUID.randomUUID().toString())
                 .transactionUuid(transactionUuid)
-                .accountUuid(saved.getUuid())
+                .accountUuid(savedSource.getUuid())
                 .amount(amount)
                 .fee(fee)
-                .newBalance(saved.getBalance())
-                .currencyCode(saved.getCurrencyCode())
+                .newBalance(savedSource.getBalance())
+                .currencyCode(savedSource.getCurrencyCode())
                 .occurredAt(Instant.now())
                 .build();
-        messaging.active().publish(accountDebitedTopic, saved.getUuid(), event);
+        messaging.active().publish(accountDebitedTopic, savedSource.getUuid(), event);
+
+        if (savedDestination != null) {
+            AccountCreditedEvent credited = AccountCreditedEvent.builder()
+                    .eventId(UUID.randomUUID().toString())
+                    .transactionUuid(transactionUuid)
+                    .accountUuid(savedDestination.getUuid())
+                    .amount(amount)
+                    .newBalance(savedDestination.getBalance())
+                    .currencyCode(savedDestination.getCurrencyCode())
+                    .occurredAt(Instant.now())
+                    .build();
+            messaging.active().publish(accountCreditedTopic, savedDestination.getUuid(), credited);
+        }
+
         return event;
     }
 
