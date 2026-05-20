@@ -176,7 +176,7 @@
         <dependency>
             <groupId>com.fintrack</groupId>
             <artifactId>user-service</artifactId>
-            <version>1.0.0-jdk21</version>
+            <version>1.0.0-jdk17</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
