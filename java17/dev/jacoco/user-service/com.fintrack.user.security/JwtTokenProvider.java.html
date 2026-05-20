@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>JwtTokenProvider.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">FinTrack Coverage Report</a> &gt; <a href="../index.html" class="el_bundle">user-service</a> &gt; <a href="index.source.html" class="el_package">com.fintrack.user.security</a> &gt; <span class="el_source">JwtTokenProvider.java</span></div><h1>JwtTokenProvider.java</h1><pre class="source lang-java linenums">package com.fintrack.user.security;
+
+import com.fintrack.user.entity.Role;
+import com.fintrack.user.entity.User;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import javax.crypto.SecretKey;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Base64;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+
+/**
+ * Issues and validates HS256 JWT access + refresh tokens. The secret is shared with
+ * api-gateway via Spring Cloud Config under {@code fintrack.security.jwt.secret} so the
+ * gateway can verify without calling user-service.
+ */
+<span class="fc" id="L27">@Slf4j</span>
+@Component
+<span class="fc" id="L29">public class JwtTokenProvider {</span>
+
+    private static final String CLAIM_ROLES = &quot;roles&quot;;
+    private static final String CLAIM_TYPE = &quot;type&quot;;
+    private static final String TYPE_ACCESS = &quot;access&quot;;
+    private static final String TYPE_REFRESH = &quot;refresh&quot;;
+
+    @Value(&quot;${fintrack.security.jwt.secret}&quot;)
+    private String secretBase64;
+
+    @Value(&quot;${fintrack.security.jwt.issuer:fintrack}&quot;)
+    private String issuer;
+
+    @Value(&quot;${fintrack.security.jwt.access-token-ttl-minutes:30}&quot;)
+    private long accessTtlMinutes;
+
+    @Value(&quot;${fintrack.security.jwt.refresh-token-ttl-days:7}&quot;)
+    private long refreshTtlDays;
+
+    private SecretKey key;
+
+    @PostConstruct
+    void init() {
+<span class="fc" id="L52">        this.key = Keys.hmacShaKeyFor(Base64.getDecoder().decode(secretBase64));</span>
+<span class="fc" id="L53">    }</span>
+
+    public IssuedToken issueAccessToken(User user) {
+<span class="fc" id="L56">        return issue(user, TYPE_ACCESS, Duration.ofMinutes(accessTtlMinutes));</span>
+    }
+
+    public IssuedToken issueRefreshToken(User user) {
+<span class="fc" id="L60">        return issue(user, TYPE_REFRESH, Duration.ofDays(refreshTtlDays));</span>
+    }
+
+    private IssuedToken issue(User user, String type, Duration ttl) {
+<span class="fc" id="L64">        Instant now = Instant.now();</span>
+<span class="fc" id="L65">        Instant expiresAt = now.plus(ttl);</span>
+<span class="fc" id="L66">        List&lt;String&gt; roles = user.getRoles().stream().map(Role::getName).toList();</span>
+<span class="fc" id="L67">        String token = Jwts.builder()</span>
+<span class="fc" id="L68">                .issuer(issuer)</span>
+<span class="fc" id="L69">                .subject(user.getUuid())</span>
+<span class="fc" id="L70">                .claim(&quot;username&quot;, user.getUsername())</span>
+<span class="fc" id="L71">                .claim(CLAIM_ROLES, roles)</span>
+<span class="fc" id="L72">                .claim(CLAIM_TYPE, type)</span>
+<span class="fc" id="L73">                .issuedAt(Date.from(now))</span>
+<span class="fc" id="L74">                .expiration(Date.from(expiresAt))</span>
+<span class="fc" id="L75">                .signWith(key, Jwts.SIG.HS256)</span>
+<span class="fc" id="L76">                .compact();</span>
+<span class="fc" id="L77">        return new IssuedToken(token, expiresAt);</span>
+    }
+
+    public Optional&lt;Claims&gt; parse(String token) {
+        try {
+<span class="fc" id="L82">            return Optional.of(Jwts.parser()</span>
+<span class="fc" id="L83">                    .verifyWith(key)</span>
+<span class="fc" id="L84">                    .requireIssuer(issuer)</span>
+<span class="fc" id="L85">                    .build()</span>
+<span class="fc" id="L86">                    .parseSignedClaims(token)</span>
+<span class="fc" id="L87">                    .getPayload());</span>
+<span class="fc" id="L88">        } catch (JwtException | IllegalArgumentException ex) {</span>
+<span class="fc" id="L89">            log.debug(&quot;JWT parse failed: {}&quot;, ex.getMessage());</span>
+<span class="fc" id="L90">            return Optional.empty();</span>
+        }
+    }
+
+    public static String stripBearer(String header) {
+<span class="fc bfc" id="L95" title="All 2 branches covered.">        if (header == null) return null;</span>
+<span class="fc bfc" id="L96" title="All 2 branches covered.">        return header.regionMatches(true, 0, &quot;Bearer &quot;, 0, 7) ? header.substring(7).trim() : header.trim();</span>
+    }
+
+<span class="fc" id="L99">    public record IssuedToken(String token, Instant expiresAt) {}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

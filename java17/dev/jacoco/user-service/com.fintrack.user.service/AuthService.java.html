@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>AuthService.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">FinTrack Coverage Report</a> &gt; <a href="../index.html" class="el_bundle">user-service</a> &gt; <a href="index.source.html" class="el_package">com.fintrack.user.service</a> &gt; <span class="el_source">AuthService.java</span></div><h1>AuthService.java</h1><pre class="source lang-java linenums">package com.fintrack.user.service;
+
+import com.fintrack.user.dto.LoginRequest;
+import com.fintrack.user.dto.LoginResponse;
+import com.fintrack.user.dto.RegisterUserRequest;
+import com.fintrack.user.dto.UserResponse;
+import com.fintrack.user.entity.Role;
+import com.fintrack.user.entity.User;
+import com.fintrack.user.entity.UserStatus;
+import com.fintrack.user.event.UserRegisteredEvent;
+import com.fintrack.user.exception.EmailAlreadyExistsException;
+import com.fintrack.user.exception.InvalidCredentialsException;
+import com.fintrack.user.exception.UsernameAlreadyExistsException;
+import com.fintrack.user.mapper.UserMapper;
+import com.fintrack.user.messaging.MessagingStrategyRegistry;
+import com.fintrack.user.repository.RoleRepository;
+import com.fintrack.user.repository.UserRepository;
+import com.fintrack.user.security.JwtTokenProvider;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Instant;
+import java.util.Set;
+import java.util.UUID;
+
+<span class="fc" id="L30">@Slf4j</span>
+@Service
+@RequiredArgsConstructor
+public class AuthService {
+
+    private static final String DEFAULT_ROLE = &quot;USER&quot;;
+
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final UserMapper userMapper;
+    private final JwtTokenProvider tokenProvider;
+    private final MessagingStrategyRegistry messaging;
+
+    @Value(&quot;${fintrack.messaging.kafka.topics.user-registered:fintrack.user.registered}&quot;)
+    private String userRegisteredTopic;
+
+    @Transactional
+    public UserResponse register(RegisterUserRequest req) {
+<span class="fc bfc" id="L49" title="All 2 branches covered.">        if (userRepository.existsByEmail(req.getEmail())) throw new EmailAlreadyExistsException(req.getEmail());</span>
+<span class="fc bfc" id="L50" title="All 2 branches covered.">        if (userRepository.existsByUsername(req.getUsername())) throw new UsernameAlreadyExistsException(req.getUsername());</span>
+
+<span class="fc" id="L52">        Role defaultRole = roleRepository.findByName(DEFAULT_ROLE)</span>
+<span class="fc" id="L53">                .orElseGet(() -&gt; roleRepository.save(Role.builder().name(DEFAULT_ROLE).build()));</span>
+
+<span class="fc" id="L55">        User user = User.builder()</span>
+<span class="fc" id="L56">                .username(req.getUsername())</span>
+<span class="fc" id="L57">                .email(req.getEmail())</span>
+<span class="fc" id="L58">                .passwordHash(passwordEncoder.encode(req.getPassword()))</span>
+<span class="fc" id="L59">                .firstName(req.getFirstName())</span>
+<span class="fc" id="L60">                .lastName(req.getLastName())</span>
+<span class="fc" id="L61">                .status(UserStatus.ACTIVE)</span>
+<span class="fc" id="L62">                .roles(Set.of(defaultRole))</span>
+<span class="fc" id="L63">                .build();</span>
+
+<span class="fc" id="L65">        User saved = userRepository.save(user);</span>
+<span class="fc" id="L66">        publishUserRegistered(saved);</span>
+<span class="fc" id="L67">        log.info(&quot;Registered user uuid={} username={}&quot;, saved.getUuid(), saved.getUsername());</span>
+<span class="fc" id="L68">        return userMapper.toResponse(saved);</span>
+    }
+
+    @Transactional(readOnly = true)
+    public LoginResponse login(LoginRequest req) {
+<span class="fc" id="L73">        User user = userRepository.findByEmail(req.getUsernameOrEmail())</span>
+<span class="fc" id="L74">                .or(() -&gt; userRepository.findByUsername(req.getUsernameOrEmail()))</span>
+<span class="fc" id="L75">                .orElseThrow(InvalidCredentialsException::new);</span>
+
+<span class="fc bfc" id="L77" title="All 4 branches covered.">        if (user.getStatus() != UserStatus.ACTIVE || !passwordEncoder.matches(req.getPassword(), user.getPasswordHash())) {</span>
+<span class="fc" id="L78">            throw new InvalidCredentialsException();</span>
+        }
+
+<span class="fc" id="L81">        var access = tokenProvider.issueAccessToken(user);</span>
+<span class="fc" id="L82">        var refresh = tokenProvider.issueRefreshToken(user);</span>
+
+<span class="fc" id="L84">        return LoginResponse.builder()</span>
+<span class="fc" id="L85">                .tokenType(&quot;Bearer&quot;)</span>
+<span class="fc" id="L86">                .accessToken(access.token())</span>
+<span class="fc" id="L87">                .refreshToken(refresh.token())</span>
+<span class="fc" id="L88">                .expiresAt(access.expiresAt())</span>
+<span class="fc" id="L89">                .user(userMapper.toResponse(user))</span>
+<span class="fc" id="L90">                .build();</span>
+    }
+
+    private void publishUserRegistered(User user) {
+<span class="fc" id="L94">        UserRegisteredEvent event = UserRegisteredEvent.builder()</span>
+<span class="fc" id="L95">                .eventId(UUID.randomUUID().toString())</span>
+<span class="fc" id="L96">                .userUuid(user.getUuid())</span>
+<span class="fc" id="L97">                .username(user.getUsername())</span>
+<span class="fc" id="L98">                .email(user.getEmail())</span>
+<span class="fc" id="L99">                .occurredAt(Instant.now())</span>
+<span class="fc" id="L100">                .build();</span>
+<span class="fc" id="L101">        messaging.active().publish(userRegisteredTopic, user.getUuid(), event);</span>
+<span class="fc" id="L102">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

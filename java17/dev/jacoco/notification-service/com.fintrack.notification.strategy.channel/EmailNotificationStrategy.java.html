@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>EmailNotificationStrategy.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">FinTrack Coverage Report</a> &gt; <a href="../index.html" class="el_bundle">notification-service</a> &gt; <a href="index.source.html" class="el_package">com.fintrack.notification.strategy.channel</a> &gt; <span class="el_source">EmailNotificationStrategy.java</span></div><h1>EmailNotificationStrategy.java</h1><pre class="source lang-java linenums">package com.fintrack.notification.strategy.channel;
+
+import com.fintrack.notification.entity.Notification;
+import com.fintrack.notification.entity.NotificationChannel;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.stereotype.Component;
+
+<span class="fc" id="L12">@Slf4j</span>
+@Component
+@RequiredArgsConstructor
+public class EmailNotificationStrategy implements NotificationStrategy {
+
+    public static final String PROVIDER = &quot;javamail-smtp&quot;;
+
+    private final JavaMailSender mailSender;
+
+    @Value(&quot;${fintrack.notification.email.from:no-reply@fintrack.local}&quot;)
+    private String from;
+
+    @Override
+<span class="fc" id="L25">    public NotificationChannel channel() { return NotificationChannel.EMAIL; }</span>
+
+    @Override
+    public DispatchResult send(Notification n) {
+<span class="fc" id="L29">        SimpleMailMessage msg = new SimpleMailMessage();</span>
+<span class="fc" id="L30">        msg.setFrom(from);</span>
+<span class="fc" id="L31">        msg.setTo(n.getRecipient());</span>
+<span class="fc bfc" id="L32" title="All 2 branches covered.">        msg.setSubject(n.getSubject() == null ? &quot;FinTrack notification&quot; : n.getSubject());</span>
+<span class="fc bfc" id="L33" title="All 2 branches covered.">        msg.setText(n.getBody() == null ? &quot;&quot; : n.getBody());</span>
+        try {
+<span class="fc" id="L35">            mailSender.send(msg);</span>
+<span class="fc" id="L36">            log.debug(&quot;Email sent to={} subject={}&quot;, n.getRecipient(), msg.getSubject());</span>
+<span class="fc" id="L37">            return DispatchResult.builder().delivered(true).provider(PROVIDER).build();</span>
+<span class="fc" id="L38">        } catch (Exception ex) {</span>
+<span class="fc" id="L39">            log.warn(&quot;Email send failed to={}: {}&quot;, n.getRecipient(), ex.getMessage());</span>
+<span class="fc" id="L40">            return DispatchResult.builder().delivered(false).provider(PROVIDER).failureReason(ex.getMessage()).build();</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>InterestStrategyRegistry.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">FinTrack Coverage Report</a> &gt; <a href="../index.html" class="el_bundle">account-service</a> &gt; <a href="index.source.html" class="el_package">com.fintrack.account.strategy.interest</a> &gt; <span class="el_source">InterestStrategyRegistry.java</span></div><h1>InterestStrategyRegistry.java</h1><pre class="source lang-java linenums">package com.fintrack.account.strategy.interest;
+
+import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+/**
+ * Strategy registry — Spring discovers all {@link InterestStrategy} beans automatically; the
+ * active one is selected at runtime via {@code fintrack.account.interest.strategy}. Adding a
+ * fourth strategy requires only a new {@link InterestStrategy} bean — no edits here.
+ */
+<span class="fc" id="L18">@Slf4j</span>
+@Component
+public class InterestStrategyRegistry {
+
+    private final Map&lt;String, InterestStrategy&gt; strategies;
+    private final String defaultStrategy;
+
+    public InterestStrategyRegistry(List&lt;InterestStrategy&gt; all,
+<span class="fc" id="L26">                                    @Value(&quot;${fintrack.account.interest.strategy:tiered}&quot;) String defaultStrategy) {</span>
+<span class="fc" id="L27">        this.strategies = all.stream()</span>
+<span class="fc" id="L28">                .collect(Collectors.toUnmodifiableMap(InterestStrategy::name, Function.identity()));</span>
+<span class="fc" id="L29">        this.defaultStrategy = defaultStrategy;</span>
+<span class="fc" id="L30">    }</span>
+
+    @PostConstruct
+    void verify() {
+<span class="fc bfc" id="L34" title="All 2 branches covered.">        if (!strategies.containsKey(defaultStrategy)) {</span>
+<span class="fc" id="L35">            throw new IllegalStateException(&quot;fintrack.account.interest.strategy=&quot; + defaultStrategy</span>
+<span class="fc" id="L36">                    + &quot; — no matching InterestStrategy bean. Available: &quot; + strategies.keySet());</span>
+        }
+<span class="fc" id="L38">        log.info(&quot;InterestStrategy default='{}', available={}&quot;, defaultStrategy, strategies.keySet());</span>
+<span class="fc" id="L39">    }</span>
+
+<span class="fc" id="L41">    public InterestStrategy active() { return strategies.get(defaultStrategy); }</span>
+
+    public InterestStrategy by(String name) {
+<span class="fc" id="L44">        InterestStrategy s = strategies.get(name);</span>
+<span class="fc bfc" id="L45" title="All 2 branches covered.">        if (s == null) throw new IllegalArgumentException(&quot;Unknown interest strategy: &quot; + name);</span>
+<span class="fc" id="L46">        return s;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

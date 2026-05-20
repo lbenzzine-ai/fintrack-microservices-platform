@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>TransactionController.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">FinTrack Coverage Report</a> &gt; <a href="../index.html" class="el_bundle">transaction-service</a> &gt; <a href="index.source.html" class="el_package">com.fintrack.transaction.controller</a> &gt; <span class="el_source">TransactionController.java</span></div><h1>TransactionController.java</h1><pre class="source lang-java linenums">package com.fintrack.transaction.controller;
+
+import com.fintrack.transaction.dto.CreateTransactionRequest;
+import com.fintrack.transaction.dto.FeeQuote;
+import com.fintrack.transaction.dto.TransactionResponse;
+import com.fintrack.transaction.entity.TransactionType;
+import com.fintrack.transaction.service.FeeService;
+import com.fintrack.transaction.service.TransactionService;
+import com.fintrack.transaction.strategy.fee.FeeCalculationContext;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+
+import java.math.BigDecimal;
+
+@Tag(name = &quot;Transactions&quot;, description = &quot;Transfers, fees, saga status&quot;)
+@SecurityRequirement(name = &quot;bearer-jwt&quot;)
+@RestController
+@RequestMapping(&quot;/api/v1/transactions&quot;)
+@RequiredArgsConstructor
+public class TransactionController {
+
+    private final TransactionService transactionService;
+    private final FeeService feeService;
+
+    @Operation(summary = &quot;Initiate a transaction — starts the saga&quot;)
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public TransactionResponse create(@Valid @RequestBody CreateTransactionRequest req) {
+<span class="fc" id="L36">        return transactionService.create(req);</span>
+    }
+
+    @Operation(summary = &quot;Get a transaction by its UUID&quot;)
+    @GetMapping(&quot;/{uuid}&quot;)
+    public TransactionResponse get(@PathVariable String uuid) {
+<span class="fc" id="L42">        return transactionService.findByUuid(uuid);</span>
+    }
+
+    @Operation(summary = &quot;List transactions where the account is either source or destination&quot;)
+    @GetMapping(&quot;/by-account/{accountUuid}&quot;)
+    public Page&lt;TransactionResponse&gt; byAccount(@PathVariable String accountUuid, Pageable pageable) {
+<span class="fc" id="L48">        return transactionService.findByAccount(accountUuid, pageable);</span>
+    }
+
+    @Operation(summary = &quot;Quote fee without creating the transaction&quot;)
+    @GetMapping(&quot;/fee/quote&quot;)
+    public FeeQuote quote(@RequestParam TransactionType type,
+                          @RequestParam BigDecimal amount,
+                          @RequestParam(defaultValue = &quot;USD&quot;) String currencyCode) {
+<span class="fc" id="L56">        return feeService.quote(FeeCalculationContext.builder()</span>
+<span class="fc" id="L57">                .type(type).amount(amount).currencyCode(currencyCode).build());</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
