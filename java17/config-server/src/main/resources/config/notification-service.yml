@@ -45,6 +45,14 @@ spring:
         keep-alive: 60s
       thread-name-prefix: fintrack-async-
 
+  kafka:
+    producer:
+      properties:
+        spring.json.type.mapping: "userRegisteredEvent:com.fintrack.notification.event.UserRegisteredEvent,accountCreatedEvent:com.fintrack.notification.event.AccountCreatedEvent,transactionCompletedEvent:com.fintrack.notification.event.TransactionCompletedEvent,transactionFailedEvent:com.fintrack.notification.event.TransactionFailedEvent,notificationRequestedEvent:com.fintrack.notification.event.NotificationRequestedEvent"
+    consumer:
+      properties:
+        spring.json.type.mapping: "userRegisteredEvent:com.fintrack.notification.event.UserRegisteredEvent,accountCreatedEvent:com.fintrack.notification.event.AccountCreatedEvent,transactionCompletedEvent:com.fintrack.notification.event.TransactionCompletedEvent,transactionFailedEvent:com.fintrack.notification.event.TransactionFailedEvent,notificationRequestedEvent:com.fintrack.notification.event.NotificationRequestedEvent"
+
 fintrack:
   notification:
     # Strategy pattern: enabled channels for each event type

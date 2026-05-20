@@ -47,6 +47,14 @@ spring:
     redis:
       time-to-live: 300000
 
+  kafka:
+    producer:
+      properties:
+        spring.json.type.mapping: "userRegisteredEvent:com.fintrack.account.event.UserRegisteredEvent,accountCreatedEvent:com.fintrack.account.event.AccountCreatedEvent,accountDebitedEvent:com.fintrack.account.event.AccountDebitedEvent,transactionInitiatedEvent:com.fintrack.account.event.TransactionInitiatedEvent,transactionFailedEvent:com.fintrack.account.event.TransactionFailedEvent"
+    consumer:
+      properties:
+        spring.json.type.mapping: "userRegisteredEvent:com.fintrack.account.event.UserRegisteredEvent,accountCreatedEvent:com.fintrack.account.event.AccountCreatedEvent,accountDebitedEvent:com.fintrack.account.event.AccountDebitedEvent,transactionInitiatedEvent:com.fintrack.account.event.TransactionInitiatedEvent,transactionFailedEvent:com.fintrack.account.event.TransactionFailedEvent"
+
 fintrack:
   account:
     default-currency: USD

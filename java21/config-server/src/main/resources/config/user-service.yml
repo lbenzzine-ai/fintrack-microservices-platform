@@ -16,7 +16,7 @@ spring:
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: validate
+      ddl-auto: none
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
@@ -44,6 +44,14 @@ spring:
     redis:
       time-to-live: 600000
       cache-null-values: false
+
+  kafka:
+    producer:
+      properties:
+        spring.json.type.mapping: "userRegisteredEvent:com.fintrack.user.event.UserRegisteredEvent"
+    consumer:
+      properties:
+        spring.json.type.mapping: "userRegisteredEvent:com.fintrack.user.event.UserRegisteredEvent"
 
 fintrack:
   user:

@@ -45,6 +45,14 @@ spring:
       time-to-live: 600000
       cache-null-values: false
 
+  kafka:
+    producer:
+      properties:
+        spring.json.type.mapping: "userRegisteredEvent:com.fintrack.user.event.UserRegisteredEvent"
+    consumer:
+      properties:
+        spring.json.type.mapping: "userRegisteredEvent:com.fintrack.user.event.UserRegisteredEvent"
+
 fintrack:
   user:
     password-encoder-strength: 12

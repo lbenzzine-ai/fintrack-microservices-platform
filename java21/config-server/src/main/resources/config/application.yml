@@ -46,6 +46,7 @@ management:
   endpoint:
     health:
       show-details: always
+      validate-group-membership: false
       probes:
         enabled: true
       group:
