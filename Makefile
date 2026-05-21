@@ -91,3 +91,15 @@ seed:
 
 smoke:
 	./scripts/smoke.sh
+
+# ── start (build + run everything) ───────────────────────────────────────────
+start-21:
+	cd $(JDK21_DIR) && mvn -q -DskipTests package
+	$(COMPOSE) up -d
+
+start-17:
+	cd $(JDK17_DIR) && mvn -q -DskipTests package
+	JAVA_FLAVOR=java17 $(COMPOSE) up -d
+
+stop-all:
+	$(COMPOSE) down
