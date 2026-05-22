@@ -16,10 +16,13 @@ x-business-env: &business-env
   CONFIG_SERVER_USER: ${CONFIG_SERVER_USER}
   CONFIG_SERVER_PASSWORD: ${CONFIG_SERVER_PASSWORD}
   EUREKA_SERVER_URL: http://${EUREKA_USER}:${EUREKA_PASSWORD}@eureka-server:8761/eureka
-  SPRING_PROFILES_ACTIVE: docker
+  SPRING_PROFILES_ACTIVE: native,docker
   SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
   SPRING_DATA_REDIS_HOST: redis
+  SPRING_CLOUD_GATEWAY_REDIS_RATE_LIMITER_ENABLED: "false"
   SPRING_RABBITMQ_HOST: rabbitmq
+  SPRING_RABBITMQ_USERNAME: ${RABBITMQ_USER}
+  SPRING_RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
   MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: http://zipkin:9411/api/v2/spans
   LOGSTASH_HOST: logstash
   LOGSTASH_PORT: "5044"
@@ -32,6 +35,7 @@ services:
   # ---------- Databases (one per bounded context) ----------
   mysql-users:
     image: mysql:8.0
+    command: --default-authentication-plugin=mysql_native_password --wait_timeout=28800 --interactive_timeout=28800
     container_name: fintrack-mysql-users
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
@@ -49,6 +53,7 @@ services:
 
   mysql-accounts:
     image: mysql:8.0
+    command: --default-authentication-plugin=mysql_native_password --wait_timeout=28800 --interactive_timeout=28800
     container_name: fintrack-mysql-accounts
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
@@ -66,6 +71,7 @@ services:
 
   mysql-transactions:
     image: mysql:8.0
+    command: --default-authentication-plugin=mysql_native_password --wait_timeout=28800 --interactive_timeout=28800
     container_name: fintrack-mysql-transactions
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
@@ -83,6 +89,7 @@ services:
 
   mysql-notifications:
     image: mysql:8.0
+    command: --default-authentication-plugin=mysql_native_password --wait_timeout=28800 --interactive_timeout=28800
     container_name: fintrack-mysql-notifications
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
@@ -131,6 +138,7 @@ services:
 
   kafdrop:
     image: obsidiandynamics/kafdrop:4.0.1
+    platform: linux/amd64
     container_name: fintrack-kafdrop
     depends_on: [kafka]
     environment:
@@ -155,6 +163,7 @@ services:
 
   mailhog:
     image: mailhog/mailhog
+    platform: linux/amd64
     container_name: fintrack-mailhog
     ports:
       - "1025:1025"
@@ -205,6 +214,7 @@ services:
   # ---------- ELK ----------
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.15
+    platform: linux/amd64
     container_name: fintrack-elasticsearch
     environment:
       - discovery.type=single-node
@@ -220,6 +230,7 @@ services:
 
   logstash:
     image: docker.elastic.co/logstash/logstash:7.17.15
+    platform: linux/amd64
     container_name: fintrack-logstash
     depends_on: [elasticsearch]
     volumes:
@@ -229,6 +240,7 @@ services:
 
   kibana:
     image: docker.elastic.co/kibana/kibana:7.17.15
+    platform: linux/amd64
     container_name: fintrack-kibana
     depends_on: [elasticsearch]
     environment:
@@ -245,6 +257,12 @@ services:
       <<: *business-env
       SERVER_PORT: "8888"
     ports: ["8888:8888"]
+    healthcheck:
+      test: [ "CMD", "curl", "-fsS", "http://localhost:8888/actuator/health/liveness" ]
+      interval: 15s
+      timeout: 5s
+      start_period: 60s
+      retries: 5
     <<: *restart
 
   eureka-server:
@@ -255,6 +273,8 @@ services:
     environment:
       <<: *business-env
       SERVER_PORT: "8761"
+      EUREKA_USER: ${EUREKA_USER}
+      EUREKA_PASSWORD: ${EUREKA_PASSWORD}
     ports: ["8761:8761"]
     <<: *restart
 
@@ -274,17 +294,31 @@ services:
       context: ./${JAVA_FLAVOR:-java21}/user-service
     container_name: fintrack-user-service
     depends_on:
-      mysql-users: { condition: service_healthy }
-      kafka:        { condition: service_healthy }
-      eureka-server: { condition: service_started }
-      redis:        { condition: service_healthy }
+      config-server:   { condition: service_healthy }
+      mysql-users:     { condition: service_healthy }
+      kafka:           { condition: service_healthy }
+      eureka-server:   { condition: service_started }
+      redis:           { condition: service_healthy }
     environment:
       <<: *business-env
       SERVER_PORT: "8081"
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-users:3306/fintrack_users
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-users:3306/fintrack_users?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
+      SPRING_FLYWAY_ENABLED: "false"
+      SPRING_DATASOURCE_HIKARI_CONNECTIONTIMEOUT: "30000"
+      SPRING_DATASOURCE_HIKARI_MAXIMUMPOOLSIZE: "5"
+      SPRING_JPA_HIBERNATE_DDL_AUTO: "none"
+      SPRING_JPA_PROPERTIES_HIBERNATE_BOOT_ALLOW_JDBC_METADATA_ACCESS: "false"
+    entrypoint: []
+    command: ["sh", "-c", "sleep 10 && java $$JAVA_OPTS -jar app.jar"]
     ports: ["8081:8081"]
+    healthcheck:
+      test: [ "CMD", "true" ]
+      interval: 60s
+      timeout: 5s
+      retries: 3
+      start_period: 180s
     <<: *restart
 
   account-service:
@@ -292,6 +326,7 @@ services:
       context: ./${JAVA_FLAVOR:-java21}/account-service
     container_name: fintrack-account-service
     depends_on:
+      config-server:  { condition: service_healthy }
       mysql-accounts: { condition: service_healthy }
       kafka:          { condition: service_healthy }
       eureka-server:  { condition: service_started }
@@ -299,10 +334,23 @@ services:
     environment:
       <<: *business-env
       SERVER_PORT: "8082"
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-accounts:3306/fintrack_accounts
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-accounts:3306/fintrack_accounts?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
+      SPRING_FLYWAY_ENABLED: "false"
+      SPRING_DATASOURCE_HIKARI_CONNECTIONTIMEOUT: "30000"
+      SPRING_DATASOURCE_HIKARI_MAXIMUMPOOLSIZE: "5"
+      SPRING_JPA_HIBERNATE_DDL_AUTO: "none"
+      SPRING_JPA_PROPERTIES_HIBERNATE_BOOT_ALLOW_JDBC_METADATA_ACCESS: "false"
+    entrypoint: []
+    command: ["sh", "-c", "sleep 30 && java $$JAVA_OPTS -jar app.jar"]
     ports: ["8082:8082"]
+    healthcheck:
+      test: [ "CMD", "true" ]
+      interval: 60s
+      timeout: 5s
+      retries: 3
+      start_period: 180s
     <<: *restart
 
   transaction-service:
@@ -310,18 +358,32 @@ services:
       context: ./${JAVA_FLAVOR:-java21}/transaction-service
     container_name: fintrack-transaction-service
     depends_on:
+      config-server:      { condition: service_healthy }
       mysql-transactions: { condition: service_healthy }
       kafka:              { condition: service_healthy }
       eureka-server:      { condition: service_started }
       redis:              { condition: service_healthy }
-      account-service:    { condition: service_started }
     environment:
       <<: *business-env
       SERVER_PORT: "8083"
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-transactions:3306/fintrack_transactions
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-transactions:3306/fintrack_transactions?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
+      SPRING_FLYWAY_ENABLED: "false"
+      SPRING_DATASOURCE_HIKARI_CONNECTIONTIMEOUT: "30000"
+      SPRING_DATASOURCE_HIKARI_MAXIMUMPOOLSIZE: "5"
+      SPRING_JPA_HIBERNATE_DDL_AUTO: "none"
+      SPRING_JPA_PROPERTIES_HIBERNATE_BOOT_ALLOW_JDBC_METADATA_ACCESS: "false"
+      JAVA_OPTS: "-XX:+UseG1GC -XX:MaxRAMPercentage=60.0 -Xmx512m"
+    entrypoint: []
+    command: ["sh", "-c", "sleep 30 && java $$JAVA_OPTS -jar app.jar"]
     ports: ["8083:8083"]
+    healthcheck:
+      test: [ "CMD", "true" ]
+      interval: 60s
+      timeout: 5s
+      retries: 3
+      start_period: 180s
     <<: *restart
 
   notification-service:
@@ -329,16 +391,30 @@ services:
       context: ./${JAVA_FLAVOR:-java21}/notification-service
     container_name: fintrack-notification-service
     depends_on:
+      config-server:       { condition: service_healthy }
       mysql-notifications: { condition: service_healthy }
       kafka:               { condition: service_healthy }
       eureka-server:       { condition: service_started }
     environment:
       <<: *business-env
       SERVER_PORT: "8084"
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-notifications:3306/fintrack_notifications
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-notifications:3306/fintrack_notifications?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
+      SPRING_FLYWAY_ENABLED: "false"
+      SPRING_DATASOURCE_HIKARI_CONNECTIONTIMEOUT: "30000"
+      SPRING_DATASOURCE_HIKARI_MAXIMUMPOOLSIZE: "5"
+      SPRING_JPA_HIBERNATE_DDL_AUTO: "none"
+      SPRING_JPA_PROPERTIES_HIBERNATE_BOOT_ALLOW_JDBC_METADATA_ACCESS: "false"
+    entrypoint: []
+    command: ["sh", "-c", "sleep 10 && java $$JAVA_OPTS -jar app.jar"]
     ports: ["8084:8084"]
+    healthcheck:
+      test: [ "CMD", "true" ]
+      interval: 60s
+      timeout: 5s
+      retries: 3
+      start_period: 180s
     <<: *restart
 
 volumes:

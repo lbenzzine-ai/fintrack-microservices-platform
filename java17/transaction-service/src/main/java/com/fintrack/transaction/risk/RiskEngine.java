@@ -23,7 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class RiskEngine {
 
     private final RiskRuleRegistry registry;
-    private final ExecutorService executor = Executors.newFixedThreadPool(4, namedThreadFactory("risk-rule-"));
+    private final ExecutorService executor = Executors.newFixedThreadPool(4, namedThreadFactory());
 
     public RiskScore assess(Transaction tx) {
         List<RiskRule> rules = registry.all();
@@ -58,10 +58,10 @@ public class RiskEngine {
         executor.shutdown();
     }
 
-    private static ThreadFactory namedThreadFactory(String prefix) {
+    private static ThreadFactory namedThreadFactory() {
         AtomicInteger counter = new AtomicInteger();
         return r -> {
-            Thread t = new Thread(r, prefix + counter.incrementAndGet());
+            Thread t = new Thread(r, "risk-rule-" + counter.incrementAndGet());
             t.setDaemon(true);
             return t;
         };

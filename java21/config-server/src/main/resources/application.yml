@@ -1,7 +1,3 @@
-server:
-  port: 8888
-  shutdown: graceful
-
 spring:
   application:
     name: config-server
@@ -10,17 +6,17 @@ spring:
   threads:
     virtual:
       enabled: true
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:29092}
   cloud:
     config:
       server:
         native:
           search-locations: classpath:/config/
-        encrypt:
-          enabled: false
   security:
     user:
-      name: ${CONFIG_SERVER_USER}
-      password: ${CONFIG_SERVER_PASSWORD}
+      name: ${CONFIG_SERVER_USER:configadmin}
+      password: ${CONFIG_SERVER_PASSWORD:configpass}
 
 eureka:
   client:
@@ -30,46 +26,3 @@ eureka:
     fetch-registry: true
   instance:
     prefer-ip-address: true
-    instance-id: ${spring.application.name}:${random.uuid}
-    metadata-map:
-      user.name: ${spring.security.user.name}
-      user.password: ${spring.security.user.password}
-
-management:
-  # Separate management port so /actuator/* isn't shadowed by Config Server's
-  # {application}/{profile}[/{label}] catch-all route on the main port.
-  server:
-    port: 8889
-  endpoints:
-    web:
-      exposure:
-        include: health,info,prometheus,refresh,busrefresh,env,metrics
-  endpoint:
-    health:
-      show-details: always
-      probes:
-        enabled: true
-  prometheus:
-    metrics:
-      export:
-        enabled: true
-  tracing:
-    sampling:
-      probability: 1.0
-  zipkin:
-    tracing:
-      endpoint: ${ZIPKIN_URL:http://localhost:9411}/api/v2/spans
-
-info:
-  app:
-    name: ${spring.application.name}
-    description: FinTrack Spring Cloud Config Server
-    java-version: 21
-    features: virtual-threads,records,sealed-interfaces,pattern-matching
-
-logging:
-  level:
-    org.springframework.cloud.config: INFO
-    com.fintrack: DEBUG
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%X{traceId:-},%X{spanId:-}] %-5level %logger{36} - %msg%n"

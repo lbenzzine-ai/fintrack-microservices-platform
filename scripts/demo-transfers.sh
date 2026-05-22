@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+docker logs fintrack-logstash 2>&1 | grep -i error#!/usr/bin/env bash
 # 10-transfer demo.
 #
 # Registers two users via api-gateway, opens a USD wallet for each, seeds
