@@ -4,12 +4,12 @@ import com.fintrack.gateway.dto.FallbackResponse;
 import com.fintrack.gateway.filter.CorrelationIdGlobalFilter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.lang.reflect.Method;
 import java.time.Instant;
 
 /**
@@ -21,45 +21,42 @@ import java.time.Instant;
 @RequestMapping(&quot;/fallback&quot;)
 <span class="fc" id="L22">public class FallbackController {</span>
 
-    @GetMapping(&quot;/users&quot;)
-    @PostMapping(&quot;/users&quot;)
+
+    @RequestMapping(value = &quot;/users&quot;, method ={ RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.PATCH, RequestMethod.DELETE})
     public ResponseEntity&lt;FallbackResponse&gt; users(
             @RequestHeader(value = CorrelationIdGlobalFilter.HEADER, required = false) String cid) {
 <span class="fc" id="L28">        return build(&quot;user-service&quot;, &quot;User service is temporarily unavailable.&quot;, cid);</span>
     }
 
-    @GetMapping(&quot;/accounts&quot;)
-    @PostMapping(&quot;/accounts&quot;)
+    @RequestMapping(value = &quot;/accounts&quot;, method ={ RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.PATCH, RequestMethod.DELETE})
     public ResponseEntity&lt;FallbackResponse&gt; accounts(
             @RequestHeader(value = CorrelationIdGlobalFilter.HEADER, required = false) String cid) {
-<span class="fc" id="L35">        return build(&quot;account-service&quot;, &quot;Account service is temporarily unavailable.&quot;, cid);</span>
+<span class="fc" id="L34">        return build(&quot;account-service&quot;, &quot;Account service is temporarily unavailable.&quot;, cid);</span>
     }
 
-    @GetMapping(&quot;/transactions&quot;)
-    @PostMapping(&quot;/transactions&quot;)
+    @RequestMapping(value = &quot;/transactions&quot;, method ={ RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.PATCH, RequestMethod.DELETE})
     public ResponseEntity&lt;FallbackResponse&gt; transactions(
             @RequestHeader(value = CorrelationIdGlobalFilter.HEADER, required = false) String cid) {
-<span class="fc" id="L42">        return build(&quot;transaction-service&quot;,</span>
+<span class="fc" id="L40">        return build(&quot;transaction-service&quot;,</span>
                 &quot;Transaction service is temporarily unavailable. Your request was NOT recorded — please retry.&quot;, cid);
     }
 
-    @GetMapping(&quot;/notifications&quot;)
-    @PostMapping(&quot;/notifications&quot;)
+    @RequestMapping(value = &quot;/notifications&quot;, method ={ RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.PATCH, RequestMethod.DELETE})
     public ResponseEntity&lt;FallbackResponse&gt; notifications(
             @RequestHeader(value = CorrelationIdGlobalFilter.HEADER, required = false) String cid) {
-<span class="fc" id="L50">        return build(&quot;notification-service&quot;, &quot;Notification service is temporarily unavailable.&quot;, cid);</span>
+<span class="fc" id="L47">        return build(&quot;notification-service&quot;, &quot;Notification service is temporarily unavailable.&quot;, cid);</span>
     }
 
     private ResponseEntity&lt;FallbackResponse&gt; build(String service, String message, String cid) {
-<span class="fc" id="L54">        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)</span>
-<span class="fc" id="L55">                .body(FallbackResponse.builder()</span>
-<span class="fc" id="L56">                        .service(service)</span>
-<span class="fc" id="L57">                        .message(message)</span>
-<span class="fc" id="L58">                        .hint(&quot;Circuit breaker is OPEN. Retry after the breaker transitions back to HALF_OPEN/CLOSED.&quot;)</span>
-<span class="fc" id="L59">                        .status(HttpStatus.SERVICE_UNAVAILABLE.value())</span>
-<span class="fc" id="L60">                        .timestamp(Instant.now())</span>
-<span class="fc" id="L61">                        .correlationId(cid)</span>
-<span class="fc" id="L62">                        .build());</span>
+<span class="fc" id="L51">        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)</span>
+<span class="fc" id="L52">                .body(FallbackResponse.builder()</span>
+<span class="fc" id="L53">                        .service(service)</span>
+<span class="fc" id="L54">                        .message(message)</span>
+<span class="fc" id="L55">                        .hint(&quot;Circuit breaker is OPEN. Retry after the breaker transitions back to HALF_OPEN/CLOSED.&quot;)</span>
+<span class="fc" id="L56">                        .status(HttpStatus.SERVICE_UNAVAILABLE.value())</span>
+<span class="fc" id="L57">                        .timestamp(Instant.now())</span>
+<span class="fc" id="L58">                        .correlationId(cid)</span>
+<span class="fc" id="L59">                        .build());</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
