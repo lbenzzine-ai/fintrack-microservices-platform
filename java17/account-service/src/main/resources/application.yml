@@ -7,6 +7,9 @@ server:
 spring:
   application:
     name: account-service
+  flyway:
+    connect-retries: 20
+    connect-retries-interval: 5
 
 info:
   app:
