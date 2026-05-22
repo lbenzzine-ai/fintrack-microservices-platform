@@ -41,7 +41,7 @@ spring:
         cache.use_query_cache: false
 
   flyway:
-    enabled: false
+    enabled: true
     baseline-on-migrate: true
     locations: classpath:db/migration
     connect-retries: 20
