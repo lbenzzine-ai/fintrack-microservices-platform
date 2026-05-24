@@ -28,6 +28,17 @@
 
     <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
         <destination>${LOGSTASH_HOST:-logstash}:${LOGSTASH_PORT:-5044}</destination>
+
+        <connectionStrategy>
+            <preferPrimary>
+                <sharedCount>1</sharedCount>
+            </preferPrimary>
+        </connectionStrategy>
+
+        <reconnectionDelay>10 second</reconnectionDelay>
+
+        <queueSize>512</queueSize>
+
         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
             <customFields>{"app":"${appName}","env":"${env}"}</customFields>
             <includeMdcKeyName>traceId</includeMdcKeyName>
@@ -37,6 +48,8 @@
 
     <appender name="ASYNC_LOGSTASH" class="ch.qos.logback.classic.AsyncAppender">
         <neverBlock>true</neverBlock>
+        <queueSize>512</queueSize>
+        <discardingThreshold>0</discardingThreshold>
         <appender-ref ref="LOGSTASH"/>
     </appender>
 

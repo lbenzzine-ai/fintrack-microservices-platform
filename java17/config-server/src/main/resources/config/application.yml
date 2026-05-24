@@ -27,12 +27,16 @@ eureka:
       defaultZone: ${EUREKA_SERVER_URL}
     register-with-eureka: true
     fetch-registry: true
-    registry-fetch-interval-seconds: 10
+    registry-fetch-interval-seconds: 30
+    should-unregister-on-shutdown: false
+    should-enforce-registration-at-init: false
+    eureka-server-connect-timeout-seconds: 15
+    eureka-server-read-timeout-seconds: 15
   instance:
     prefer-ip-address: true
     instance-id: ${spring.application.name}:${random.uuid}
-    lease-renewal-interval-in-seconds: 10
-    lease-expiration-duration-in-seconds: 30
+    lease-renewal-interval-in-seconds: 30
+    lease-expiration-duration-in-seconds: 90
 
 # ── Observability: metrics + tracing ─────────────────────────────────────────
 management:
@@ -70,7 +74,7 @@ management:
       type: B3
   zipkin:
     tracing:
-      endpoint: ${ZIPKIN_URL:http://localhost:9411}/api/v2/spans
+      endpoint: ${MANAGEMENT_ZIPKIN_TRACING_ENDPOINT:http://zipkin:9411/api/v2/spans}
 
 # ── Kafka (default broker) ───────────────────────────────────────────────────
 spring.kafka:
