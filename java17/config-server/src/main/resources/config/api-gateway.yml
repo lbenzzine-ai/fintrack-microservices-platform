@@ -4,8 +4,8 @@ server:
 spring:
   data:
     redis:
-      host: ${REDIS_HOST:localhost}
-      port: ${REDIS_PORT:6379}
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
 
   cloud:
     gateway:
@@ -25,6 +25,11 @@ spring:
               maxBackoff: 500ms
               factor: 2
               basedOnPreviousValue: false
+        - name: RequestRateLimiter
+          args:
+            redis-rate-limiter.replenishRate: 10
+            redis-rate-limiter.burstCapacity: 20
+            redis-rate-limiter.requestedTokens: 1
 
       routes:
         # ── user-service ───────────────────────────────────────────────────
@@ -37,11 +42,6 @@ spring:
               args:
                 name: userServiceCB
                 fallbackUri: forward:/fallback/users
-            - name: RequestRateLimiter
-              args:
-                redis-rate-limiter.replenishRate: 50
-                redis-rate-limiter.burstCapacity: 100
-                key-resolver: "#{@ipKeyResolver}"
 
         - id: user-service-users
           uri: lb://user-service
@@ -65,11 +65,6 @@ spring:
                 name: accountServiceCB
                 fallbackUri: forward:/fallback/accounts
             - JwtAuth
-            - name: RequestRateLimiter
-              args:
-                redis-rate-limiter.replenishRate: 100
-                redis-rate-limiter.burstCapacity: 200
-                key-resolver: "#{@userKeyResolver}"
 
         # ── transaction-service ────────────────────────────────────────────
         - id: transaction-service
@@ -82,12 +77,6 @@ spring:
                 name: transactionServiceCB
                 fallbackUri: forward:/fallback/transactions
             - JwtAuth
-            - name: RequestRateLimiter
-              args:
-                redis-rate-limiter.replenishRate: 30
-                redis-rate-limiter.burstCapacity: 60
-                key-resolver: "#{@userKeyResolver}"
-
         # ── notification-service ───────────────────────────────────────────
         - id: notification-service
           uri: lb://notification-service

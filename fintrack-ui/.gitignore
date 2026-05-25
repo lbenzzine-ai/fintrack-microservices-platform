@@ -1,0 +1,23 @@
+# Node
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Angular
+dist/
+.angular/
+out-tsc/
+
+# Environment
+.env
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+
+# Environment files with sensitive data
+src/environments/environment.prod.ts

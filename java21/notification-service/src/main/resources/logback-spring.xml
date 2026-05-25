@@ -54,9 +54,14 @@
         </encoder>
     </appender>
 
+    <appender name="ASYNC_LOGSTASH" class="ch.qos.logback.classic.AsyncAppender">
+        <neverBlock>true</neverBlock>
+        <appender-ref ref="LOGSTASH"/>
+    </appender>
+
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="JSON_FILE"/>
-        <appender-ref ref="LOGSTASH"/>
+        <appender-ref ref="ASYNC_LOGSTASH"/>
     </root>
 </configuration>

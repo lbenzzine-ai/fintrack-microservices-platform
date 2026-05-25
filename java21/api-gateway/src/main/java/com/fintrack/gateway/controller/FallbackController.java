@@ -4,10 +4,9 @@ import com.fintrack.gateway.dto.FallbackResponse;
 import com.fintrack.gateway.filter.CorrelationIdGlobalFilter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Instant;
@@ -21,30 +20,26 @@ import java.time.Instant;
 @RequestMapping("/fallback")
 public class FallbackController {
 
-    @GetMapping("/users")
-    @PostMapping("/users")
+    @RequestMapping(value = "/users", method ={ RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.PATCH, RequestMethod.DELETE})
     public ResponseEntity<FallbackResponse> users(
             @RequestHeader(value = CorrelationIdGlobalFilter.HEADER, required = false) String cid) {
         return build("user-service", "User service is temporarily unavailable.", cid);
     }
 
-    @GetMapping("/accounts")
-    @PostMapping("/accounts")
+    @RequestMapping(value = "/accounts", method ={ RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.PATCH, RequestMethod.DELETE})
     public ResponseEntity<FallbackResponse> accounts(
             @RequestHeader(value = CorrelationIdGlobalFilter.HEADER, required = false) String cid) {
         return build("account-service", "Account service is temporarily unavailable.", cid);
     }
 
-    @GetMapping("/transactions")
-    @PostMapping("/transactions")
+    @RequestMapping(value = "/transactions", method ={ RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.PATCH, RequestMethod.DELETE})
     public ResponseEntity<FallbackResponse> transactions(
             @RequestHeader(value = CorrelationIdGlobalFilter.HEADER, required = false) String cid) {
         return build("transaction-service",
                 "Transaction service is temporarily unavailable. Your request was NOT recorded — please retry.", cid);
     }
 
-    @GetMapping("/notifications")
-    @PostMapping("/notifications")
+    @RequestMapping(value = "/notifications", method ={ RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.PATCH, RequestMethod.DELETE})
     public ResponseEntity<FallbackResponse> notifications(
             @RequestHeader(value = CorrelationIdGlobalFilter.HEADER, required = false) String cid) {
         return build("notification-service", "Notification service is temporarily unavailable.", cid);

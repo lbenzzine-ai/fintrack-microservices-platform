@@ -43,7 +43,7 @@
         <lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
 
         <springdoc.version>2.6.0</springdoc.version>
-        <jjwt.version>0.12.6</jjwt.version>
+        <jjwt.version>0.12.5</jjwt.version>
         <resilience4j.version>2.2.0</resilience4j.version>
         <ehcache.version>3.10.8</ehcache.version>
         <hibernate-jcache.version>6.5.3.Final</hibernate-jcache.version>

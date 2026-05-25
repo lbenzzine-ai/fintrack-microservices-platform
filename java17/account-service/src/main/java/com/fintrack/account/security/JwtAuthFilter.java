@@ -30,6 +30,17 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         chain.doFilter(req, res);
     }
 
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String path = request.getServletPath();
+
+        // Bypasses the security filter for your actual AuthController endpoints
+        return path.equals("/api/v1/auth/register") ||
+                path.equals("/api/v1/auth/login") ||
+                path.equals("/register") ||
+                path.equals("/login");
+    }
+
     private void populate(Claims claims) {
         String userUuid = claims.getSubject();
         @SuppressWarnings("unchecked")
