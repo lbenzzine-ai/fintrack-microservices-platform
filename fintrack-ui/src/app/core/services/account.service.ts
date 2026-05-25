@@ -8,7 +8,7 @@ export class AccountService {
   private readonly API = '/api/v1/accounts';
 
   getMyAccounts() {
-    return this.http.get<Account[]>(`${this.API}/my`);
+    return this.http.get<Account[]>(`${this.API}/me`);
   }
 
   getAccount(uuid: string) {

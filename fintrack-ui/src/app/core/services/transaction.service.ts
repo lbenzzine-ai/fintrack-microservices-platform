@@ -13,7 +13,8 @@ export class TransactionService {
 
   getMyTransactions(page = 0, size = 20) {
     const params = new HttpParams().set('page', page).set('size', size);
-    return this.http.get<{ content: Transaction[]; totalElements: number }>(`${this.API}/my`, { params });
+    return this.http.get<{ content: Transaction[]; totalElements: number }
+    >(`${this.API}/by-account/${accountUuid}`, { params });
   }
 
   getTransaction(uuid: string) {
