@@ -11,7 +11,7 @@ env:
   NODE_VERSION: '22'
 
 jobs:
-  # ── Job 1: Build & Test Java 21 ─────────────────────────────────────────────
+  # ── Job 1: Build Java 21 ─────────────────────────────────────────────────────
   build-java:
     name: Build Java 21 Services
     runs-on: ubuntu-latest
@@ -39,7 +39,7 @@ jobs:
           path: java21/**/target/*.jar
           retention-days: 1
 
-  # ── Job 2: Build Angular UI ─────────────────────────────────────────────────
+  # ── Job 2: Build Angular UI ──────────────────────────────────────────────────
   build-angular:
     name: Build Angular UI
     runs-on: ubuntu-latest
@@ -92,7 +92,7 @@ jobs:
           path: fintrack-ui/dist/fintrack-ui/
           retention-days: 1
 
-  # ── Job 3: Deploy (only on push to main) ────────────────────────────────────
+  # ── Job 3: Deploy (only on push to main) ─────────────────────────────────────
   deploy:
     name: Deploy to Oracle Cloud
     runs-on: ubuntu-latest
@@ -101,12 +101,6 @@ jobs:
     environment: production
 
     steps:
-      - name: Download Java JARs
-        uses: actions/download-artifact@v4
-        with:
-          name: java21-jars
-          path: java21-jars/
-
       - name: Download Angular dist
         uses: actions/download-artifact@v4
         with:
@@ -135,14 +129,19 @@ jobs:
             echo "🐳 Restarting Docker services..."
             docker compose down
             docker compose up -d
-            
+
             echo "⏳ Waiting for services to be healthy..."
             sleep 120
-            
+
             echo "✅ Service status:"
             docker compose ps --format "table {{.Name}}\t{{.Status}}"
 
-      - name: Deploy Angular to Nginx
+            echo "🧹 Preparing Nginx folder..."
+            sudo rm -rf /var/www/fintrack
+            sudo mkdir -p /var/www/fintrack
+            sudo chown ubuntu:ubuntu /var/www/fintrack
+
+      - name: Copy Angular files to server
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.ORACLE_HOST }}
@@ -151,15 +150,17 @@ jobs:
           source: "angular-dist/*"
           target: "/var/www/fintrack"
           strip_components: 1
-          rm: true
+          rm: false
 
-      - name: Reload Nginx
+      - name: Fix permissions and reload Nginx
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.ORACLE_HOST }}
           username: ubuntu
           key: ${{ secrets.ORACLE_SSH_KEY }}
           script: |
+            sudo chown -R www-data:www-data /var/www/fintrack
+            sudo chmod -R 755 /var/www/fintrack
             sudo systemctl reload nginx
             echo "✅ Nginx reloaded"
             echo "🌐 FinTrack is live at https://fintrack.ddns.net"
