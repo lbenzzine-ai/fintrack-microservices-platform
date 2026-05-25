@@ -11,13 +11,19 @@ export class TransactionService {
     return this.http.post<Transaction>(this.API, req);
   }
 
-  getMyTransactions(page = 0, size = 20) {
+  getTransactionsByAccount(accountUuid: string, page = 0, size = 20) {
     const params = new HttpParams().set('page', page).set('size', size);
-    return this.http.get<{ content: Transaction[]; totalElements: number }
-    >(`${this.API}/by-account/${accountUuid}`, { params });
+    return this.http.get<{ content: Transaction[]; totalElements: number }>(
+      `${this.API}/by-account/${accountUuid}`, { params }
+    );
   }
 
   getTransaction(uuid: string) {
     return this.http.get<Transaction>(`${this.API}/${uuid}`);
+  }
+
+  getFeeQuote(amount: number, currency: string = 'USD') {
+    const params = new HttpParams().set('amount', amount).set('currency', currency);
+    return this.http.get<{ feeAmount: number; strategy: string }>(`${this.API}/fee/quote`, { params });
   }
 }

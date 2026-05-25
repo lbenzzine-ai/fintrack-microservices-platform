@@ -15,6 +15,10 @@ export class AccountService {
     return this.http.get<Account>(`${this.API}/${uuid}`);
   }
 
+  getBalance(uuid: string) {
+    return this.http.get<{ balance: number }>(`${this.API}/${uuid}/balance`);
+  }
+
   openAccount(currency: string = 'USD') {
     return this.http.post<Account>(this.API, { currency });
   }
