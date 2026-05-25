@@ -81,7 +81,7 @@ Chart.register(...registerables);
           [class]="tx.status === 'COMPLETED' ? 'text-green-400' : 'text-red-400'">
           {{ tx.amount | currency }}
         </span>
-        <span style="flex:1" class="text-xs text-slate-muted">{{ tx.feeAmount | currency }}</span>
+        <span style="flex:1" class="text-xs text-slate-muted">{{ ( tx.fee || tx.feeAmount || 0 ) | currency }}</span>
         <span style="flex:1">
           <span [ngClass]="{
             'badge-success': tx.riskLevel === 'LOW',
@@ -169,7 +169,7 @@ export class HistoryComponent implements OnInit, AfterViewInit, OnDestroy {
       next: res => {
         this.transactions = res.content;
         this.totalElements = res.totalElements;
-        this.totalFees = res.content.reduce((s, tx) => s + (tx.feeAmount || 0), 0);
+        this.totalFees = res.content.reduce((s, tx) => s + (tx.fee || tx.feeAmount || 0), 0);
         this.avgFee = res.content.length ? this.totalFees / res.content.length : 0;
         this.filterTx();
         this.loading = false;

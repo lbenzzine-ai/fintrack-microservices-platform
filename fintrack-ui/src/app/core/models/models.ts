@@ -31,31 +31,47 @@ export interface AuthResponse {
 
 export interface Account {
   uuid: string;
-  accountNumber: string;
-  balance: number;
-  currency: string;
-  type: string;
-  status: string;
   userUuid: string;
+  balance: number;
+  currencyCode: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+  // computed
+  currency?: string;
+  type?: string;
+  accountNumber?: string;
 }
 
 export interface Transaction {
   uuid: string;
-  sourceAccountUuid: string;
-  destinationAccountUuid: string;
+  fromAccountUuid: string;
+  toAccountUuid: string;
   amount: number;
-  currency: string;
-  description: string;
+  fee: number;
+  currencyCode: string;
+  type: string;
   status: 'INITIATED' | 'COMPLETED' | 'FAILED' | 'COMPENSATED';
-  riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  feeAmount: number;
+  riskLevel?: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  description: string;
   createdAt: string;
+  updatedAt: string;
+  // aliases for backward compat
+  feeAmount?: number;
 }
 
 export interface TransferRequest {
-  sourceAccountUuid: string;
-  destinationAccountUuid: string;
+  fromAccountUuid: string;
+  toAccountUuid: string;
   amount: number;
-  currency: string;
+  currencyCode: string;
   description: string;
+}
+
+export interface PagedResponse<T> {
+  content: T[];
+  totalElements: number;
+  totalPages: number;
+  size: number;
+  number: number;
 }
