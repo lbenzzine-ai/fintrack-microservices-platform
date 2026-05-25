@@ -31,17 +31,15 @@ eureka:
     register-with-eureka: true
     fetch-registry: true
     registry-fetch-interval-seconds: 30
-    eureka-server-connect-timeout-seconds: 15
-    eureka-server-read-timeout-seconds: 15
-    eureka-connection-idle-timeout-seconds: 30
     should-unregister-on-shutdown: false
     should-enforce-registration-at-init: false
+    eureka-server-connect-timeout-seconds: 30
+    eureka-server-read-timeout-seconds: 30
   instance:
     prefer-ip-address: true
-    instance-id: ${spring.application.name}:${random.uuid}
+    instance-id: ${spring.application.name}:${SERVER_PORT:8080}
     lease-renewal-interval-in-seconds: 30
     lease-expiration-duration-in-seconds: 90
-
 # ── Observability: metrics + tracing ─────────────────────────────────────────
 management:
   endpoints:

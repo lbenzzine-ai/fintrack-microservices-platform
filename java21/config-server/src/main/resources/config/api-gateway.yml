@@ -32,22 +32,13 @@ spring:
           uri: lb://user-service
           predicates:
             - Path=/api/v1/auth/**
-          filters:
-            - name: CircuitBreaker
-              args:
-                name: userServiceCB
-                fallbackUri: forward:/fallback/users
-
+          filters: []
 
         - id: user-service-users
           uri: lb://user-service
           predicates:
             - Path=/api/v1/users/**
           filters:
-            - name: CircuitBreaker
-              args:
-                name: userServiceCB
-                fallbackUri: forward:/fallback/users
             - JwtAuth
 
         # ── account-service ────────────────────────────────────────────────
@@ -61,31 +52,19 @@ spring:
                 name: accountServiceCB
                 fallbackUri: forward:/fallback/accounts
             - JwtAuth
-
-
         # ── transaction-service ────────────────────────────────────────────
         - id: transaction-service
           uri: lb://transaction-service
           predicates:
             - Path=/api/v1/transactions/**
           filters:
-            - name: CircuitBreaker
-              args:
-                name: transactionServiceCB
-                fallbackUri: forward:/fallback/transactions
             - JwtAuth
-
-
         # ── notification-service ───────────────────────────────────────────
         - id: notification-service
           uri: lb://notification-service
           predicates:
             - Path=/api/v1/notifications/**
           filters:
-            - name: CircuitBreaker
-              args:
-                name: notificationServiceCB
-                fallbackUri: forward:/fallback/notifications
             - JwtAuth
 
         # ── aggregated openapi docs (per-service) ──────────────────────────

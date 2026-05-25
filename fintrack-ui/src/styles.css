@@ -1,0 +1,185 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=DM+Sans:wght@300;400;500&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-navy-800 text-slate-text font-sans;
+    min-height: 100vh;
+  }
+
+  input, select, textarea {
+    @apply bg-navy-900 border border-gold-500/20 rounded-md px-4 py-2.5 text-slate-text
+           placeholder-slate-muted focus:outline-none focus:border-gold-500/50
+           w-full font-sans text-sm transition-colors;
+  }
+}
+
+@layer components {
+
+  /* ── Buttons ─────────────────────────────────────────────────── */
+  .btn-primary {
+    @apply bg-gold-500 text-navy-900 font-medium px-6 py-2.5 rounded-md
+           hover:bg-gold-400 transition-colors w-full text-sm;
+  }
+  .btn-outline {
+    @apply border border-gold-500/30 text-gold-500 font-medium px-6 py-2.5 rounded-md
+           hover:bg-gold-500/10 transition-colors w-full text-sm;
+  }
+  .btn-danger {
+    @apply border border-red-500/30 text-red-400 font-medium px-4 py-2 rounded-md
+           hover:bg-red-500/10 transition-colors text-sm;
+  }
+  .btn-sm {
+    @apply px-3 py-1.5 text-xs rounded-md;
+  }
+
+  /* ── Cards ───────────────────────────────────────────────────── */
+  .card {
+    @apply bg-navy-700 border border-gold-500/15 rounded-xl p-5;
+  }
+  .card-hover {
+    @apply card hover:border-gold-500/40 transition-all cursor-pointer;
+  }
+  .stat-card {
+    @apply bg-navy-700 border border-gold-500/10 rounded-lg p-4;
+  }
+  .result-card {
+    @apply rounded-xl border border-gold-500/20 bg-navy-900 p-5;
+  }
+  .success-card {
+    @apply rounded-xl border border-green-500/20 bg-green-500/5 p-4;
+  }
+  .error-card {
+    @apply rounded-xl border border-red-500/20 bg-red-500/5 p-3;
+  }
+
+  /* ── Badges ──────────────────────────────────────────────────── */
+  .badge-success {
+    @apply text-xs px-2 py-0.5 rounded bg-green-500/15 text-green-400 font-medium;
+  }
+  .badge-warning {
+    @apply text-xs px-2 py-0.5 rounded bg-gold-500/15 text-gold-400 font-medium;
+  }
+  .badge-danger {
+    @apply text-xs px-2 py-0.5 rounded bg-red-500/15 text-red-400 font-medium;
+  }
+  .badge-neutral {
+    @apply text-xs px-2 py-0.5 rounded bg-white/5 text-slate-muted font-medium;
+  }
+
+  /* ── Typography ──────────────────────────────────────────────── */
+  .section-title {
+    @apply font-display text-gold-500 text-base mb-4;
+  }
+  .page-title {
+    @apply font-display text-2xl text-slate-text mb-7;
+  }
+  .label {
+    @apply text-xs text-slate-muted uppercase tracking-widest block mb-1.5;
+  }
+
+  /* ── Layout ──────────────────────────────────────────────────── */
+  .table-row {
+    @apply flex justify-between items-center py-2.5 border-b border-white/5 last:border-0;
+  }
+  .table-header {
+    @apply text-xs text-slate-muted uppercase tracking-widest pb-3 border-b border-white/5 mb-1;
+  }
+  .divider {
+    @apply border-t border-gold-500/10 my-4;
+  }
+
+  /* ── Avatar ──────────────────────────────────────────────────── */
+  .avatar {
+    @apply w-10 h-10 rounded-full bg-gold-500/10 border border-gold-500/20
+           flex items-center justify-center font-display text-gold-500;
+  }
+  .avatar-lg {
+    @apply w-12 h-12 rounded-full bg-gold-500/10 border border-gold-500/20
+           flex items-center justify-center font-display text-gold-500 text-lg;
+  }
+
+  /* ── Saga steps ──────────────────────────────────────────────── */
+  .saga-step-done {
+    @apply w-6 h-6 rounded-full bg-green-500/20 text-green-400 flex items-center justify-center text-xs flex-shrink-0;
+  }
+  .saga-step-pending {
+    @apply w-6 h-6 rounded-full bg-gold-500/20 text-gold-500 flex items-center justify-center text-xs flex-shrink-0 animate-pulse;
+  }
+  .saga-step-failed {
+    @apply w-6 h-6 rounded-full bg-red-500/20 text-red-400 flex items-center justify-center text-xs flex-shrink-0;
+  }
+  .saga-step-waiting {
+    @apply w-6 h-6 rounded-full bg-white/5 text-slate-muted flex items-center justify-center text-xs flex-shrink-0;
+  }
+
+  /* ── Nav tooltip ─────────────────────────────────────────────── */
+  .nav-item { @apply relative; }
+  .nav-tooltip {
+    @apply hidden absolute top-full left-1/2 mt-2 -translate-x-1/2
+           bg-navy-900 border border-gold-500/20 text-slate-muted
+           text-xs px-3 py-1.5 rounded-lg whitespace-nowrap z-50 pointer-events-none;
+  }
+  .nav-item:hover .nav-tooltip { @apply block; }
+
+  /* ── Hero banner ─────────────────────────────────────────────── */
+  .hero-banner {
+    background: linear-gradient(135deg, #071020 0%, #0F1E35 50%, #162640 100%);
+    @apply relative rounded-2xl overflow-hidden h-48 mb-8;
+  }
+  .hero-grid {
+    background-image:
+      linear-gradient(rgba(196,163,82,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(196,163,82,0.05) 1px, transparent 1px);
+    background-size: 40px 40px;
+    @apply absolute inset-0;
+  }
+  .hero-orb-1 {
+    background: radial-gradient(circle, rgba(196,163,82,0.15) 0%, transparent 70%);
+    @apply absolute rounded-full;
+    width: 200px;
+    height: 200px;
+    top: -50px;
+    right: 100px;
+  }
+  .hero-orb-2 {
+    background: radial-gradient(circle, rgba(196,163,82,0.08) 0%, transparent 70%);
+    @apply absolute rounded-full;
+    width: 150px;
+    height: 150px;
+    bottom: -30px;
+    left: 200px;
+  }
+
+  /* ── Arch diagram ────────────────────────────────────────────── */
+  .arch-node {
+    @apply bg-navy-900 border border-gold-500/30 rounded-lg px-3 py-2 text-center;
+    min-width: 80px;
+  }
+  .arch-connector {
+    @apply flex-1 flex items-center justify-center;
+  }
+  .arch-line {
+    @apply h-px bg-gold-500/30 flex-1;
+  }
+  .arch-label {
+    @apply text-gold-500/50 mx-2 text-xs;
+  }
+
+  /* ── Spinner ─────────────────────────────────────────────────── */
+  .spinner {
+    @apply animate-spin h-4 w-4;
+  }
+
+  /* ── Form group ──────────────────────────────────────────────── */
+  .form-group {
+    @apply mb-4;
+  }
+
+  /* ── Infra cards ─────────────────────────────────────────────── */
+  .infra-card {
+    @apply rounded-lg p-2 text-center border border-white/5;
+  }
+}

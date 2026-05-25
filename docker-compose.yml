@@ -341,6 +341,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql-accounts:3306/fintrack_accounts?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
+      JAVA_OPTS: "-XX:+UseG1GC -XX:MaxRAMPercentage=40.0 -Xmx256m -XX:+UseStringDeduplication"
     entrypoint: []
     command: ["sh", "-c", "sleep 30 && java $$JAVA_OPTS -jar app.jar"]
     ports: ["8082:8082"]
@@ -369,6 +370,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql-transactions:3306/fintrack_transactions?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
+      JAVA_OPTS: "-XX:+UseG1GC -XX:MaxRAMPercentage=40.0 -Xmx256m -XX:+UseStringDeduplication"
     entrypoint: []
     command: ["sh", "-c", "sleep 30 && java $$JAVA_OPTS -jar app.jar"]
     ports: ["8083:8083"]
