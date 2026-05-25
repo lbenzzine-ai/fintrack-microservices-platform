@@ -81,9 +81,10 @@ class JwtTokenProviderTest {
     @Test
     void parse_tampered_signature_returns_empty() {
         String token = tokenWith(ISSUER, 60_000, "u", List.of("USER"));
-        char last = token.charAt(token.length() - 1);
-        char swap = last == 'A' ? 'B' : 'A';
-        String tampered = token.substring(0, token.length() - 1) + swap;
+        int lastDot = token.lastIndexOf('.');
+        String tampered = token.substring(0, lastDot + 1)
+                + (token.charAt(lastDot + 1) == 'A' ? 'B' : 'A')
+                + token.substring(lastDot + 2);
         assertThat(provider.parse(tampered)).isEmpty();
     }
 
