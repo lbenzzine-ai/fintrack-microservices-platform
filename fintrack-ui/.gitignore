@@ -18,3 +18,6 @@ out-tsc/
 
 # OS
 .DS_Store
+
+# Environment files with sensitive data
+src/environments/environment.prod.ts

@@ -2,6 +2,7 @@ import { Component, inject, OnInit, AfterViewInit, ViewChild, ElementRef, OnDest
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Chart, registerables } from 'chart.js';
+import { environment } from '../../../environments/environment';
 
 Chart.register(...registerables);
 
@@ -15,7 +16,6 @@ interface ServiceStatus { name: string; status: 'UP' | 'DOWN' | 'UNKNOWN'; }
     <div class="font-display text-xl mb-5">Infrastructure</div>
 
     <div class="grid grid-cols-2 gap-5 mb-5">
-      <!-- Service health -->
       <div class="card">
         <div class="section-title">Service health</div>
         <div *ngFor="let svc of services" class="table-row">
@@ -32,36 +32,32 @@ interface ServiceStatus { name: string; status: 'UP' | 'DOWN' | 'UNKNOWN'; }
         <button (click)="checkHealth()" class="btn-outline mt-4" style="padding:8px;">Refresh</button>
       </div>
 
-      <!-- Platform info -->
       <div class="card">
-        <div class="section-title">Platform info</div>
-        <div class="table-row"><span class="text-sm">Active broker</span><span class="badge-success">Kafka</span></div>
-        <div class="table-row"><span class="text-sm">Java version</span><span class="text-sm">21 — Virtual threads</span></div>
-        <div class="table-row"><span class="text-sm">Fee strategy</span><span class="text-sm">Tiered</span></div>
-        <div class="table-row">
-          <span class="text-sm">Eureka</span>
-          <a href="http://localhost:8761" target="_blank" class="text-gold-500 text-xs hover:text-gold-400">:8761 →</a>
+        <div class="section-title">Platform links</div>
+        <div class="table-row"><span class="text-sm">API Gateway</span>
+          <a [href]="env.swagger" target="_blank" class="text-gold-500 text-xs hover:text-gold-400">Swagger →</a>
         </div>
-        <div class="table-row">
-          <span class="text-sm">Grafana</span>
-          <a href="http://localhost:3000" target="_blank" class="text-gold-500 text-xs hover:text-gold-400">:3000 →</a>
+        <div class="table-row"><span class="text-sm">Eureka</span>
+          <a [href]="env.eureka" target="_blank" class="text-gold-500 text-xs hover:text-gold-400">Registry →</a>
         </div>
-        <div class="table-row">
-          <span class="text-sm">Zipkin</span>
-          <a href="http://localhost:9411" target="_blank" class="text-gold-500 text-xs hover:text-gold-400">:9411 →</a>
+        <div class="table-row"><span class="text-sm">Grafana</span>
+          <a [href]="env.grafana" target="_blank" class="text-gold-500 text-xs hover:text-gold-400">Dashboards →</a>
         </div>
-        <div class="table-row">
-          <span class="text-sm">Swagger</span>
-          <a href="http://localhost:8080/swagger-ui.html" target="_blank" class="text-gold-500 text-xs hover:text-gold-400">:8080 →</a>
+        <div class="table-row"><span class="text-sm">Zipkin</span>
+          <a [href]="env.zipkin" target="_blank" class="text-gold-500 text-xs hover:text-gold-400">Traces →</a>
         </div>
-        <div class="table-row">
-          <span class="text-sm">Kafdrop</span>
-          <a href="http://localhost:8090" target="_blank" class="text-gold-500 text-xs hover:text-gold-400">:8090 →</a>
+        <div class="table-row"><span class="text-sm">Kibana</span>
+          <a [href]="env.kibana" target="_blank" class="text-gold-500 text-xs hover:text-gold-400">Logs →</a>
+        </div>
+        <div class="table-row"><span class="text-sm">Kafdrop</span>
+          <a [href]="env.kafdrop" target="_blank" class="text-gold-500 text-xs hover:text-gold-400">Topics →</a>
+        </div>
+        <div class="table-row"><span class="text-sm">Mailhog</span>
+          <a [href]="env.mailhog" target="_blank" class="text-gold-500 text-xs hover:text-gold-400">Emails →</a>
         </div>
       </div>
     </div>
 
-    <!-- Charts -->
     <div class="grid grid-cols-2 gap-5">
       <div class="card">
         <div class="section-title">Request rate (req/s)</div>
@@ -80,6 +76,7 @@ export class InfrastructureComponent implements OnInit, AfterViewInit, OnDestroy
 
   private http = inject(HttpClient);
   private charts: any[] = [];
+  env = environment.services;
 
   services: ServiceStatus[] = [
     { name: 'api-gateway', status: 'UNKNOWN' },
