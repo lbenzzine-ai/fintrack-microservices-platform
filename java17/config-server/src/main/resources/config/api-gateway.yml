@@ -25,6 +25,11 @@ spring:
               maxBackoff: 500ms
               factor: 2
               basedOnPreviousValue: false
+        - name: RequestRateLimiter
+          args:
+            redis-rate-limiter.replenishRate: 10
+            redis-rate-limiter.burstCapacity: 20
+            redis-rate-limiter.requestedTokens: 1
 
       routes:
         # ── user-service ───────────────────────────────────────────────────
@@ -112,7 +117,7 @@ spring:
 
       httpclient:
         connect-timeout: 2000
-        response-timeout: 30s
+        response-timeout: 5s
         pool:
           max-connections: 500
           acquire-timeout: 3000
