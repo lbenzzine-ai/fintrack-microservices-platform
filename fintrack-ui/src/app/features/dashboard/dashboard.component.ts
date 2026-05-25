@@ -13,7 +13,7 @@ import { Account, Transaction } from '../../core/models/models';
   template: `
     <div class="flex justify-between items-center mb-7">
       <div>
-        <div class="text-xs text-slate-muted mb-1">Good morning</div>
+        <div class="text-xs text-slate-muted mb-1">Welcome back</div>
         <div class="font-display text-3xl">{{ user?.firstName || user?.username }}</div>
       </div>
       <div class="text-xs text-slate-muted">{{ today | date:'fullDate' }}</div>
@@ -49,7 +49,7 @@ import { Account, Transaction } from '../../core/models/models';
       <a routerLink="/history" class="card-hover">
         <div class="avatar mb-4"><span class="text-lg">≡</span></div>
         <div class="section-title mb-1">Transactions</div>
-        <div class="text-xs text-slate-muted">View your full history</div>
+        <div class="text-xs text-slate-muted">View your full history & charts</div>
       </a>
       <a routerLink="/about" class="card-hover">
         <div class="avatar mb-4"><span class="text-lg">ℹ</span></div>
@@ -58,46 +58,27 @@ import { Account, Transaction } from '../../core/models/models';
       </a>
     </div>
 
-    <!-- Accounts + recent tx -->
-    <div class="grid grid-cols-2 gap-5">
-      <div class="card">
-        <div class="section-title">Accounts</div>
-        <div *ngIf="loading" class="text-slate-muted text-sm">Loading...</div>
-        <div *ngFor="let acc of accounts" class="table-row">
-          <div>
-            <div class="text-sm">{{ acc.uuid.substring(0,8) }}...</div>
-            <div class="text-xs text-slate-muted">{{ acc.currency }} · {{ acc.type }}</div>
-          </div>
-          <div class="text-right">
-            <div class="font-display text-gold-500">{{ acc.balance | currency }}</div>
-            <span [class]="acc.status === 'ACTIVE' ? 'badge-success' : 'badge-warning'">{{ acc.status }}</span>
-          </div>
+    <!-- Recent transactions -->
+    <div class="card">
+      <div class="flex justify-between items-center mb-4">
+        <div class="section-title mb-0">Recent transactions</div>
+        <a routerLink="/history" class="text-xs text-gold-500 hover:text-gold-400">View all →</a>
+      </div>
+      <div *ngIf="loading" class="text-slate-muted text-sm py-4">Loading...</div>
+      <div *ngFor="let tx of recentTransactions" class="table-row">
+        <div>
+          <div class="text-sm">{{ tx.description || 'Transfer' }}</div>
+          <div class="text-xs text-slate-muted">{{ tx.createdAt | date:'short' }}</div>
         </div>
-        <div *ngIf="!loading && accounts.length === 0" class="text-slate-muted text-sm">
-          No accounts yet.
+        <div class="text-right">
+          <div class="font-display text-sm" [class]="tx.status === 'COMPLETED' ? 'text-green-400' : 'text-red-400'">
+            {{ tx.amount | currency }}
+          </div>
+          <span class="badge-success">{{ tx.status }}</span>
         </div>
       </div>
-
-      <div class="card">
-        <div class="section-title">Recent transactions</div>
-        <div *ngIf="loading" class="text-slate-muted text-sm">Loading...</div>
-        <div *ngFor="let tx of recentTransactions" class="table-row">
-          <div>
-            <div class="text-sm">{{ tx.description || 'Transfer' }}</div>
-            <div class="text-xs text-slate-muted">{{ tx.createdAt | date:'short' }}</div>
-          </div>
-          <div class="text-right">
-            <div class="text-sm font-display" [class]="tx.status === 'COMPLETED' ? 'text-green-400' : 'text-red-400'">
-              {{ tx.amount | currency }}
-            </div>
-            <span [ngClass]="{
-              'badge-success': tx.riskLevel === 'LOW',
-              'badge-warning': tx.riskLevel === 'MEDIUM',
-              'badge-danger': tx.riskLevel === 'HIGH' || tx.riskLevel === 'CRITICAL'
-            }">{{ tx.riskLevel }}</span>
-          </div>
-        </div>
-        <div *ngIf="!loading && recentTransactions.length === 0" class="text-slate-muted text-sm">No transactions yet.</div>
+      <div *ngIf="!loading && recentTransactions.length === 0" class="text-slate-muted text-sm py-4 text-center">
+        No transactions yet. <a routerLink="/transfer" class="text-gold-500 ml-1">Make a transfer →</a>
       </div>
     </div>
   `
@@ -120,16 +101,17 @@ export class DashboardComponent implements OnInit {
       next: accounts => {
         this.accounts = accounts;
         this.totalBalance = accounts.reduce((sum, a) => sum + a.balance, 0);
-        this.loading = false;
-
-        // Load recent transactions from first account
         if (accounts.length > 0) {
           this.txService.getTransactionsByAccount(accounts[0].uuid, 0, 5).subscribe({
             next: res => {
               this.recentTransactions = res.content;
               this.totalTransactions = res.totalElements;
-            }
+              this.loading = false;
+            },
+            error: () => { this.loading = false; }
           });
+        } else {
+          this.loading = false;
         }
       },
       error: () => { this.loading = false; }
