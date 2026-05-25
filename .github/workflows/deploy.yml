@@ -56,6 +56,7 @@ jobs:
 
       - name: Create production environment file
         run: |
+          mkdir -p fintrack-ui/src/environments
           cat > fintrack-ui/src/environments/environment.prod.ts << 'ENVEOF'
           export const environment = {
             production: true,
