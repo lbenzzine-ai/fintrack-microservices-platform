@@ -10,17 +10,6 @@ import { Account, Transaction } from '../../core/models/models';
   selector: 'ft-dashboard',
   standalone: true,
   imports: [CommonModule, RouterLink],
-  styles: [`
-    .tx-row {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      align-items: center;
-      padding: 10px 0;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-      gap: 12px;
-    }
-    .tx-row:last-child { border-bottom: none; }
-  `],
   template: `
     <div class="flex justify-between items-center mb-7">
       <div>
@@ -75,15 +64,17 @@ import { Account, Transaction } from '../../core/models/models';
         <div class="section-title mb-0">Recent transactions</div>
         <a routerLink="/history" class="text-xs text-gold-500 hover:text-gold-400">View all →</a>
       </div>
+
       <div *ngIf="loading" class="text-slate-muted text-sm py-4">Loading...</div>
 
-      <div *ngFor="let tx of recentTransactions" class="tx-row">
-        <div>
-          <div class="text-sm font-medium">{{ tx.description || 'Transfer' }}</div>
-          <div class="text-xs text-slate-muted mt-0.5">{{ tx.createdAt | date:'MMM d, y · h:mm a' }}</div>
+      <div *ngFor="let tx of recentTransactions"
+           class="flex justify-between items-center py-3 border-b border-white/5 last:border-0">
+        <div class="flex-1 min-w-0 pr-4">
+          <div class="text-sm font-medium truncate">{{ tx.description || 'Transfer' }}</div>
+          <div class="text-xs text-slate-muted mt-0.5">{{ tx.createdAt | date:'MMM d · h:mm a' }}</div>
         </div>
-        <div class="text-right">
-          <div class="font-display text-sm mb-1"
+        <div class="flex items-center gap-3 flex-shrink-0">
+          <div class="font-display text-sm"
                [class]="tx.status === 'COMPLETED' ? 'text-green-400' : 'text-red-400'">
             {{ tx.amount | currency }}
           </div>
