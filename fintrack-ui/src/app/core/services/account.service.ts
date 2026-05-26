@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { map } from 'rxjs/operators';
 import { Account } from '../models/models';
 
 @Injectable({ providedIn: 'root' })
@@ -8,7 +9,9 @@ export class AccountService {
   private readonly API = '/api/v1/accounts';
 
   getMyAccounts() {
-    return this.http.get<Account[]>(`${this.API}/me`);
+    return this.http.get<Account>(`${this.API}/me`).pipe(
+      map(account => [account])
+    );
   }
 
   getAccount(uuid: string) {
