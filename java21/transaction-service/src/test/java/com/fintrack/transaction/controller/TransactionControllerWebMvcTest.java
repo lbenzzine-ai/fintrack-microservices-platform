@@ -59,7 +59,7 @@ class TransactionControllerWebMvcTest {
     }
 
     private static TransactionResponse anyResponse(String uuid) {
-        return new TransactionResponse(uuid, null, null, new BigDecimal("100"), null, null, null, null, null, null, null, null);
+        return new TransactionResponse(uuid, null, null, new BigDecimal("100"), null, null, null, null,null, null, null, null, null);
     }
 
     @Test

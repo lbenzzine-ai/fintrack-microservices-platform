@@ -103,7 +103,9 @@ public class TransactionService {
                 .status(TransactionStatus.INITIATED)
                 .build();
         RiskScore riskScore = riskEngine.assess(tx);
-        tx.setRiskLevel(riskScore.getLevel().name());
+        if (riskScore != null) {
+            tx.setRiskLevel(riskScore.getLevel().name());
+        }
         Transaction saved = transactionRepository.save(tx);
         publishInitiated(saved);
         log.info("Transaction created uuid={} type={} amount={} fee={}",

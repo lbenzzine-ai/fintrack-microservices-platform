@@ -90,7 +90,7 @@ class TransactionServiceTest {
     }
 
     private static TransactionResponse anyResponse(String uuid) {
-        return new TransactionResponse(uuid, null, null, null, null, null, null, null, null, null, null, null);
+        return new TransactionResponse(uuid, null, null,null, null, null, null, null, null, null, null, null, null);
     }
 
     private static RiskScore cleanScore() { return RiskScore.clean("tx"); }
