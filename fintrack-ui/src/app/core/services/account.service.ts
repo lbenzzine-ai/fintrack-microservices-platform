@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { map } from 'rxjs/operators';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { map, tap, shareReplay } from 'rxjs/operators';
 import { Account } from '../models/models';
 
 @Injectable({ providedIn: 'root' })
@@ -8,10 +9,30 @@ export class AccountService {
   private http = inject(HttpClient);
   private readonly API = '/api/v1/accounts';
 
-  getMyAccounts() {
-    return this.http.get<Account>(`${this.API}/me`).pipe(
-      map(account => [account])
-    );
+  private accountCache$: Observable<Account[]> | null = null;
+  private accountSubject = new BehaviorSubject<Account | null>(null);
+  
+  // Shared account state — components subscribe to this
+  currentAccount$ = this.accountSubject.asObservable();
+
+  getMyAccounts(): Observable<Account[]> {
+    if (!this.accountCache$) {
+      this.accountCache$ = this.http.get<Account>(`${this.API}/me`).pipe(
+        tap(account => this.accountSubject.next(account)),
+        map(account => [account]),
+        shareReplay(1)
+      );
+    }
+    return this.accountCache$;
+  }
+
+  getCurrentAccount(): Account | null {
+    return this.accountSubject.value;
+  }
+
+  clearCache() {
+    this.accountCache$ = null;
+    this.accountSubject.next(null);
   }
 
   getAccount(uuid: string) {

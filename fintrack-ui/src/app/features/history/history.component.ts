@@ -11,18 +11,29 @@ Chart.register(...registerables);
   selector: 'ft-history',
   standalone: true,
   imports: [CommonModule],
+  styles: [`
+    .tx-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      gap: 8px;
+    }
+    .tx-grid:last-child { border-bottom: none; }
+    .tx-header {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr;
+      gap: 8px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(196,163,82,0.1);
+      margin-bottom: 4px;
+    }
+  `],
   template: `
     <div class="flex justify-between items-center mb-7">
       <div class="page-title mb-0">Transaction history</div>
       <div class="flex gap-2 items-center">
-        <!-- Account selector -->
-        <select *ngIf="accounts.length > 0" (change)="onAccountChange($event)"
-          class="text-xs px-3 py-1.5 rounded-md bg-navy-900 border border-gold-500/20 text-slate-text">
-          <option *ngFor="let acc of accounts" [value]="acc.uuid">
-            {{ acc.uuid.substring(0,8) }}... · {{ acc.balance | currency }}
-          </option>
-        </select>
-        <!-- Filter buttons -->
         <button *ngFor="let f of filters"
           (click)="activeFilter = f; filterTx()"
           [class]="activeFilter === f
@@ -64,39 +75,33 @@ Chart.register(...registerables);
 
     <!-- Table -->
     <div *ngIf="accounts.length > 0" class="card">
-      <div class="table-header flex justify-between">
-        <span style="flex:2">Description</span>
-        <span style="flex:1">Amount</span>
-        <span style="flex:1">Fee</span>
-        <span style="flex:1">Risk</span>
-        <span style="flex:1">Status</span>
-        <span style="flex:1">Date</span>
+      <!-- Header -->
+      <div class="tx-header">
+        <span class="text-xs text-slate-muted uppercase tracking-widest">Description</span>
+        <span class="text-xs text-slate-muted uppercase tracking-widest">Amount</span>
+        <span class="text-xs text-slate-muted uppercase tracking-widest">Fee</span>
+        <span class="text-xs text-slate-muted uppercase tracking-widest">Type</span>
+        <span class="text-xs text-slate-muted uppercase tracking-widest">Status</span>
+        <span class="text-xs text-slate-muted uppercase tracking-widest">Date</span>
       </div>
 
       <div *ngIf="loading" class="text-slate-muted text-sm py-4">Loading...</div>
 
-      <div *ngFor="let tx of displayedTx" class="table-row">
-        <span style="flex:2" class="text-sm">{{ tx.description || 'Transfer' }}</span>
-        <span style="flex:1" class="text-sm font-display"
-          [class]="tx.status === 'COMPLETED' ? 'text-green-400' : 'text-red-400'">
+      <div *ngFor="let tx of displayedTx" class="tx-grid">
+        <span class="text-sm truncate">{{ tx.description || 'Transfer' }}</span>
+        <span class="text-sm font-display" [class]="tx.status === 'COMPLETED' ? 'text-green-400' : 'text-red-400'">
           {{ tx.amount | currency }}
         </span>
-        <span style="flex:1" class="text-xs text-slate-muted">{{ ( tx.fee || tx.feeAmount || 0 ) | currency }}</span>
-        <span style="flex:1">
-          <span [ngClass]="{
-            'badge-success': tx.riskLevel === 'LOW',
-            'badge-warning': tx.riskLevel === 'MEDIUM',
-            'badge-danger': tx.riskLevel === 'HIGH' || tx.riskLevel === 'CRITICAL'
-          }">{{ tx.riskLevel }}</span>
-        </span>
-        <span style="flex:1">
+        <span class="text-xs text-slate-muted">{{ (tx.fee || 0) | currency }}</span>
+        <span class="text-xs text-slate-muted">{{ tx.type || '—' }}</span>
+        <span>
           <span [ngClass]="{
             'badge-success': tx.status === 'COMPLETED',
             'badge-warning': tx.status === 'INITIATED',
             'badge-danger': tx.status === 'FAILED' || tx.status === 'COMPENSATED'
           }">{{ tx.status }}</span>
         </span>
-        <span style="flex:1" class="text-xs text-slate-muted">{{ tx.createdAt | date:'shortDate' }}</span>
+        <span class="text-xs text-slate-muted">{{ tx.createdAt | date:'MM/dd HH:mm' }}</span>
       </div>
 
       <div *ngIf="!loading && displayedTx.length === 0" class="text-slate-muted text-sm py-4 text-center">
@@ -139,6 +144,7 @@ export class HistoryComponent implements OnInit, AfterViewInit, OnDestroy {
   private dataReady = false;
 
   ngOnInit() {
+    // Use cached account — no repeated API calls
     this.accountService.getMyAccounts().subscribe({
       next: accounts => {
         this.accounts = accounts;
@@ -156,12 +162,6 @@ export class HistoryComponent implements OnInit, AfterViewInit, OnDestroy {
   ngAfterViewInit() { this.viewReady = true; if (this.dataReady) this.buildCharts(); }
   ngOnDestroy() { this.charts.forEach(c => c.destroy()); }
 
-  onAccountChange(event: any) {
-    this.selectedAccountUuid = event.target.value;
-    this.page = 0;
-    this.load();
-  }
-
   load() {
     if (!this.selectedAccountUuid) return;
     this.loading = true;
@@ -169,7 +169,7 @@ export class HistoryComponent implements OnInit, AfterViewInit, OnDestroy {
       next: res => {
         this.transactions = res.content;
         this.totalElements = res.totalElements;
-        this.totalFees = res.content.reduce((s, tx) => s + (tx.fee || tx.feeAmount || 0), 0);
+        this.totalFees = res.content.reduce((s, tx) => s + (tx.fee || 0), 0);
         this.avgFee = res.content.length ? this.totalFees / res.content.length : 0;
         this.filterTx();
         this.loading = false;
@@ -195,32 +195,28 @@ export class HistoryComponent implements OnInit, AfterViewInit, OnDestroy {
     const gridColor = 'rgba(196,163,82,0.08)';
     const textColor = '#5A7090';
 
-    const completed = this.transactions.filter(t => t.status === 'COMPLETED').length || 8;
-    const failed = this.transactions.filter(t => t.status === 'FAILED').length || 2;
-    const initiated = this.transactions.filter(t => t.status === 'INITIATED').length || 1;
+    const completed = this.transactions.filter(t => t.status === 'COMPLETED').length || 0;
+    const failed = this.transactions.filter(t => t.status === 'FAILED').length || 0;
+    const initiated = this.transactions.filter(t => t.status === 'INITIATED').length || 0;
     const compensated = this.transactions.filter(t => t.status === 'COMPENSATED').length || 0;
 
     this.charts.push(new Chart(this.statusChartRef.nativeElement, {
       type: 'doughnut',
       data: {
         labels: ['Completed', 'Failed', 'Initiated', 'Compensated'],
-        datasets: [{ data: [completed, failed, initiated, compensated], backgroundColor: ['rgba(76,175,128,0.8)', 'rgba(224,112,112,0.8)', 'rgba(196,163,82,0.8)', 'rgba(138,155,181,0.8)'], borderColor: navy, borderWidth: 2 }]
+        datasets: [{ data: [completed || 1, failed, initiated, compensated], backgroundColor: ['rgba(76,175,128,0.8)', 'rgba(224,112,112,0.8)', 'rgba(196,163,82,0.8)', 'rgba(138,155,181,0.8)'], borderColor: navy, borderWidth: 2 }]
       },
       options: { responsive: true, cutout: '60%', plugins: { legend: { display: true, position: 'bottom', labels: { color: textColor, font: { size: 10 }, boxWidth: 8, padding: 8 } } } }
     }));
 
     const buckets = ['<$100', '$100-1k', '$1k-10k', '$10k+'];
     const counts = [0, 0, 0, 0];
-    if (this.transactions.length > 0) {
-      this.transactions.forEach(tx => {
-        if (tx.amount < 100) counts[0]++;
-        else if (tx.amount < 1000) counts[1]++;
-        else if (tx.amount < 10000) counts[2]++;
-        else counts[3]++;
-      });
-    } else {
-      counts[0] = 5; counts[1] = 8; counts[2] = 4; counts[3] = 1;
-    }
+    this.transactions.forEach(tx => {
+      if (tx.amount < 100) counts[0]++;
+      else if (tx.amount < 1000) counts[1]++;
+      else if (tx.amount < 10000) counts[2]++;
+      else counts[3]++;
+    });
 
     this.charts.push(new Chart(this.amountChartRef.nativeElement, {
       type: 'bar',
