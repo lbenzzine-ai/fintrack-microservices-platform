@@ -132,6 +132,9 @@ jobs:
 
             echo "⏳ Waiting for services to be healthy..."
             sleep 120
+            
+            echo "🗑️ Flushing Redis stale cache..."
+            docker exec fintrack-redis redis-cli FLUSHALL
 
             echo "✅ Service status:"
             docker compose ps --format "table {{.Name}}\t{{.Status}}"
