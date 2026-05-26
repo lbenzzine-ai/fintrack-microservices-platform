@@ -16,6 +16,7 @@ public record TransactionResponse(
         String currencyCode,
         TransactionType type,
         TransactionStatus status,
+        String riskLevel,
         String description,
         String failureReason,
         Instant createdAt,

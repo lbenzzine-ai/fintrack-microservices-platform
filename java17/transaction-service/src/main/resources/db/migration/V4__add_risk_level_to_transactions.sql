@@ -1,0 +1,1 @@
+ALTER TABLE transactions ADD COLUMN risk_level VARCHAR(16) NULL;

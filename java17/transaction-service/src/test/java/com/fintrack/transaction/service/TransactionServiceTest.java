@@ -102,27 +102,31 @@ class TransactionServiceTest {
                 .build();
     }
 
-    private static RiskScore cleanScore() { return RiskScore.clean("tx"); }
+    private static RiskScore cleanScore() {
+        return RiskScore.clean("tx");
+    }
+
     private static RiskScore reviewScore() {
+
+
         return RiskScore.from("tx", List.of(
                 RiskFinding.builder().level(RiskLevel.HIGH).reason("r").ruleName("R").build()));
     }
+
     private static RiskScore blockedScore() {
         return RiskScore.from("tx", List.of(
                 RiskFinding.builder().level(RiskLevel.CRITICAL).reason("self").ruleName("S").build()));
     }
-
     // ── create ───────────────────────────────────────────────────────────────────────
     @Test
     void shouldSaveTransactionAndPublishInitiatedEvent() {
         CreateTransactionRequest req = request(TransactionType.DOMESTIC_TRANSFER, "dst", new BigDecimal("100"));
         when(feeService.computeAndAudit(any(), any())).thenReturn(quote());
+        when(riskEngine.assess(any())).thenReturn(blockedScore());
         when(transactionRepository.save(any(Transaction.class))).thenAnswer(inv -> inv.getArgument(0));
         when(messaging.active()).thenReturn(strategy);
         when(mapper.toResponse(any())).thenReturn(TransactionResponse.builder().uuid("u").build());
-
         TransactionResponse out = service.create(req);
-
         assertThat(out).isNotNull();
         verify(transactionRepository).save(any(Transaction.class));
         ArgumentCaptor<TransactionInitiatedEvent> evtCaptor = ArgumentCaptor.forClass(TransactionInitiatedEvent.class);
@@ -135,6 +139,7 @@ class TransactionServiceTest {
     void shouldReturnMappedResponseFromCreate() {
         CreateTransactionRequest req = request(TransactionType.DOMESTIC_TRANSFER, "dst", new BigDecimal("50"));
         when(feeService.computeAndAudit(any(), any())).thenReturn(quote());
+        when(riskEngine.assess(any())).thenReturn(cleanScore());
         when(transactionRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
         when(messaging.active()).thenReturn(strategy);
         TransactionResponse mapped = TransactionResponse.builder().uuid("MAPPED").build();
