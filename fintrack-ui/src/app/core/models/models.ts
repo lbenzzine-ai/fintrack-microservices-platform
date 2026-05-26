@@ -34,6 +34,7 @@ export interface Account {
   userUuid: string;
   balance: number;
   currencyCode: string;
+  type: string;
   status: string;
   createdAt: string;
   updatedAt: string;
@@ -51,6 +52,7 @@ export interface Transaction {
   fee: number;
   currencyCode: string;
   type: string;
+  type: string;
   status: 'INITIATED' | 'COMPLETED' | 'FAILED' | 'COMPENSATED';
   riskLevel?: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
   description: string;
@@ -65,6 +67,7 @@ export interface TransferRequest {
   toAccountUuid: string;
   amount: number;
   currencyCode: string;
+  type: string;
   description: string;
 }
 

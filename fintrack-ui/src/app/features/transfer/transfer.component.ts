@@ -52,6 +52,17 @@ type SagaStep = { label: string; status: 'done' | 'pending' | 'waiting' | 'faile
             </div>
           </div>
 
+          <!-- Transfer type -->
+          <div class="form-group">
+            <label class="label">Transfer type</label>
+            <select formControlName="type">
+              <option value="DOMESTIC_TRANSFER">Domestic Transfer</option>
+              <option value="INTERNATIONAL_TRANSFER">International Transfer</option>
+              <option value="BILL_PAYMENT">Bill Payment</option>
+              <option value="INTERNAL_TRANSFER">Internal Transfer</option>
+            </select>
+          </div>
+
           <!-- Description -->
           <div class="form-group">
             <label class="label">Description</label>
@@ -148,6 +159,7 @@ export class TransferComponent implements OnInit {
     toAccountUuid: ['', Validators.required],
     amount: [null, [Validators.required, Validators.min(0.01)]],
     currencyCode: ['USD'],
+    type: ['DOMESTIC_TRANSFER'],
     description: ['']
   });
 
