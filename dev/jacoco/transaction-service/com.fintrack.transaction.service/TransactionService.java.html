@@ -117,195 +117,200 @@ public class TransactionService {
 <span class="fc" id="L117">                .description(req.getDescription())</span>
 <span class="fc" id="L118">                .status(TransactionStatus.INITIATED)</span>
 <span class="fc" id="L119">                .build();</span>
-<span class="fc" id="L120">        Transaction saved = transactionRepository.save(tx);</span>
-<span class="fc" id="L121">        publishInitiated(saved);</span>
-<span class="fc" id="L122">        log.info(&quot;Transaction created uuid={} type={} amount={} fee={}&quot;,</span>
-<span class="fc" id="L123">                saved.getUuid(), saved.getType(), saved.getAmount(), saved.getFee());</span>
-<span class="fc" id="L124">        return mapper.toResponse(saved);</span>
+
+<span class="fc" id="L121">        RiskScore riskScore = riskEngine.assess(tx);</span>
+<span class="pc bpc" id="L122" title="1 of 2 branches missed.">        if (riskScore != null) {</span>
+<span class="fc" id="L123">            tx.setRiskLevel(riskScore.getLevel().name());</span>
+        }
+<span class="fc" id="L125">        Transaction saved = transactionRepository.save(tx);</span>
+<span class="fc" id="L126">        publishInitiated(saved);</span>
+<span class="fc" id="L127">        log.info(&quot;Transaction created uuid={} type={} amount={} fee={}&quot;,</span>
+<span class="fc" id="L128">                saved.getUuid(), saved.getType(), saved.getAmount(), saved.getFee());</span>
+<span class="fc" id="L129">        return mapper.toResponse(saved);</span>
     }
 
     @Transactional(readOnly = true)
     @Cacheable(value = &quot;transactions:byUuid&quot;, key = &quot;#uuid&quot;, unless = &quot;#result == null&quot;)
     public TransactionResponse findByUuid(String uuid) {
-<span class="fc" id="L130">        Transaction t = transactionRepository.findByUuid(uuid)</span>
-<span class="fc" id="L131">                .orElseThrow(() -&gt; new TransactionNotFoundException(uuid));</span>
-<span class="fc" id="L132">        return mapper.toResponse(t);</span>
+<span class="fc" id="L135">        Transaction t = transactionRepository.findByUuid(uuid)</span>
+<span class="fc" id="L136">                .orElseThrow(() -&gt; new TransactionNotFoundException(uuid));</span>
+<span class="fc" id="L137">        return mapper.toResponse(t);</span>
     }
 
     @Transactional(readOnly = true)
     public Page&lt;TransactionResponse&gt; findByAccount(String accountUuid, Pageable pageable) {
-<span class="fc" id="L137">        return transactionRepository.findByFromAccountUuidOrToAccountUuid(accountUuid, accountUuid, pageable)</span>
-<span class="fc" id="L138">                .map(mapper::toResponse);</span>
+<span class="fc" id="L142">        return transactionRepository.findByFromAccountUuidOrToAccountUuid(accountUuid, accountUuid, pageable)</span>
+<span class="fc" id="L143">                .map(mapper::toResponse);</span>
     }
 
     /** Step 2 of the saga — account-service has debited the source. Mark DEBITED and complete. */
     @Transactional
     @CacheEvict(value = &quot;transactions:byUuid&quot;, allEntries = true)
     public void markDebited(String transactionUuid) {
-<span class="fc" id="L145">        Transaction t = lookup(transactionUuid);</span>
-<span class="fc bfc" id="L146" title="All 4 branches covered.">        if (t.getStatus() == TransactionStatus.COMPLETED || t.getStatus() == TransactionStatus.FAILED) {</span>
-<span class="fc" id="L147">            log.debug(&quot;Tx {} already terminal ({}), ignoring debited event&quot;, transactionUuid, t.getStatus());</span>
-<span class="fc" id="L148">            return;</span>
+<span class="fc" id="L150">        Transaction t = lookup(transactionUuid);</span>
+<span class="fc bfc" id="L151" title="All 4 branches covered.">        if (t.getStatus() == TransactionStatus.COMPLETED || t.getStatus() == TransactionStatus.FAILED) {</span>
+<span class="fc" id="L152">            log.debug(&quot;Tx {} already terminal ({}), ignoring debited event&quot;, transactionUuid, t.getStatus());</span>
+<span class="fc" id="L153">            return;</span>
         }
-<span class="fc" id="L150">        t.setStatus(TransactionStatus.DEBITED);</span>
-<span class="fc" id="L151">        transactionRepository.save(t);</span>
-<span class="fc" id="L152">        self.complete(t);</span>
-<span class="fc" id="L153">    }</span>
+<span class="fc" id="L155">        t.setStatus(TransactionStatus.DEBITED);</span>
+<span class="fc" id="L156">        transactionRepository.save(t);</span>
+<span class="fc" id="L157">        self.complete(t);</span>
+<span class="fc" id="L158">    }</span>
 
     /** Step 3 — emit COMPLETED + ask notification-service to ping the user. */
     @Transactional
     public void complete(Transaction t) {
         // Tx is DEBITED on entry (set by markDebited). Assess risk BEFORE flipping to
         // COMPLETED so a blocked tx still satisfies markFailed's non-terminal guard.
-<span class="fc" id="L160">        RiskScore score = riskEngine.assess(t);</span>
-<span class="fc bfc" id="L161" title="All 2 branches covered.">        if (score.isBlocked()) {</span>
-<span class="fc" id="L162">            String topReason = topFindingReason(score);</span>
-<span class="fc" id="L163">            self.markFailed(t.getUuid(), &quot;RISK_BLOCKED&quot;,</span>
+<span class="fc" id="L165">        RiskScore score = riskEngine.assess(t);</span>
+<span class="fc bfc" id="L166" title="All 2 branches covered.">        if (score.isBlocked()) {</span>
+<span class="fc" id="L167">            String topReason = topFindingReason(score);</span>
+<span class="fc" id="L168">            self.markFailed(t.getUuid(), &quot;RISK_BLOCKED&quot;,</span>
                     &quot;Blocked by Risk Engine: &quot; + topReason, true);
-<span class="fc" id="L165">            return;</span>
+<span class="fc" id="L170">            return;</span>
         }
 
-<span class="fc" id="L168">        t.setStatus(TransactionStatus.COMPLETED);</span>
-<span class="fc" id="L169">        transactionRepository.save(t);</span>
+<span class="fc" id="L173">        t.setStatus(TransactionStatus.COMPLETED);</span>
+<span class="fc" id="L174">        transactionRepository.save(t);</span>
 
-<span class="fc bfc" id="L171" title="All 2 branches covered.">        if (score.isRequiresReview()) {</span>
-<span class="fc" id="L172">            publishRiskAssessed(t, score);</span>
+<span class="fc bfc" id="L176" title="All 2 branches covered.">        if (score.isRequiresReview()) {</span>
+<span class="fc" id="L177">            publishRiskAssessed(t, score);</span>
         }
 
-<span class="fc" id="L175">        TransactionCompletedEvent completed = TransactionCompletedEvent.builder()</span>
-<span class="fc" id="L176">                .eventId(UUID.randomUUID().toString())</span>
-<span class="fc" id="L177">                .transactionUuid(t.getUuid())</span>
-<span class="fc" id="L178">                .fromAccountUuid(t.getFromAccountUuid())</span>
-<span class="fc" id="L179">                .toAccountUuid(t.getToAccountUuid())</span>
-<span class="fc" id="L180">                .amount(t.getAmount())</span>
-<span class="fc" id="L181">                .fee(t.getFee())</span>
-<span class="fc" id="L182">                .currencyCode(t.getCurrencyCode())</span>
-<span class="fc" id="L183">                .type(t.getType().name())</span>
-<span class="fc" id="L184">                .occurredAt(Instant.now())</span>
-<span class="fc" id="L185">                .build();</span>
-<span class="fc" id="L186">        messaging.active().publish(txCompletedTopic, t.getUuid(), completed);</span>
+<span class="fc" id="L180">        TransactionCompletedEvent completed = TransactionCompletedEvent.builder()</span>
+<span class="fc" id="L181">                .eventId(UUID.randomUUID().toString())</span>
+<span class="fc" id="L182">                .transactionUuid(t.getUuid())</span>
+<span class="fc" id="L183">                .fromAccountUuid(t.getFromAccountUuid())</span>
+<span class="fc" id="L184">                .toAccountUuid(t.getToAccountUuid())</span>
+<span class="fc" id="L185">                .amount(t.getAmount())</span>
+<span class="fc" id="L186">                .fee(t.getFee())</span>
+<span class="fc" id="L187">                .currencyCode(t.getCurrencyCode())</span>
+<span class="fc" id="L188">                .type(t.getType().name())</span>
+<span class="fc" id="L189">                .occurredAt(Instant.now())</span>
+<span class="fc" id="L190">                .build();</span>
+<span class="fc" id="L191">        messaging.active().publish(txCompletedTopic, t.getUuid(), completed);</span>
 
-<span class="fc" id="L188">        NotificationRequestedEvent notify = NotificationRequestedEvent.builder()</span>
-<span class="fc" id="L189">                .eventId(UUID.randomUUID().toString())</span>
-<span class="fc" id="L190">                .transactionUuid(t.getUuid())</span>
-<span class="fc" id="L191">                .accountUuid(t.getFromAccountUuid())</span>
-<span class="fc" id="L192">                .channel(&quot;EMAIL&quot;)</span>
-<span class="fc" id="L193">                .template(&quot;transaction.completed&quot;)</span>
-<span class="fc" id="L194">                .subject(&quot;Your transaction has completed&quot;)</span>
-<span class="fc" id="L195">                .payload(Map.of(</span>
-<span class="fc" id="L196">                        &quot;amount&quot;, t.getAmount(),</span>
-<span class="fc" id="L197">                        &quot;fee&quot;, t.getFee(),</span>
-<span class="fc" id="L198">                        &quot;currency&quot;, t.getCurrencyCode(),</span>
-<span class="fc" id="L199">                        &quot;type&quot;, t.getType().name()))</span>
-<span class="fc" id="L200">                .occurredAt(Instant.now())</span>
-<span class="fc" id="L201">                .build();</span>
-<span class="fc" id="L202">        messaging.active().publish(notificationRequestedTopic, t.getUuid(), notify);</span>
-<span class="fc" id="L203">        log.info(&quot;[SAGA] tx={} COMPLETED, downstream notify published&quot;, t.getUuid());</span>
-<span class="fc" id="L204">    }</span>
+<span class="fc" id="L193">        NotificationRequestedEvent notify = NotificationRequestedEvent.builder()</span>
+<span class="fc" id="L194">                .eventId(UUID.randomUUID().toString())</span>
+<span class="fc" id="L195">                .transactionUuid(t.getUuid())</span>
+<span class="fc" id="L196">                .accountUuid(t.getFromAccountUuid())</span>
+<span class="fc" id="L197">                .channel(&quot;EMAIL&quot;)</span>
+<span class="fc" id="L198">                .template(&quot;transaction.completed&quot;)</span>
+<span class="fc" id="L199">                .subject(&quot;Your transaction has completed&quot;)</span>
+<span class="fc" id="L200">                .payload(Map.of(</span>
+<span class="fc" id="L201">                        &quot;amount&quot;, t.getAmount(),</span>
+<span class="fc" id="L202">                        &quot;fee&quot;, t.getFee(),</span>
+<span class="fc" id="L203">                        &quot;currency&quot;, t.getCurrencyCode(),</span>
+<span class="fc" id="L204">                        &quot;type&quot;, t.getType().name()))</span>
+<span class="fc" id="L205">                .occurredAt(Instant.now())</span>
+<span class="fc" id="L206">                .build();</span>
+<span class="fc" id="L207">        messaging.active().publish(notificationRequestedTopic, t.getUuid(), notify);</span>
+<span class="fc" id="L208">        log.info(&quot;[SAGA] tx={} COMPLETED, downstream notify published&quot;, t.getUuid());</span>
+<span class="fc" id="L209">    }</span>
 
     /** Saga compensation — mark FAILED and emit tx-failed for account-service to compensate. */
     @Transactional
     @CacheEvict(value = &quot;transactions:byUuid&quot;, allEntries = true)
     public void markFailed(String transactionUuid, String reasonCode, String reason, boolean wasDebited) {
-<span class="fc" id="L210">        Transaction t = lookup(transactionUuid);</span>
-<span class="fc bfc" id="L211" title="All 4 branches covered.">        if (t.getStatus() == TransactionStatus.COMPLETED || t.getStatus() == TransactionStatus.FAILED) return;</span>
+<span class="fc" id="L215">        Transaction t = lookup(transactionUuid);</span>
+<span class="fc bfc" id="L216" title="All 4 branches covered.">        if (t.getStatus() == TransactionStatus.COMPLETED || t.getStatus() == TransactionStatus.FAILED) return;</span>
 
-<span class="fc" id="L213">        t.setStatus(TransactionStatus.FAILED);</span>
-<span class="fc" id="L214">        t.setFailureReason(reasonCode + &quot;:&quot; + reason);</span>
-<span class="fc" id="L215">        transactionRepository.save(t);</span>
+<span class="fc" id="L218">        t.setStatus(TransactionStatus.FAILED);</span>
+<span class="fc" id="L219">        t.setFailureReason(reasonCode + &quot;:&quot; + reason);</span>
+<span class="fc" id="L220">        transactionRepository.save(t);</span>
 
-<span class="fc" id="L217">        TransactionFailedEvent failed = TransactionFailedEvent.builder()</span>
-<span class="fc" id="L218">                .eventId(UUID.randomUUID().toString())</span>
-<span class="fc" id="L219">                .transactionUuid(t.getUuid())</span>
-<span class="fc" id="L220">                .fromAccountUuid(t.getFromAccountUuid())</span>
-<span class="fc" id="L221">                .toAccountUuid(t.getToAccountUuid())</span>
-<span class="fc" id="L222">                .amount(t.getAmount())</span>
-<span class="fc" id="L223">                .fee(t.getFee())</span>
-<span class="fc" id="L224">                .currencyCode(t.getCurrencyCode())</span>
-<span class="fc" id="L225">                .reasonCode(reasonCode)</span>
-<span class="fc" id="L226">                .reason(reason)</span>
-<span class="fc" id="L227">                .alreadyDebited(wasDebited)</span>
-<span class="fc" id="L228">                .occurredAt(Instant.now())</span>
-<span class="fc" id="L229">                .build();</span>
-<span class="fc" id="L230">        messaging.active().publish(txFailedTopic, t.getUuid(), failed);</span>
-<span class="fc" id="L231">        log.warn(&quot;[SAGA] tx={} FAILED reason={} wasDebited={}&quot;, t.getUuid(), reasonCode, wasDebited);</span>
-<span class="fc" id="L232">    }</span>
+<span class="fc" id="L222">        TransactionFailedEvent failed = TransactionFailedEvent.builder()</span>
+<span class="fc" id="L223">                .eventId(UUID.randomUUID().toString())</span>
+<span class="fc" id="L224">                .transactionUuid(t.getUuid())</span>
+<span class="fc" id="L225">                .fromAccountUuid(t.getFromAccountUuid())</span>
+<span class="fc" id="L226">                .toAccountUuid(t.getToAccountUuid())</span>
+<span class="fc" id="L227">                .amount(t.getAmount())</span>
+<span class="fc" id="L228">                .fee(t.getFee())</span>
+<span class="fc" id="L229">                .currencyCode(t.getCurrencyCode())</span>
+<span class="fc" id="L230">                .reasonCode(reasonCode)</span>
+<span class="fc" id="L231">                .reason(reason)</span>
+<span class="fc" id="L232">                .alreadyDebited(wasDebited)</span>
+<span class="fc" id="L233">                .occurredAt(Instant.now())</span>
+<span class="fc" id="L234">                .build();</span>
+<span class="fc" id="L235">        messaging.active().publish(txFailedTopic, t.getUuid(), failed);</span>
+<span class="fc" id="L236">        log.warn(&quot;[SAGA] tx={} FAILED reason={} wasDebited={}&quot;, t.getUuid(), reasonCode, wasDebited);</span>
+<span class="fc" id="L237">    }</span>
 
     /** Called by the tx-failed consumer to record the compensated terminal state on our side. */
     @Transactional
     @CacheEvict(value = &quot;transactions:byUuid&quot;, allEntries = true)
     public void markCompensated(String transactionUuid, String reasonCode, String reason) {
-<span class="fc" id="L238">        Transaction t = lookup(transactionUuid);</span>
-<span class="fc" id="L239">        t.setStatus(TransactionStatus.COMPENSATED);</span>
-<span class="fc" id="L240">        t.setFailureReason(reasonCode + &quot;:&quot; + reason);</span>
-<span class="fc" id="L241">        transactionRepository.save(t);</span>
-<span class="fc" id="L242">        log.info(&quot;[SAGA] tx={} COMPENSATED reason={}&quot;, t.getUuid(), reasonCode);</span>
-<span class="fc" id="L243">    }</span>
+<span class="fc" id="L243">        Transaction t = lookup(transactionUuid);</span>
+<span class="fc" id="L244">        t.setStatus(TransactionStatus.COMPENSATED);</span>
+<span class="fc" id="L245">        t.setFailureReason(reasonCode + &quot;:&quot; + reason);</span>
+<span class="fc" id="L246">        transactionRepository.save(t);</span>
+<span class="fc" id="L247">        log.info(&quot;[SAGA] tx={} COMPENSATED reason={}&quot;, t.getUuid(), reasonCode);</span>
+<span class="fc" id="L248">    }</span>
 
     private Transaction lookup(String uuid) {
-<span class="fc" id="L246">        return transactionRepository.findByUuid(uuid)</span>
-<span class="fc" id="L247">                .orElseThrow(() -&gt; new TransactionNotFoundException(uuid));</span>
+<span class="fc" id="L251">        return transactionRepository.findByUuid(uuid)</span>
+<span class="fc" id="L252">                .orElseThrow(() -&gt; new TransactionNotFoundException(uuid));</span>
     }
 
     private void publishRiskAssessed(Transaction t, RiskScore score) {
-<span class="fc" id="L251">        List&lt;String&gt; triggered = score.getFindings().stream()</span>
-<span class="fc" id="L252">                .map(RiskFinding::getRuleName)</span>
-<span class="fc" id="L253">                .collect(Collectors.toList());</span>
-<span class="fc" id="L254">        RiskAssessedEvent event = RiskAssessedEvent.builder()</span>
-<span class="fc" id="L255">                .eventId(UUID.randomUUID().toString())</span>
-<span class="fc" id="L256">                .transactionUuid(t.getUuid())</span>
-<span class="fc" id="L257">                .level(score.getLevel().name())</span>
-<span class="fc" id="L258">                .score(score.getScore())</span>
-<span class="fc" id="L259">                .blocked(score.isBlocked())</span>
-<span class="fc" id="L260">                .requiresReview(score.isRequiresReview())</span>
-<span class="fc" id="L261">                .triggeredRules(triggered)</span>
-<span class="fc" id="L262">                .assessedAt(score.getAssessedAt())</span>
-<span class="fc" id="L263">                .occurredAt(Instant.now())</span>
-<span class="fc" id="L264">                .build();</span>
-<span class="fc" id="L265">        messaging.active().publish(riskAssessedTopic, t.getUuid(), event);</span>
-<span class="fc" id="L266">        log.info(&quot;[RISK] tx={} REVIEW level={} score={} rules={}&quot;,</span>
-<span class="fc" id="L267">                t.getUuid(), score.getLevel(), score.getScore(), triggered);</span>
-<span class="fc" id="L268">    }</span>
+<span class="fc" id="L256">        List&lt;String&gt; triggered = score.getFindings().stream()</span>
+<span class="fc" id="L257">                .map(RiskFinding::getRuleName)</span>
+<span class="fc" id="L258">                .collect(Collectors.toList());</span>
+<span class="fc" id="L259">        RiskAssessedEvent event = RiskAssessedEvent.builder()</span>
+<span class="fc" id="L260">                .eventId(UUID.randomUUID().toString())</span>
+<span class="fc" id="L261">                .transactionUuid(t.getUuid())</span>
+<span class="fc" id="L262">                .level(score.getLevel().name())</span>
+<span class="fc" id="L263">                .score(score.getScore())</span>
+<span class="fc" id="L264">                .blocked(score.isBlocked())</span>
+<span class="fc" id="L265">                .requiresReview(score.isRequiresReview())</span>
+<span class="fc" id="L266">                .triggeredRules(triggered)</span>
+<span class="fc" id="L267">                .assessedAt(score.getAssessedAt())</span>
+<span class="fc" id="L268">                .occurredAt(Instant.now())</span>
+<span class="fc" id="L269">                .build();</span>
+<span class="fc" id="L270">        messaging.active().publish(riskAssessedTopic, t.getUuid(), event);</span>
+<span class="fc" id="L271">        log.info(&quot;[RISK] tx={} REVIEW level={} score={} rules={}&quot;,</span>
+<span class="fc" id="L272">                t.getUuid(), score.getLevel(), score.getScore(), triggered);</span>
+<span class="fc" id="L273">    }</span>
 
     private static String topFindingReason(RiskScore score) {
-<span class="fc" id="L271">        return score.getFindings().stream()</span>
-<span class="pc" id="L272">                .max(Comparator.comparingInt(f -&gt; f.getLevel().weight()))</span>
-<span class="fc" id="L273">                .map(RiskFinding::getReason)</span>
-<span class="fc" id="L274">                .orElse(&quot;unspecified&quot;);</span>
+<span class="fc" id="L276">        return score.getFindings().stream()</span>
+<span class="pc" id="L277">                .max(Comparator.comparingInt(f -&gt; f.getLevel().weight()))</span>
+<span class="fc" id="L278">                .map(RiskFinding::getReason)</span>
+<span class="fc" id="L279">                .orElse(&quot;unspecified&quot;);</span>
     }
 
     private void publishInitiated(Transaction t) {
-<span class="fc" id="L278">        TransactionInitiatedEvent event = TransactionInitiatedEvent.builder()</span>
-<span class="fc" id="L279">                .eventId(UUID.randomUUID().toString())</span>
-<span class="fc" id="L280">                .transactionUuid(t.getUuid())</span>
-<span class="fc" id="L281">                .fromAccountUuid(t.getFromAccountUuid())</span>
-<span class="fc" id="L282">                .toAccountUuid(t.getToAccountUuid())</span>
-<span class="fc" id="L283">                .amount(t.getAmount())</span>
-<span class="fc" id="L284">                .fee(t.getFee())</span>
-<span class="fc" id="L285">                .currencyCode(t.getCurrencyCode())</span>
-<span class="fc" id="L286">                .type(t.getType().name())</span>
-<span class="fc" id="L287">                .occurredAt(Instant.now())</span>
-<span class="fc" id="L288">                .build();</span>
-<span class="fc" id="L289">        messaging.active().publish(txInitiatedTopic, t.getUuid(), event);</span>
-<span class="fc" id="L290">    }</span>
+<span class="fc" id="L283">        TransactionInitiatedEvent event = TransactionInitiatedEvent.builder()</span>
+<span class="fc" id="L284">                .eventId(UUID.randomUUID().toString())</span>
+<span class="fc" id="L285">                .transactionUuid(t.getUuid())</span>
+<span class="fc" id="L286">                .fromAccountUuid(t.getFromAccountUuid())</span>
+<span class="fc" id="L287">                .toAccountUuid(t.getToAccountUuid())</span>
+<span class="fc" id="L288">                .amount(t.getAmount())</span>
+<span class="fc" id="L289">                .fee(t.getFee())</span>
+<span class="fc" id="L290">                .currencyCode(t.getCurrencyCode())</span>
+<span class="fc" id="L291">                .type(t.getType().name())</span>
+<span class="fc" id="L292">                .occurredAt(Instant.now())</span>
+<span class="fc" id="L293">                .build();</span>
+<span class="fc" id="L294">        messaging.active().publish(txInitiatedTopic, t.getUuid(), event);</span>
+<span class="fc" id="L295">    }</span>
 
     private void validate(CreateTransactionRequest req) {
-<span class="fc bfc" id="L293" title="All 4 branches covered.">        if (req.getToAccountUuid() != null &amp;&amp; req.getFromAccountUuid().equals(req.getToAccountUuid())) {</span>
-<span class="fc" id="L294">            throw new InvalidTransactionException(&quot;fromAccountUuid and toAccountUuid must differ&quot;);</span>
+<span class="fc bfc" id="L298" title="All 4 branches covered.">        if (req.getToAccountUuid() != null &amp;&amp; req.getFromAccountUuid().equals(req.getToAccountUuid())) {</span>
+<span class="fc" id="L299">            throw new InvalidTransactionException(&quot;fromAccountUuid and toAccountUuid must differ&quot;);</span>
         }
-<span class="pc bpc" id="L296" title="1 of 2 branches missed.">        switch (req.getType()) {</span>
+<span class="pc bpc" id="L301" title="1 of 2 branches missed.">        switch (req.getType()) {</span>
             case DOMESTIC_TRANSFER, INTERNATIONAL_TRANSFER, INTERNAL_TRANSFER -&gt; {
-<span class="fc bfc" id="L298" title="All 2 branches covered.">                if (req.getToAccountUuid() == null) {</span>
-<span class="fc" id="L299">                    throw new InvalidTransactionException(&quot;toAccountUuid is required for &quot; + req.getType());</span>
+<span class="fc bfc" id="L303" title="All 2 branches covered.">                if (req.getToAccountUuid() == null) {</span>
+<span class="fc" id="L304">                    throw new InvalidTransactionException(&quot;toAccountUuid is required for &quot; + req.getType());</span>
                 }
             }
             case ATM_WITHDRAWAL, BILL_PAYMENT -&gt; { /* no destination needed */ }
         }
-<span class="fc" id="L304">    }</span>
+<span class="fc" id="L309">    }</span>
 
     private boolean isWeekend() {
-<span class="fc" id="L307">        DayOfWeek day = LocalDate.now().getDayOfWeek();</span>
-<span class="pc bpc" id="L308" title="2 of 4 branches missed.">        return day == DayOfWeek.SATURDAY || day == DayOfWeek.SUNDAY;</span>
+<span class="fc" id="L312">        DayOfWeek day = LocalDate.now().getDayOfWeek();</span>
+<span class="pc bpc" id="L313" title="2 of 4 branches missed.">        return day == DayOfWeek.SATURDAY || day == DayOfWeek.SUNDAY;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
