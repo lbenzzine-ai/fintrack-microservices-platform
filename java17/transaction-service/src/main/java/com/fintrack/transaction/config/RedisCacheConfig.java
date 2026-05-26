@@ -1,5 +1,6 @@
 package com.fintrack.transaction.config;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
@@ -23,12 +24,7 @@ public class RedisCacheConfig {
         ObjectMapper mapper = new ObjectMapper()
                 .registerModule(new JavaTimeModule())
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-                .activateDefaultTyping(BasicPolymorphicTypeValidator.builder()
-                                .allowIfSubType("com.fintrack")
-                                .allowIfSubType("java.util")
-                                .allowIfSubType("java.time")
-                                .build(),
-                        ObjectMapper.DefaultTyping.NON_FINAL);
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
         RedisCacheConfiguration cfg = RedisCacheConfiguration.defaultCacheConfig()
                 .disableCachingNullValues()
