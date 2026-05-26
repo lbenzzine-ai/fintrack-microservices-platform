@@ -233,6 +233,7 @@ jobs:
 
       # ── Assemble site ─────────────────────────────────────────────────
       - name: Assemble coverage site
+
         run: |
           BRANCH=${{ github.ref_name }}
           mkdir -p gh-pages/$BRANCH/jacoco
@@ -364,6 +365,8 @@ jobs:
 
           # PIT per service — copy both HTML and XML
           for svc in account-service transaction-service user-service notification-service api-gateway; do
+            echo "=== PIT debug: $svc ==="
+            ls java17/$svc/target/pit-reports/ 2>&1 || echo "no pit-reports folder"
             latest=$(ls java17/$svc/target/pit-reports/ 2>/dev/null | tail -1)
             if [ -n "$latest" ]; then
               cp -r java17/$svc/target/pit-reports/$latest/. \
