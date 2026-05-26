@@ -10,6 +10,17 @@ import { Account, Transaction } from '../../core/models/models';
   selector: 'ft-dashboard',
   standalone: true,
   imports: [CommonModule, RouterLink],
+  styles: [`
+    .tx-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      gap: 12px;
+    }
+    .tx-row:last-child { border-bottom: none; }
+  `],
   template: `
     <div class="flex justify-between items-center mb-7">
       <div>
@@ -65,20 +76,29 @@ import { Account, Transaction } from '../../core/models/models';
         <a routerLink="/history" class="text-xs text-gold-500 hover:text-gold-400">View all →</a>
       </div>
       <div *ngIf="loading" class="text-slate-muted text-sm py-4">Loading...</div>
-      <div *ngFor="let tx of recentTransactions" class="table-row">
+
+      <div *ngFor="let tx of recentTransactions" class="tx-row">
         <div>
-          <div class="text-sm">{{ tx.description || 'Transfer' }}</div>
-          <div class="text-xs text-slate-muted">{{ tx.createdAt | date:'short' }}</div>
+          <div class="text-sm font-medium">{{ tx.description || 'Transfer' }}</div>
+          <div class="text-xs text-slate-muted mt-0.5">{{ tx.createdAt | date:'MMM d, y · h:mm a' }}</div>
         </div>
         <div class="text-right">
-          <div class="font-display text-sm" [class]="tx.status === 'COMPLETED' ? 'text-green-400' : 'text-red-400'">
+          <div class="font-display text-sm mb-1"
+               [class]="tx.status === 'COMPLETED' ? 'text-green-400' : 'text-red-400'">
             {{ tx.amount | currency }}
           </div>
-          <span class="badge-success">{{ tx.status }}</span>
+          <span [ngClass]="{
+            'badge-success': tx.status === 'COMPLETED',
+            'badge-warning': tx.status === 'INITIATED',
+            'badge-danger': tx.status === 'FAILED'
+          }">{{ tx.status }}</span>
         </div>
       </div>
-      <div *ngIf="!loading && recentTransactions.length === 0" class="text-slate-muted text-sm py-4 text-center">
-        No transactions yet. <a routerLink="/transfer" class="text-gold-500 ml-1">Make a transfer →</a>
+
+      <div *ngIf="!loading && recentTransactions.length === 0"
+           class="text-slate-muted text-sm py-6 text-center">
+        No transactions yet.
+        <a routerLink="/transfer" class="text-gold-500 ml-1">Make a transfer →</a>
       </div>
     </div>
   `
