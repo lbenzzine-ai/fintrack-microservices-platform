@@ -25,7 +25,7 @@ type SagaStep = { label: string; status: 'done' | 'pending' | 'waiting' | 'faile
           <!-- Source account -->
           <div class="mb-4">
             <label class="text-xs text-slate-muted uppercase tracking-widest block mb-1.5">From account</label>
-            <select formControlName="sourceAccountUuid" class="w-full">
+            <select formControlName="fromAccountUuid" class="w-full">
               <option value="">Select your account</option>
               <option *ngFor="let acc of accounts" [value]="acc.uuid">
                 {{ acc.accountNumber }} · {{ acc.balance | currency }} · {{ acc.currency }}
@@ -75,7 +75,7 @@ type SagaStep = { label: string; status: 'done' | 'pending' | 'waiting' | 'faile
             <!-- Manual UUID fallback -->
             <div *ngIf="!confirmedRecipient" class="mt-2">
               <label class="text-xs text-slate-muted block mb-1">Or paste account UUID directly</label>
-              <input formControlName="destinationAccountUuid" placeholder="3fa85f64-5717-4562-b3fc..." />
+              <input formControlName="toAccountUuid" placeholder="3fa85f64-5717-4562-b3fc..." />
             </div>
           </div>
 
@@ -197,10 +197,10 @@ export class TransferComponent implements OnInit {
   ];
 
   form = this.fb.group({
-    sourceAccountUuid: ['', Validators.required],
-    destinationAccountUuid: ['', Validators.required],
+    fromAccountUuid: ['', Validators.required],
+    toAccountUuid: ['', Validators.required],
     amount: [null, [Validators.required, Validators.min(0.01)]],
-    currency: ['USD'],
+    currencyCode: ['USD'],
     description: ['']
   });
 
@@ -249,7 +249,7 @@ export class TransferComponent implements OnInit {
           accountNumber: result.accountNumber || result.uuid?.substring(0, 8) + '...',
           uuid: result.uuid
         };
-        this.form.patchValue({ destinationAccountUuid: result.uuid });
+        this.form.patchValue({ toAccountUuid: result.uuid });
       } else {
         this.recipientNotFound = true;
       }
@@ -259,7 +259,7 @@ export class TransferComponent implements OnInit {
   clearRecipient() {
     this.confirmedRecipient = null;
     this.recipientSearch.setValue('');
-    this.form.patchValue({ destinationAccountUuid: '' });
+    this.form.patchValue({ toAccountUuid: '' });
     this.recipientNotFound = false;
   }
 
