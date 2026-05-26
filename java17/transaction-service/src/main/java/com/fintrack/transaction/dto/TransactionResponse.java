@@ -20,6 +20,7 @@ public class TransactionResponse implements Serializable {
     private String currencyCode;
     private TransactionType type;
     private TransactionStatus status;
+    private String riskLevel;
     private String description;
     private String failureReason;
     private Instant createdAt;

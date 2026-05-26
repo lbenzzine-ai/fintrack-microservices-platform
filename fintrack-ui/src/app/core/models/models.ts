@@ -34,14 +34,9 @@ export interface Account {
   userUuid: string;
   balance: number;
   currencyCode: string;
-  type: string;
   status: string;
   createdAt: string;
   updatedAt: string;
-  // computed
-  currency?: string;
-  type?: string;
-  accountNumber?: string;
 }
 
 export interface Transaction {
@@ -52,14 +47,12 @@ export interface Transaction {
   fee: number;
   currencyCode: string;
   type: string;
-  type: string;
-  status: 'INITIATED' | 'COMPLETED' | 'FAILED' | 'COMPENSATED';
-  riskLevel?: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  status: string;
+  riskLevel?: string;
   description: string;
+  failureReason?: string;
   createdAt: string;
   updatedAt: string;
-  // aliases for backward compat
-  feeAmount?: number;
 }
 
 export interface TransferRequest {

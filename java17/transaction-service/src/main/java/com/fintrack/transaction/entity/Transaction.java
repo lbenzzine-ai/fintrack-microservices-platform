@@ -75,6 +75,9 @@ public class Transaction implements Serializable {
     @Column(name = "failure_reason", length = 255)
     private String failureReason;
 
+    @Column(name = "risk_level", length = 16)
+    private String riskLevel;
+
     @Version
     private Long version;
 
