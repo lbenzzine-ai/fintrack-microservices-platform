@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = &quot;org.mapstruct.ap.MappingProcessor&quot;,
-    date = &quot;2026-05-26T05:00:05+0000&quot;,
+    date = &quot;2026-05-27T10:21:32+0000&quot;,
     comments = &quot;version: 1.5.5.Final, compiler: javac, environment: Java 17.0.19 (Eclipse Adoptium)&quot;
 )
 @Component
@@ -29,12 +29,13 @@ import org.springframework.stereotype.Component;
 <span class="nc" id="L29">        transactionResponse.currencyCode( t.getCurrencyCode() );</span>
 <span class="nc" id="L30">        transactionResponse.type( t.getType() );</span>
 <span class="nc" id="L31">        transactionResponse.status( t.getStatus() );</span>
-<span class="nc" id="L32">        transactionResponse.description( t.getDescription() );</span>
-<span class="nc" id="L33">        transactionResponse.failureReason( t.getFailureReason() );</span>
-<span class="nc" id="L34">        transactionResponse.createdAt( t.getCreatedAt() );</span>
-<span class="nc" id="L35">        transactionResponse.updatedAt( t.getUpdatedAt() );</span>
+<span class="nc" id="L32">        transactionResponse.riskLevel( t.getRiskLevel() );</span>
+<span class="nc" id="L33">        transactionResponse.description( t.getDescription() );</span>
+<span class="nc" id="L34">        transactionResponse.failureReason( t.getFailureReason() );</span>
+<span class="nc" id="L35">        transactionResponse.createdAt( t.getCreatedAt() );</span>
+<span class="nc" id="L36">        transactionResponse.updatedAt( t.getUpdatedAt() );</span>
 
-<span class="nc" id="L37">        return transactionResponse.build();</span>
+<span class="nc" id="L38">        return transactionResponse.build();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
