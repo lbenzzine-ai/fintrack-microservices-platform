@@ -2,6 +2,8 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
+import { timeout, catchError } from 'rxjs/operators';
+import { of } from 'rxjs';
 
 interface User { uuid: string; username: string; email: string; status: string; roles: string[]; }
 
@@ -16,7 +18,7 @@ interface User { uuid: string; username: string; email: string; status: string; 
       <div class="section-title">Find user</div>
 
       <!-- Search -->
-      <div class="flex gap-3 mb-6">
+      <div class="flex gap-3 mb-4">
         <div class="relative flex-1">
           <input
             [(ngModel)]="searchQuery"
@@ -36,34 +38,25 @@ interface User { uuid: string; username: string; email: string; status: string; 
       </div>
 
       <!-- Error -->
-      <div *ngIf="searchError" class="text-red-400 text-sm mb-4 p-3 rounded-lg border border-red-500/20 bg-red-500/5">
-        {{ searchError }}
-      </div>
+      <div *ngIf="searchError" class="error-card text-red-400 text-sm mb-4">{{ searchError }}</div>
 
       <!-- Result -->
-      <div *ngIf="searchResult" class="rounded-xl border border-gold-500/20 bg-navy-900 p-5">
+      <div *ngIf="searchResult" class="result-card">
         <div class="flex items-start justify-between">
           <div class="flex items-center gap-4">
-            <!-- Avatar -->
-            <div class="w-12 h-12 rounded-full bg-gold-500/10 border border-gold-500/20 flex items-center justify-center font-display text-gold-500 text-lg">
-              {{ searchResult.username[0].toUpperCase() }}
-            </div>
+            <div class="avatar-lg">{{ searchResult.username[0].toUpperCase() }}</div>
             <div>
               <div class="font-medium text-slate-text mb-1">{{ searchResult.username }}</div>
               <div class="text-xs text-slate-muted mb-2">{{ searchResult.email }}</div>
               <div class="flex gap-1.5 flex-wrap">
                 <span *ngFor="let role of searchResult.roles"
-                  [class]="role === 'ADMIN' ? 'badge-warning' : 'badge-success'">
-                  {{ role }}
-                </span>
+                  [class]="role === 'ADMIN' ? 'badge-warning' : 'badge-success'">{{ role }}</span>
                 <span [class]="searchResult.status === 'ACTIVE' ? 'badge-success' : 'badge-danger'">
                   {{ searchResult.status }}
                 </span>
               </div>
             </div>
           </div>
-
-          <!-- Actions -->
           <div class="flex flex-col gap-2">
             <button *ngIf="!searchResult.roles.includes('ADMIN')"
               (click)="assignAdmin(searchResult)"
@@ -77,8 +70,6 @@ interface User { uuid: string; username: string; email: string; status: string; 
             </button>
           </div>
         </div>
-
-        <!-- Success message -->
         <div *ngIf="actionMessage" class="mt-4 text-xs text-green-400 p-2 rounded border border-green-500/20 bg-green-500/5">
           {{ actionMessage }}
         </div>
@@ -88,7 +79,7 @@ interface User { uuid: string; username: string; email: string; status: string; 
       <div *ngIf="!searchResult && !searchError && !searching" class="text-center py-10">
         <div class="text-4xl mb-3">👥</div>
         <div class="text-slate-muted text-sm mb-1">Search for a user to manage their roles</div>
-        <div class="text-xs text-slate-muted/60">Enter a username or email address</div>
+        <div class="text-xs text-slate-muted/60">Enter exact username or email address</div>
       </div>
     </div>
   `
@@ -117,24 +108,26 @@ export class UserManagementComponent {
     this.actionMessage = '';
 
     const query = encodeURIComponent(this.searchQuery.trim());
-    this.http.get<any>(`/api/v1/users?search=${query}`).subscribe({
+    this.http.get<any>(`/api/v1/users?search=${query}`).pipe(
+      timeout(5000),
+      catchError(err => {
+        if (err.name === 'TimeoutError') {
+          return of({ content: [] });
+        }
+        return of({ content: [] });
+      })
+    ).subscribe({
       next: res => {
         const users = Array.isArray(res) ? res : res.content || [];
+        const q = this.searchQuery.toLowerCase();
         const found = users.find((u: User) =>
-          u.username?.toLowerCase() === this.searchQuery.toLowerCase() ||
-          u.email?.toLowerCase() === this.searchQuery.toLowerCase()
+          u.username?.toLowerCase() === q || u.email?.toLowerCase() === q
         );
         if (found) {
           this.searchResult = found;
         } else {
           this.searchError = `No user found for "${this.searchQuery}"`;
         }
-        this.searching = false;
-      },
-      error: err => {
-        this.searchError = err.status === 503
-          ? 'User service unavailable — try again shortly'
-          : `No user found for "${this.searchQuery}"`;
         this.searching = false;
       }
     });
