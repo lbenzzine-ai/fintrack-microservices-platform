@@ -2,8 +2,8 @@ GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_
 account-service,com.fintrack.account.exception,AccountNotFoundException,0,7,0,0,0,2,0,1,0,1
 account-service,com.fintrack.account.exception,InsufficientFundsException,0,7,0,0,0,2,0,1,0,1
 account-service,com.fintrack.account.exception,ApiException,0,10,0,0,0,4,0,1,0,1
-account-service,com.fintrack.account.exception,AccountFrozenException,0,7,0,0,0,2,0,1,0,1
 account-service,com.fintrack.account.exception,GlobalExceptionHandler,0,71,0,0,0,18,0,4,0,4
+account-service,com.fintrack.account.exception,AccountFrozenException,0,7,0,0,0,2,0,1,0,1
 account-service,com.fintrack.account.controller,AccountController,25,5,0,0,4,1,4,1,4,1
 account-service,com.fintrack.account.strategy.interest,InterestStrategyRegistry,0,68,0,4,0,15,0,7,0,5
 account-service,com.fintrack.account.strategy.interest,TieredInterestStrategy.Tier,0,24,0,0,0,7,0,7,0,7
