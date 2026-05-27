@@ -27,12 +27,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleAny(Exception ex, HttpServletRequest req) {
-        log.error("Unhandled exception", ex);
+        String traceId = java.util.UUID.randomUUID().toString();
+        log.error("Unhandled exception [traceId={}]", traceId, ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ApiError.builder()
                 .timestamp(Instant.now())
                 .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
                 .code("INTERNAL_ERROR")
-                .message("Unexpected error")
+                .message("Unexpected error [" + ex.getClass().getSimpleName() + "] traceId=" + traceId)
                 .path(req.getRequestURI())
                 .build());
     }

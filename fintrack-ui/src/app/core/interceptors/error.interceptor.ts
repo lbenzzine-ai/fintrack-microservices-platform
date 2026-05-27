@@ -12,6 +12,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
         localStorage.removeItem('fintrack_user');
         router.navigate(['/login']);
       }
+      // Don't redirect on 500 — let components handle it
       return throwError(() => error);
     })
   );
