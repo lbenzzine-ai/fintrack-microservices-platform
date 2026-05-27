@@ -68,7 +68,7 @@ import { environment } from '../../../environments/environment';
           <div class="arch-node">
             <div class="text-gold-500 text-lg mb-1">🌐</div>
             <div class="text-xs text-slate-text">Angular UI</div>
-            <div class="text-xs text-slate-muted">:4200</div>
+            <div class="text-xs text-slate-muted">:443</div>
           </div>
           <div class="arch-connector">
             <div class="arch-line"></div>
@@ -105,11 +105,25 @@ import { environment } from '../../../environments/environment';
       <!-- Design patterns -->
       <div class="card mb-5">
         <div class="section-title">Design patterns</div>
-        <div class="grid grid-cols-3 gap-3">
+        <div class="grid grid-cols-3 gap-3 mb-3">
           <div *ngFor="let pattern of patterns" class="pattern-card rounded-xl p-4 border border-white/5 hover:border-gold-500/20 transition-colors">
-            <div class="text-2xl mb-3">{{ pattern.icon }}</div>
-            <div class="text-sm font-medium text-gold-500 mb-1">{{ pattern.name }}</div>
+            <div class="flex items-center gap-2 mb-2">
+              <div class="text-xl">{{ pattern.icon }}</div>
+              <div class="text-sm font-medium text-gold-500">{{ pattern.name }}</div>
+            </div>
             <div class="text-xs text-slate-muted leading-relaxed">{{ pattern.desc }}</div>
+          </div>
+        </div>
+        <!-- Coming soon -->
+        <div class="divider"></div>
+        <div class="label mb-2">Coming soon</div>
+        <div class="grid grid-cols-2 gap-3">
+          <div *ngFor="let p of comingSoon" class="rounded-xl p-3 border border-white/5 border-dashed flex items-start gap-3">
+            <div class="text-lg">{{ p.icon }}</div>
+            <div>
+              <div class="text-sm text-slate-muted font-medium">{{ p.name }}</div>
+              <div class="text-xs text-slate-muted/60 leading-relaxed">{{ p.desc }}</div>
+            </div>
           </div>
         </div>
       </div>
@@ -160,7 +174,7 @@ export class AboutComponent {
     { value: '7', label: 'Services' },
     { value: '9', label: 'Kafka topics' },
     { value: '4', label: 'Databases' },
-    { value: '86%', label: 'Test coverage' },
+    { value: '80%+', label: 'Test coverage' },
   ];
 
   miniServices = ['user-svc', 'account-svc', 'transaction-svc', 'notification-svc'];
@@ -179,10 +193,17 @@ export class AboutComponent {
   patterns = [
     { icon: '🔄', name: 'Saga Pattern', desc: 'Distributed transaction coordination with automatic compensation on failure across account and transaction services.' },
     { icon: '🎯', name: 'Strategy Pattern', desc: 'Pluggable fee strategies (flat, percentage, tiered, crypto) and notification channels (Email, SMS, Push).' },
-    { icon: '⚡', name: 'Circuit Breaker', desc: 'Resilience4j circuit breakers on all inter-service calls with configurable failure thresholds and half-open probing.' },
-    { icon: '📬', name: 'Outbox Pattern', desc: 'Guaranteed event delivery by writing events to the database before publishing to Kafka — no lost messages.' },
-    { icon: '🛡️', name: 'Bulkhead', desc: 'Thread pool isolation between services to prevent cascading failures and resource exhaustion.' },
+    { icon: '⚡', name: 'Circuit Breaker', desc: 'Resilience4j circuit breakers on all gateway routes and inter-service calls with configurable failure thresholds.' },
+    { icon: '🔁', name: 'Retry Pattern', desc: 'Automatic retry with exponential backoff on service client calls to handle transient failures gracefully.' },
+    { icon: '🚦', name: 'Rate Limiter', desc: 'Redis-backed rate limiting on the API Gateway — 10 requests/second per user with a burst capacity of 20.' },
     { icon: '🏗️', name: 'Config Server', desc: 'Centralized externalized configuration served to all services with environment-specific overrides.' },
+    { icon: '🛡️', name: 'Risk Engine', desc: 'Parallel rule evaluation across 7 risk rules using ExecutorService — assesses every transaction before save.' },
+    { icon: '🗃️', name: 'Flyway Migrations', desc: 'Versioned database schema evolution with checksums, repeatable scripts and automatic validation on startup.' },
+  ];
+
+  comingSoon = [
+    { icon: '📬', name: 'Outbox Pattern', desc: 'Guaranteed event delivery by persisting events to DB before publishing to Kafka.' },
+    { icon: '🛡️', name: 'Bulkhead Isolation', desc: 'Thread pool isolation between services to prevent cascading failures.' },
   ];
 
   techStack = [
@@ -198,6 +219,7 @@ export class AboutComponent {
     { icon: '🔍', name: 'Zipkin', version: 'B3 tracing' },
     { icon: '📊', name: 'Prometheus', version: 'Metrics' },
     { icon: '🐳', name: 'Docker', version: 'Compose' },
+    { icon: '🗃️', name: 'Flyway', version: 'Migrations' },
   ];
 
   links = [
