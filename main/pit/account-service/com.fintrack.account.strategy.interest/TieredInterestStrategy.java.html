@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    <link rel="stylesheet" type="text/css" href="../style.css">
+</head>
+<body>
+
+
+<h1>TieredInterestStrategy.java</h1>
+
+<table class="src">
+
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_1'/>
+1
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_1'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>package com.fintrack.account.strategy.interest;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_2'/>
+2
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_2'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_3'/>
+3
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_3'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import com.fasterxml.jackson.annotation.JsonProperty;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_4'/>
+4
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_4'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.springframework.boot.context.properties.ConfigurationProperties;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_5'/>
+5
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_5'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.springframework.stereotype.Component;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_6'/>
+6
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_6'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_7'/>
+7
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_7'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.math.BigDecimal;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_8'/>
+8
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_8'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.math.RoundingMode;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_9'/>
+9
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_9'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.util.ArrayList;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_10'/>
+10
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_10'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.util.List;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_11'/>
+11
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_11'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_12'/>
+12
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_12'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>/**</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_13'/>
+13
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_13'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * Tier rates pulled from the {@code fintrack.account.interest.tiered} list in Config Server:</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_14'/>
+14
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_14'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> *</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_15'/>
+15
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_15'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * &#60;pre&#62;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_16'/>
+16
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_16'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * fintrack:</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_17'/>
+17
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_17'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> *   account:</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_18'/>
+18
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_18'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> *     interest:</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_19'/>
+19
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_19'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> *       tiered:</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_20'/>
+20
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_20'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> *         - { min: 0,      max: 1000,    rate: 0.005 }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_21'/>
+21
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_21'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> *         - { min: 1000,   max: 10000,   rate: 0.015 }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_22'/>
+22
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_22'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> *         - { min: 10000,  max: 100000,  rate: 0.025 }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_23'/>
+23
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_23'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> *         - { min: 100000, max: 9.9E18,  rate: 0.04  }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_24'/>
+24
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_24'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * &#60;/pre&#62;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_25'/>
+25
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_25'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> */</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_26'/>
+26
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_26'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>@Component</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_27'/>
+27
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_27'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>@ConfigurationProperties(prefix = &#34;fintrack.account.interest&#34;)</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_28'/>
+28
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_28'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>public class TieredInterestStrategy implements InterestStrategy {</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_29'/>
+29
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_29'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_30'/>
+30
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_30'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    public static final String NAME = &#34;tiered&#34;;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_31'/>
+31
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_31'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_32'/>
+32
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_32'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    private List&#60;Tier&#62; tiered = new ArrayList&#60;&#62;();</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_33'/>
+33
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_33'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_34'/>
+34
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_34'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    @Override</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_35'/>
+35
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_35'>1</a>
+<span>
+1. name : replaced return value with &#34;&#34; for com/fintrack/account/strategy/interest/TieredInterestStrategy::name &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>    public String name() { return NAME; }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_36'/>
+36
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_36'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_37'/>
+37
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_37'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    @Override</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_38'/>
+38
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_38'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    public BigDecimal compute(BigDecimal principal, BigDecimal annualRate, int months) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_39'/>
+39
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_39'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>        BigDecimal rate = tiered.stream()</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_40'/>
+40
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_40'>5</a>
+<span>
+1. lambda$compute$0 : negated conditional &rarr; KILLED<br/>
+2. lambda$compute$0 : negated conditional &rarr; KILLED<br/>
+3. lambda$compute$0 : replaced boolean return with true for com/fintrack/account/strategy/interest/TieredInterestStrategy::lambda$compute$0 &rarr; KILLED<br/>
+4. lambda$compute$0 : changed conditional boundary &rarr; KILLED<br/>
+5. lambda$compute$0 : changed conditional boundary &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>                .filter(t -&#62; principal.compareTo(t.min) &#62;= 0 &#38;&#38; principal.compareTo(t.max) &#60; 0)</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_41'/>
+41
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_41'>1</a>
+<span>
+1. lambda$compute$1 : replaced return value with null for com/fintrack/account/strategy/interest/TieredInterestStrategy::lambda$compute$1 &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>                .map(t -&#62; t.rate)</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_42'/>
+42
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_42'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>                .findFirst()</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_43'/>
+43
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_43'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>                .orElse(BigDecimal.ZERO);</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_44'/>
+44
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_44'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_45'/>
+45
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_45'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>        BigDecimal monthly = rate.divide(BigDecimal.valueOf(12), 10, RoundingMode.HALF_EVEN);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_46'/>
+46
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_46'>1</a>
+<span>
+1. compute : replaced return value with null for com/fintrack/account/strategy/interest/TieredInterestStrategy::compute &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        return principal.multiply(monthly).multiply(BigDecimal.valueOf(months)).setScale(4, RoundingMode.HALF_EVEN);</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_47'/>
+47
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_47'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_48'/>
+48
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_48'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_49'/>
+49
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_49'>1</a>
+<span>
+1. getTiered : replaced return value with Collections.emptyList for com/fintrack/account/strategy/interest/TieredInterestStrategy::getTiered &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>    public List&#60;Tier&#62; getTiered() { return tiered; }</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_50'/>
+50
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_50'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    public void setTiered(List&#60;Tier&#62; tiered) { this.tiered = tiered; }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_51'/>
+51
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_51'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_52'/>
+52
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_52'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    public static class Tier {</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_53'/>
+53
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_53'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>        @JsonProperty BigDecimal min;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_54'/>
+54
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_54'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>        @JsonProperty BigDecimal max;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_55'/>
+55
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_55'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>        @JsonProperty BigDecimal rate;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_56'/>
+56
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_56'>1</a>
+<span>
+1. getMin : replaced return value with null for com/fintrack/account/strategy/interest/TieredInterestStrategy$Tier::getMin &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        public BigDecimal getMin()  { return min; }</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_57'/>
+57
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_57'>1</a>
+<span>
+1. getMax : replaced return value with null for com/fintrack/account/strategy/interest/TieredInterestStrategy$Tier::getMax &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        public BigDecimal getMax()  { return max; }</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_58'/>
+58
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_58'>1</a>
+<span>
+1. getRate : replaced return value with null for com/fintrack/account/strategy/interest/TieredInterestStrategy$Tier::getRate &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        public BigDecimal getRate() { return rate; }</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_59'/>
+59
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_59'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>        public void setMin(BigDecimal v)  { this.min = v; }</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_60'/>
+60
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_60'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>        public void setMax(BigDecimal v)  { this.max = v; }</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_61'/>
+61
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_61'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>        public void setRate(BigDecimal v) { this.rate = v; }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_62'/>
+62
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_62'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_63'/>
+63
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_63'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>}</span></pre></td></tr>
+
+
+
+<tr><td></td><td></td><td><h2>Mutations</h2></td></tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_35'>35</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_35'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>name<br/><b>Killed by : </b>com.fintrack.account.strategy.interest.TieredInterestStrategyTest.[engine:junit-jupiter]/[class:com.fintrack.account.strategy.interest.TieredInterestStrategyTest]/[method:name_is_tiered()]</span></span> replaced return value with &#34;&#34; for com/fintrack/account/strategy/interest/TieredInterestStrategy::name &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_40'>40</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_40'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>lambda$compute$0<br/><b>Killed by : </b>com.fintrack.account.strategy.interest.TieredInterestStrategyTest.[engine:junit-jupiter]/[class:com.fintrack.account.strategy.interest.TieredInterestStrategyTest]/[method:principal_below_lowest_tier_returns_zero()]</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>lambda$compute$0<br/><b>Killed by : </b>com.fintrack.account.strategy.interest.TieredInterestStrategyTest.[engine:junit-jupiter]/[class:com.fintrack.account.strategy.interest.TieredInterestStrategyTest]/[test-template:each_principal_uses_correct_tier(java.lang.String, java.lang.String)]/[test-template-invocation:#4]</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>lambda$compute$0<br/><b>Killed by : </b>com.fintrack.account.strategy.interest.TieredInterestStrategyTest.[engine:junit-jupiter]/[class:com.fintrack.account.strategy.interest.TieredInterestStrategyTest]/[method:principal_below_lowest_tier_returns_zero()]</span></span> replaced boolean return with true for com/fintrack/account/strategy/interest/TieredInterestStrategy::lambda$compute$0 &rarr; KILLED</p> <p class='KILLED'><span class='pop'>4.<span><b>4</b><br/><b>Location : </b>lambda$compute$0<br/><b>Killed by : </b>com.fintrack.account.strategy.interest.TieredInterestStrategyTest.[engine:junit-jupiter]/[class:com.fintrack.account.strategy.interest.TieredInterestStrategyTest]/[test-template:each_principal_uses_correct_tier(java.lang.String, java.lang.String)]/[test-template-invocation:#3]</span></span> changed conditional boundary &rarr; KILLED</p> <p class='KILLED'><span class='pop'>5.<span><b>5</b><br/><b>Location : </b>lambda$compute$0<br/><b>Killed by : </b>com.fintrack.account.strategy.interest.TieredInterestStrategyTest.[engine:junit-jupiter]/[class:com.fintrack.account.strategy.interest.TieredInterestStrategyTest]/[method:tier_boundary_min_is_inclusive()]</span></span> changed conditional boundary &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_41'>41</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_41'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>lambda$compute$1<br/><b>Killed by : </b>com.fintrack.account.strategy.interest.TieredInterestStrategyTest.[engine:junit-jupiter]/[class:com.fintrack.account.strategy.interest.TieredInterestStrategyTest]/[method:zero_months_returns_zero()]</span></span> replaced return value with null for com/fintrack/account/strategy/interest/TieredInterestStrategy::lambda$compute$1 &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_46'>46</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_46'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>compute<br/><b>Killed by : </b>com.fintrack.account.strategy.interest.TieredInterestStrategyTest.[engine:junit-jupiter]/[class:com.fintrack.account.strategy.interest.TieredInterestStrategyTest]/[method:empty_tiers_returns_zero()]</span></span> replaced return value with null for com/fintrack/account/strategy/interest/TieredInterestStrategy::compute &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_49'>49</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_49'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getTiered<br/><b>Killed by : </b>com.fintrack.account.strategy.interest.TieredInterestStrategyTest.[engine:junit-jupiter]/[class:com.fintrack.account.strategy.interest.TieredInterestStrategyTest]/[method:getters_setters_roundtrip()]</span></span> replaced return value with Collections.emptyList for com/fintrack/account/strategy/interest/TieredInterestStrategy::getTiered &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_56'>56</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_56'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getMin<br/><b>Killed by : </b>com.fintrack.account.strategy.interest.TieredInterestStrategyTest.[engine:junit-jupiter]/[class:com.fintrack.account.strategy.interest.TieredInterestStrategyTest]/[method:getters_setters_roundtrip()]</span></span> replaced return value with null for com/fintrack/account/strategy/interest/TieredInterestStrategy$Tier::getMin &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_57'>57</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_57'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getMax<br/><b>Killed by : </b>com.fintrack.account.strategy.interest.TieredInterestStrategyTest.[engine:junit-jupiter]/[class:com.fintrack.account.strategy.interest.TieredInterestStrategyTest]/[method:getters_setters_roundtrip()]</span></span> replaced return value with null for com/fintrack/account/strategy/interest/TieredInterestStrategy$Tier::getMax &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_58'>58</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@6fd9dbe6_58'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>getRate<br/><b>Killed by : </b>com.fintrack.account.strategy.interest.TieredInterestStrategyTest.[engine:junit-jupiter]/[class:com.fintrack.account.strategy.interest.TieredInterestStrategyTest]/[method:getters_setters_roundtrip()]</span></span> replaced return value with null for com/fintrack/account/strategy/interest/TieredInterestStrategy$Tier::getRate &rarr; KILLED</p> 
+</td>
+</tr>
+
+</table>
+
+
+<h2>Active mutators</h2>
+<ul>
+<li class='mutator'>CONDITIONALS_BOUNDARY</li>
+<li class='mutator'>EMPTY_RETURNS</li>
+<li class='mutator'>FALSE_RETURNS</li>
+<li class='mutator'>INCREMENTS</li>
+<li class='mutator'>INVERT_NEGS</li>
+<li class='mutator'>MATH</li>
+<li class='mutator'>NEGATE_CONDITIONALS</li>
+<li class='mutator'>NULL_RETURNS</li>
+<li class='mutator'>PRIMITIVE_RETURNS</li>
+<li class='mutator'>TRUE_RETURNS</li>
+<li class='mutator'>VOID_METHOD_CALLS</li>
+
+</ul>
+
+<h2>Tests examined</h2>
+<ul>
+<li>com.fintrack.account.strategy.interest.TieredInterestStrategyTest.[engine:junit-jupiter]/[class:com.fintrack.account.strategy.interest.TieredInterestStrategyTest]/[method:principal_below_lowest_tier_returns_zero()] (0 ms)</li><li>com.fintrack.account.strategy.interest.TieredInterestStrategyTest.[engine:junit-jupiter]/[class:com.fintrack.account.strategy.interest.TieredInterestStrategyTest]/[method:zero_months_returns_zero()] (0 ms)</li><li>com.fintrack.account.strategy.interest.TieredInterestStrategyTest.[engine:junit-jupiter]/[class:com.fintrack.account.strategy.interest.TieredInterestStrategyTest]/[method:tier_boundary_min_is_inclusive()] (0 ms)</li><li>com.fintrack.account.strategy.interest.TieredInterestStrategyTest.[engine:junit-jupiter]/[class:com.fintrack.account.strategy.interest.TieredInterestStrategyTest]/[test-template:each_principal_uses_correct_tier(java.lang.String, java.lang.String)]/[test-template-invocation:#4] (0 ms)</li><li>com.fintrack.account.strategy.interest.TieredInterestStrategyTest.[engine:junit-jupiter]/[class:com.fintrack.account.strategy.interest.TieredInterestStrategyTest]/[test-template:each_principal_uses_correct_tier(java.lang.String, java.lang.String)]/[test-template-invocation:#3] (0 ms)</li><li>com.fintrack.account.strategy.interest.TieredInterestStrategyTest.[engine:junit-jupiter]/[class:com.fintrack.account.strategy.interest.TieredInterestStrategyTest]/[test-template:each_principal_uses_correct_tier(java.lang.String, java.lang.String)]/[test-template-invocation:#10] (0 ms)</li><li>com.fintrack.account.strategy.interest.TieredInterestStrategyTest.[engine:junit-jupiter]/[class:com.fintrack.account.strategy.interest.TieredInterestStrategyTest]/[test-template:each_principal_uses_correct_tier(java.lang.String, java.lang.String)]/[test-template-invocation:#2] (0 ms)</li><li>com.fintrack.account.strategy.interest.TieredInterestStrategyTest.[engine:junit-jupiter]/[class:com.fintrack.account.strategy.interest.TieredInterestStrategyTest]/[test-template:each_principal_uses_correct_tier(java.lang.String, java.lang.String)]/[test-template-invocation:#9] (0 ms)</li><li>com.fintrack.account.strategy.interest.TieredInterestStrategyTest.[engine:junit-jupiter]/[class:com.fintrack.account.strategy.interest.TieredInterestStrategyTest]/[test-template:each_principal_uses_correct_tier(java.lang.String, java.lang.String)]/[test-template-invocation:#8] (0 ms)</li><li>com.fintrack.account.strategy.interest.TieredInterestStrategyTest.[engine:junit-jupiter]/[class:com.fintrack.account.strategy.interest.TieredInterestStrategyTest]/[test-template:each_principal_uses_correct_tier(java.lang.String, java.lang.String)]/[test-template-invocation:#7] (0 ms)</li><li>com.fintrack.account.strategy.interest.TieredInterestStrategyTest.[engine:junit-jupiter]/[class:com.fintrack.account.strategy.interest.TieredInterestStrategyTest]/[test-template:each_principal_uses_correct_tier(java.lang.String, java.lang.String)]/[test-template-invocation:#6] (0 ms)</li><li>com.fintrack.account.strategy.interest.TieredInterestStrategyTest.[engine:junit-jupiter]/[class:com.fintrack.account.strategy.interest.TieredInterestStrategyTest]/[test-template:each_principal_uses_correct_tier(java.lang.String, java.lang.String)]/[test-template-invocation:#5] (0 ms)</li><li>com.fintrack.account.strategy.interest.TieredInterestStrategyTest.[engine:junit-jupiter]/[class:com.fintrack.account.strategy.interest.TieredInterestStrategyTest]/[test-template:each_principal_uses_correct_tier(java.lang.String, java.lang.String)]/[test-template-invocation:#1] (1 ms)</li><li>com.fintrack.account.strategy.interest.TieredInterestStrategyTest.[engine:junit-jupiter]/[class:com.fintrack.account.strategy.interest.TieredInterestStrategyTest]/[method:getters_setters_roundtrip()] (0 ms)</li><li>com.fintrack.account.strategy.interest.TieredInterestStrategyTest.[engine:junit-jupiter]/[class:com.fintrack.account.strategy.interest.TieredInterestStrategyTest]/[method:empty_tiers_returns_zero()] (0 ms)</li><li>com.fintrack.account.strategy.interest.TieredInterestStrategyTest.[engine:junit-jupiter]/[class:com.fintrack.account.strategy.interest.TieredInterestStrategyTest]/[method:name_is_tiered()] (0 ms)</li>
+</ul>
+
+<br/>
+
+Report generated by <a href='https://pitest.org'>PIT</a> 1.15.3
+
+</body>
+</html>

@@ -1,0 +1,1600 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    <link rel="stylesheet" type="text/css" href="../style.css">
+</head>
+<body>
+
+
+<h1>RiskRuleRegistry.java</h1>
+
+<table class="src">
+
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_1'/>
+1
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_1'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>package com.fintrack.transaction.risk;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_2'/>
+2
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_2'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_3'/>
+3
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_3'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import com.fintrack.transaction.entity.Transaction;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_4'/>
+4
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_4'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import com.fintrack.transaction.entity.TransactionType;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_5'/>
+5
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_5'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import org.springframework.stereotype.Component;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_6'/>
+6
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_6'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_7'/>
+7
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_7'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.math.BigDecimal;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_8'/>
+8
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_8'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.util.List;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_9'/>
+9
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_9'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.util.Map;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_10'/>
+10
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_10'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.util.Objects;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_11'/>
+11
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_11'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.util.Optional;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_12'/>
+12
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_12'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.util.function.Predicate;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_13'/>
+13
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_13'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_14'/>
+14
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_14'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>@Component</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_15'/>
+15
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_15'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>public class RiskRuleRegistry {</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_16'/>
+16
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_16'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_17'/>
+17
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_17'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    private static final BigDecimal LARGE_THRESHOLD = new BigDecimal(&#34;10000&#34;);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_18'/>
+18
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_18'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    private static final BigDecimal INTL_HIGH_VALUE_THRESHOLD = new BigDecimal(&#34;5000&#34;);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_19'/>
+19
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_19'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    private static final BigDecimal ATM_HIGH_VALUE_THRESHOLD = new BigDecimal(&#34;1000&#34;);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_20'/>
+20
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_20'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    private static final BigDecimal STRUCTURING_BUCKET = new BigDecimal(&#34;1000&#34;);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_21'/>
+21
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_21'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    private static final BigDecimal MISSING_DESC_THRESHOLD = new BigDecimal(&#34;5000&#34;);</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_22'/>
+22
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_22'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_23'/>
+23
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_23'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    private final Map&#60;String, RiskRule&#62; rules = Map.ofEntries(</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_24'/>
+24
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_24'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>            entry(&#34;SELF_TRANSFER&#34;, RiskLevel.CRITICAL,</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_25'/>
+25
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_25'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>                    &#34;Source and destination wallets are identical&#34;,</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_26'/>
+26
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_26'>2</a>
+<span>
+1. lambda$new$0 : replaced boolean return with true for com/fintrack/transaction/risk/RiskRuleRegistry::lambda$new$0 &rarr; KILLED<br/>
+2. lambda$new$0 : negated conditional &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>                    tx -&#62; tx.getToAccountUuid() != null</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_27'/>
+27
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_27'>1</a>
+<span>
+1. lambda$new$0 : negated conditional &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>                            &#38;&#38; Objects.equals(tx.getFromAccountUuid(), tx.getToAccountUuid())),</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_28'/>
+28
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_28'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_29'/>
+29
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_29'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>            entry(&#34;LARGE_AMOUNT&#34;, RiskLevel.HIGH,</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_30'/>
+30
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_30'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>                    &#34;Amount exceeds large-transfer threshold (10,000)&#34;,</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_31'/>
+31
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_31'>4</a>
+<span>
+1. lambda$new$1 : replaced boolean return with true for com/fintrack/transaction/risk/RiskRuleRegistry::lambda$new$1 &rarr; KILLED<br/>
+2. lambda$new$1 : negated conditional &rarr; KILLED<br/>
+3. lambda$new$1 : negated conditional &rarr; KILLED<br/>
+4. lambda$new$1 : changed conditional boundary &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>                    tx -&#62; tx.getAmount() != null &#38;&#38; tx.getAmount().compareTo(LARGE_THRESHOLD) &#62;= 0),</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_32'/>
+32
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_32'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_33'/>
+33
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_33'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>            entry(&#34;STRUCTURING_PATTERN&#34;, RiskLevel.MEDIUM,</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_34'/>
+34
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_34'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>                    &#34;Round-thousand amount &#8212; possible structuring&#34;,</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_35'/>
+35
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_35'>2</a>
+<span>
+1. lambda$new$2 : negated conditional &rarr; KILLED<br/>
+2. lambda$new$2 : replaced boolean return with true for com/fintrack/transaction/risk/RiskRuleRegistry::lambda$new$2 &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>                    tx -&#62; tx.getAmount() != null</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_36'/>
+36
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_36'>2</a>
+<span>
+1. lambda$new$2 : negated conditional &rarr; KILLED<br/>
+2. lambda$new$2 : changed conditional boundary &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>                            &#38;&#38; tx.getAmount().compareTo(STRUCTURING_BUCKET) &#62;= 0</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_37'/>
+37
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_37'>1</a>
+<span>
+1. lambda$new$2 : negated conditional &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>                            &#38;&#38; tx.getAmount().remainder(STRUCTURING_BUCKET).signum() == 0),</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_38'/>
+38
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_38'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_39'/>
+39
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_39'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>            entry(&#34;HIGH_VALUE_INTERNATIONAL&#34;, RiskLevel.HIGH,</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_40'/>
+40
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_40'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>                    &#34;International transfer above review threshold (5,000)&#34;,</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_41'/>
+41
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_41'>2</a>
+<span>
+1. lambda$new$3 : replaced boolean return with true for com/fintrack/transaction/risk/RiskRuleRegistry::lambda$new$3 &rarr; KILLED<br/>
+2. lambda$new$3 : negated conditional &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>                    tx -&#62; tx.getType() == TransactionType.INTERNATIONAL_TRANSFER</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_42'/>
+42
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_42'>1</a>
+<span>
+1. lambda$new$3 : negated conditional &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>                            &#38;&#38; tx.getAmount() != null</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_43'/>
+43
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_43'>2</a>
+<span>
+1. lambda$new$3 : negated conditional &rarr; KILLED<br/>
+2. lambda$new$3 : changed conditional boundary &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>                            &#38;&#38; tx.getAmount().compareTo(INTL_HIGH_VALUE_THRESHOLD) &#62;= 0),</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_44'/>
+44
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_44'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_45'/>
+45
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_45'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>            entry(&#34;ATM_HIGH_VALUE&#34;, RiskLevel.MEDIUM,</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_46'/>
+46
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_46'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>                    &#34;ATM withdrawal above per-tx limit (1,000)&#34;,</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_47'/>
+47
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_47'>2</a>
+<span>
+1. lambda$new$4 : negated conditional &rarr; KILLED<br/>
+2. lambda$new$4 : replaced boolean return with true for com/fintrack/transaction/risk/RiskRuleRegistry::lambda$new$4 &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>                    tx -&#62; tx.getType() == TransactionType.ATM_WITHDRAWAL</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_48'/>
+48
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_48'>1</a>
+<span>
+1. lambda$new$4 : negated conditional &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>                            &#38;&#38; tx.getAmount() != null</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_49'/>
+49
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_49'>2</a>
+<span>
+1. lambda$new$4 : negated conditional &rarr; KILLED<br/>
+2. lambda$new$4 : changed conditional boundary &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>                            &#38;&#38; tx.getAmount().compareTo(ATM_HIGH_VALUE_THRESHOLD) &#62; 0),</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_50'/>
+50
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_50'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_51'/>
+51
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_51'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>            entry(&#34;MISSING_DESCRIPTION&#34;, RiskLevel.LOW,</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_52'/>
+52
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_52'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>                    &#34;Large transfer without description&#34;,</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_53'/>
+53
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_53'>2</a>
+<span>
+1. lambda$new$5 : negated conditional &rarr; KILLED<br/>
+2. lambda$new$5 : replaced boolean return with true for com/fintrack/transaction/risk/RiskRuleRegistry::lambda$new$5 &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>                    tx -&#62; tx.getAmount() != null</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_54'/>
+54
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_54'>2</a>
+<span>
+1. lambda$new$5 : changed conditional boundary &rarr; KILLED<br/>
+2. lambda$new$5 : negated conditional &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>                            &#38;&#38; tx.getAmount().compareTo(MISSING_DESC_THRESHOLD) &#62;= 0</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_55'/>
+55
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_55'>2</a>
+<span>
+1. lambda$new$5 : negated conditional &rarr; KILLED<br/>
+2. lambda$new$5 : negated conditional &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>                            &#38;&#38; (tx.getDescription() == null || tx.getDescription().isBlank())),</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_56'/>
+56
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_56'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_57'/>
+57
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_57'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>            entry(&#34;UNKNOWN_DESTINATION&#34;, RiskLevel.HIGH,</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_58'/>
+58
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_58'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>                    &#34;Transfer-type transaction missing destination wallet&#34;,</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_59'/>
+59
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_59'>2</a>
+<span>
+1. lambda$new$6 : replaced boolean return with true for com/fintrack/transaction/risk/RiskRuleRegistry::lambda$new$6 &rarr; KILLED<br/>
+2. lambda$new$6 : negated conditional &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>                    tx -&#62; (tx.getType() == TransactionType.DOMESTIC_TRANSFER</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_60'/>
+60
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_60'>1</a>
+<span>
+1. lambda$new$6 : negated conditional &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>                            || tx.getType() == TransactionType.INTERNATIONAL_TRANSFER</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_61'/>
+61
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_61'>1</a>
+<span>
+1. lambda$new$6 : negated conditional &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>                            || tx.getType() == TransactionType.INTERNAL_TRANSFER)</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_62'/>
+62
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_62'>2</a>
+<span>
+1. lambda$new$6 : negated conditional &rarr; KILLED<br/>
+2. lambda$new$6 : negated conditional &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>                            &#38;&#38; (tx.getToAccountUuid() == null || tx.getToAccountUuid().isBlank()))</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_63'/>
+63
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_63'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    );</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_64'/>
+64
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_64'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_65'/>
+65
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_65'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    public List&#60;RiskRule&#62; all() {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_66'/>
+66
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_66'>1</a>
+<span>
+1. all : replaced return value with Collections.emptyList for com/fintrack/transaction/risk/RiskRuleRegistry::all &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        return List.copyOf(rules.values());</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_67'/>
+67
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_67'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_68'/>
+68
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_68'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_69'/>
+69
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_69'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    public Map&#60;String, RiskRule&#62; byName() {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_70'/>
+70
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_70'>1</a>
+<span>
+1. byName : replaced return value with Collections.emptyMap for com/fintrack/transaction/risk/RiskRuleRegistry::byName &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        return rules;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_71'/>
+71
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_71'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_72'/>
+72
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_72'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_73'/>
+73
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_73'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    private static Map.Entry&#60;String, RiskRule&#62; entry(String name, RiskLevel level,</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_74'/>
+74
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_74'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>                                                     String reason, Predicate&#60;Transaction&#62; when) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_75'/>
+75
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_75'>1</a>
+<span>
+1. lambda$entry$7 : negated conditional &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        RiskRule rule = tx -&#62; when.test(tx)</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_76'/>
+76
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_76'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>                ? Optional.of(RiskFinding.builder()</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_77'/>
+77
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_77'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>                        .level(level)</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_78'/>
+78
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_78'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>                        .reason(reason)</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_79'/>
+79
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_79'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>                        .ruleName(name)</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_80'/>
+80
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_80'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>                        .build())</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_81'/>
+81
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_81'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>                : Optional.empty();</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_82'/>
+82
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_82'>1</a>
+<span>
+1. entry : replaced return value with null for com/fintrack/transaction/risk/RiskRuleRegistry::entry &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        return Map.entry(name, rule);</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_83'/>
+83
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_83'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@6207145c_84'/>
+84
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_84'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>}</span></pre></td></tr>
+
+
+
+<tr><td></td><td></td><td><h2>Mutations</h2></td></tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@6207145c_26'>26</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_26'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>lambda$new$0<br/><b>Killed by : </b>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[method:selfTransferRule_doesNotFireWhenToIsNull()]</span></span> replaced boolean return with true for com/fintrack/transaction/risk/RiskRuleRegistry::lambda$new$0 &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>lambda$new$0<br/><b>Killed by : </b>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[method:selfTransferRule_firesWhenFromEqualsTo()]</span></span> negated conditional &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@6207145c_27'>27</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_27'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>lambda$new$0<br/><b>Killed by : </b>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[method:selfTransferRule_doesNotFireForDifferentWallets()]</span></span> negated conditional &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@6207145c_31'>31</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_31'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>lambda$new$1<br/><b>Killed by : </b>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[test-template:largeAmountRule(java.math.BigDecimal, boolean)]/[test-template-invocation:#4]</span></span> replaced boolean return with true for com/fintrack/transaction/risk/RiskRuleRegistry::lambda$new$1 &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>lambda$new$1<br/><b>Killed by : </b>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[test-template:largeAmountRule(java.math.BigDecimal, boolean)]/[test-template-invocation:#3]</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>lambda$new$1<br/><b>Killed by : </b>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[test-template:largeAmountRule(java.math.BigDecimal, boolean)]/[test-template-invocation:#4]</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>4.<span><b>4</b><br/><b>Location : </b>lambda$new$1<br/><b>Killed by : </b>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[test-template:largeAmountRule(java.math.BigDecimal, boolean)]/[test-template-invocation:#1]</span></span> changed conditional boundary &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@6207145c_35'>35</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_35'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>lambda$new$2<br/><b>Killed by : </b>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[test-template:structuringRule(java.math.BigDecimal, boolean)]/[test-template-invocation:#2]</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>lambda$new$2<br/><b>Killed by : </b>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[test-template:structuringRule(java.math.BigDecimal, boolean)]/[test-template-invocation:#4]</span></span> replaced boolean return with true for com/fintrack/transaction/risk/RiskRuleRegistry::lambda$new$2 &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@6207145c_36'>36</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_36'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>lambda$new$2<br/><b>Killed by : </b>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[test-template:structuringRule(java.math.BigDecimal, boolean)]/[test-template-invocation:#2]</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>lambda$new$2<br/><b>Killed by : </b>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[test-template:structuringRule(java.math.BigDecimal, boolean)]/[test-template-invocation:#1]</span></span> changed conditional boundary &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@6207145c_37'>37</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_37'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>lambda$new$2<br/><b>Killed by : </b>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[test-template:structuringRule(java.math.BigDecimal, boolean)]/[test-template-invocation:#5]</span></span> negated conditional &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@6207145c_41'>41</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_41'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>lambda$new$3<br/><b>Killed by : </b>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[method:highValueIntlRule_doesNotFireForDomestic()]</span></span> replaced boolean return with true for com/fintrack/transaction/risk/RiskRuleRegistry::lambda$new$3 &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>lambda$new$3<br/><b>Killed by : </b>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[method:highValueIntlRule_doesNotFireForDomestic()]</span></span> negated conditional &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@6207145c_42'>42</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_42'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>lambda$new$3<br/><b>Killed by : </b>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[method:highValueIntlRule_firesAtThreshold()]</span></span> negated conditional &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@6207145c_43'>43</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_43'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>lambda$new$3<br/><b>Killed by : </b>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[method:highValueIntlRule_doesNotFireBelowThreshold()]</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>lambda$new$3<br/><b>Killed by : </b>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[method:highValueIntlRule_firesAtThreshold()]</span></span> changed conditional boundary &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@6207145c_47'>47</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_47'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>lambda$new$4<br/><b>Killed by : </b>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[method:atmHighValueRule_doesNotFireForNonAtm()]</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>lambda$new$4<br/><b>Killed by : </b>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[method:atmHighValueRule_doesNotFireForNonAtm()]</span></span> replaced boolean return with true for com/fintrack/transaction/risk/RiskRuleRegistry::lambda$new$4 &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@6207145c_48'>48</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_48'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>lambda$new$4<br/><b>Killed by : </b>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[method:atmHighValueRule_firesAbove1000()]</span></span> negated conditional &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@6207145c_49'>49</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_49'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>lambda$new$4<br/><b>Killed by : </b>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[method:atmHighValueRule_doesNotFireExactlyAt1000()]</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>lambda$new$4<br/><b>Killed by : </b>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[method:atmHighValueRule_doesNotFireExactlyAt1000()]</span></span> changed conditional boundary &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@6207145c_53'>53</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_53'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>lambda$new$5<br/><b>Killed by : </b>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[method:missingDescriptionRule_firesWhenDescriptionNull()]</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>lambda$new$5<br/><b>Killed by : </b>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[test-template:missingDescriptionRule(java.math.BigDecimal, java.lang.String, boolean)]/[test-template-invocation:#3]</span></span> replaced boolean return with true for com/fintrack/transaction/risk/RiskRuleRegistry::lambda$new$5 &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@6207145c_54'>54</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_54'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>lambda$new$5<br/><b>Killed by : </b>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[method:missingDescriptionRule_firesWhenDescriptionNull()]</span></span> changed conditional boundary &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>lambda$new$5<br/><b>Killed by : </b>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[test-template:missingDescriptionRule(java.math.BigDecimal, java.lang.String, boolean)]/[test-template-invocation:#4]</span></span> negated conditional &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@6207145c_55'>55</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_55'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>lambda$new$5<br/><b>Killed by : </b>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[test-template:missingDescriptionRule(java.math.BigDecimal, java.lang.String, boolean)]/[test-template-invocation:#3]</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>lambda$new$5<br/><b>Killed by : </b>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[test-template:missingDescriptionRule(java.math.BigDecimal, java.lang.String, boolean)]/[test-template-invocation:#3]</span></span> negated conditional &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@6207145c_59'>59</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_59'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>lambda$new$6<br/><b>Killed by : </b>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[method:unknownDestinationRule_doesNotFireWhenDestinationPresent()]</span></span> replaced boolean return with true for com/fintrack/transaction/risk/RiskRuleRegistry::lambda$new$6 &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>lambda$new$6<br/><b>Killed by : </b>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[method:unknownDestinationRule_doesNotFireForAtmWithdrawal()]</span></span> negated conditional &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@6207145c_60'>60</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_60'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>lambda$new$6<br/><b>Killed by : </b>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[method:unknownDestinationRule_doesNotFireForAtmWithdrawal()]</span></span> negated conditional &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@6207145c_61'>61</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_61'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>lambda$new$6<br/><b>Killed by : </b>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[method:unknownDestinationRule_doesNotFireForAtmWithdrawal()]</span></span> negated conditional &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@6207145c_62'>62</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_62'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>lambda$new$6<br/><b>Killed by : </b>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[method:unknownDestinationRule_doesNotFireWhenDestinationPresent()]</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>lambda$new$6<br/><b>Killed by : </b>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[method:unknownDestinationRule_doesNotFireWhenDestinationPresent()]</span></span> negated conditional &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@6207145c_66'>66</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_66'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>all<br/><b>Killed by : </b>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[method:registryExposesAllSevenRules()]</span></span> replaced return value with Collections.emptyList for com/fintrack/transaction/risk/RiskRuleRegistry::all &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@6207145c_70'>70</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_70'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>byName<br/><b>Killed by : </b>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[method:atmHighValueRule_doesNotFireForNonAtm()]</span></span> replaced return value with Collections.emptyMap for com/fintrack/transaction/risk/RiskRuleRegistry::byName &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@6207145c_75'>75</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_75'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>lambda$entry$7<br/><b>Killed by : </b>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[method:atmHighValueRule_doesNotFireForNonAtm()]</span></span> negated conditional &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@6207145c_82'>82</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@6207145c_82'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>entry<br/><b>Killed by : </b>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[method:atmHighValueRule_doesNotFireForNonAtm()]</span></span> replaced return value with null for com/fintrack/transaction/risk/RiskRuleRegistry::entry &rarr; KILLED</p> 
+</td>
+</tr>
+
+</table>
+
+
+<h2>Active mutators</h2>
+<ul>
+<li class='mutator'>CONDITIONALS_BOUNDARY</li>
+<li class='mutator'>EMPTY_RETURNS</li>
+<li class='mutator'>FALSE_RETURNS</li>
+<li class='mutator'>INCREMENTS</li>
+<li class='mutator'>INVERT_NEGS</li>
+<li class='mutator'>MATH</li>
+<li class='mutator'>NEGATE_CONDITIONALS</li>
+<li class='mutator'>NULL_RETURNS</li>
+<li class='mutator'>PRIMITIVE_RETURNS</li>
+<li class='mutator'>TRUE_RETURNS</li>
+<li class='mutator'>VOID_METHOD_CALLS</li>
+
+</ul>
+
+<h2>Tests examined</h2>
+<ul>
+<li>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[test-template:largeAmountRule(java.math.BigDecimal, boolean)]/[test-template-invocation:#4] (0 ms)</li><li>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[test-template:largeAmountRule(java.math.BigDecimal, boolean)]/[test-template-invocation:#2] (0 ms)</li><li>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[test-template:largeAmountRule(java.math.BigDecimal, boolean)]/[test-template-invocation:#3] (0 ms)</li><li>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[test-template:largeAmountRule(java.math.BigDecimal, boolean)]/[test-template-invocation:#1] (16 ms)</li><li>com.fintrack.transaction.risk.RiskEngineTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskEngineTest]/[method:cleanTransaction_isLowAndNotBlocked()] (5 ms)</li><li>com.fintrack.transaction.risk.RiskEngineTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskEngineTest]/[method:selfTransfer_isCriticalAndBlocked()] (3 ms)</li><li>com.fintrack.transaction.risk.RiskEngineTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskEngineTest]/[method:atmWithdrawalAboveLimit_isMedium()] (4 ms)</li><li>com.fintrack.transaction.risk.RiskEngineTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskEngineTest]/[method:multipleRulesFire_worstLevelWins()] (4 ms)</li><li>com.fintrack.transaction.risk.RiskEngineTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskEngineTest]/[method:roundThousandStructuringPattern_isMedium()] (6 ms)</li><li>com.fintrack.transaction.risk.RiskEngineTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskEngineTest]/[method:internationalAtOrAboveHighValueThreshold_isHigh()] (6 ms)</li><li>com.fintrack.transaction.risk.RiskEngineTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskEngineTest]/[method:amountAtOrAboveLargeThreshold_isHighAndRequiresReview()] (16 ms)</li><li>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[method:highValueIntlRule_doesNotFireBelowThreshold()] (0 ms)</li><li>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[method:highValueIntlRule_firesAtThreshold()] (0 ms)</li><li>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[test-template:missingDescriptionRule(java.math.BigDecimal, java.lang.String, boolean)]/[test-template-invocation:#3] (0 ms)</li><li>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[test-template:missingDescriptionRule(java.math.BigDecimal, java.lang.String, boolean)]/[test-template-invocation:#4] (0 ms)</li><li>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[method:missingDescriptionRule_firesWhenDescriptionNull()] (0 ms)</li><li>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[test-template:missingDescriptionRule(java.math.BigDecimal, java.lang.String, boolean)]/[test-template-invocation:#1] (0 ms)</li><li>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[test-template:missingDescriptionRule(java.math.BigDecimal, java.lang.String, boolean)]/[test-template-invocation:#2] (0 ms)</li><li>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[method:unknownDestinationRule_doesNotFireWhenDestinationPresent()] (0 ms)</li><li>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[method:unknownDestinationRule_doesNotFireForAtmWithdrawal()] (1 ms)</li><li>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[method:unknownDestinationRule_firesForBlankDestination()] (0 ms)</li><li>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[method:unknownDestinationRule_firesForDomesticWithoutDest()] (0 ms)</li><li>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[method:atmHighValueRule_doesNotFireForNonAtm()] (0 ms)</li><li>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[method:highValueIntlRule_doesNotFireForDomestic()] (0 ms)</li><li>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[method:selfTransferRule_doesNotFireWhenToIsNull()] (0 ms)</li><li>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[method:selfTransferRule_doesNotFireForDifferentWallets()] (0 ms)</li><li>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[test-template:structuringRule(java.math.BigDecimal, boolean)]/[test-template-invocation:#4] (0 ms)</li><li>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[test-template:structuringRule(java.math.BigDecimal, boolean)]/[test-template-invocation:#5] (0 ms)</li><li>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[method:atmHighValueRule_doesNotFireExactlyAt1000()] (1 ms)</li><li>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[test-template:structuringRule(java.math.BigDecimal, boolean)]/[test-template-invocation:#3] (1 ms)</li><li>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[method:registryExposesAllSevenRules()] (4 ms)</li><li>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[method:atmHighValueRule_firesAbove1000()] (0 ms)</li><li>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[method:selfTransferRule_firesWhenFromEqualsTo()] (0 ms)</li><li>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[test-template:structuringRule(java.math.BigDecimal, boolean)]/[test-template-invocation:#2] (1 ms)</li><li>com.fintrack.transaction.risk.RiskRuleRegistryTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskRuleRegistryTest]/[test-template:structuringRule(java.math.BigDecimal, boolean)]/[test-template-invocation:#1] (1 ms)</li><li>com.fintrack.transaction.risk.RiskEngineTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskEngineTest]/[method:nullTransaction_throwsNullPointerException()] (7 ms)</li><li>com.fintrack.transaction.risk.RiskEngineTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskEngineTest]/[method:rulesThatThrow_areSkippedWithoutFailingEngine()] (20 ms)</li><li>com.fintrack.transaction.risk.RiskEngineTest.[engine:junit-jupiter]/[class:com.fintrack.transaction.risk.RiskEngineTest]/[method:registryThatReturnsEmpty_yieldsCleanScore()] (42 ms)</li>
+</ul>
+
+<br/>
+
+Report generated by <a href='https://pitest.org'>PIT</a> 1.15.3
+
+</body>
+</html>
