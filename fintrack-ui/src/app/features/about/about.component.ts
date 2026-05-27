@@ -183,6 +183,7 @@ export class AboutComponent {
     { icon: '📬', name: 'Outbox Pattern', desc: 'Guaranteed event delivery by writing events to the database before publishing to Kafka — no lost messages.' },
     { icon: '🛡️', name: 'Bulkhead', desc: 'Thread pool isolation between services to prevent cascading failures and resource exhaustion.' },
     { icon: '🏗️', name: 'Config Server', desc: 'Centralized externalized configuration served to all services with environment-specific overrides.' },
+    { icon: '🗃️', name: 'Flyway Migrations', desc: 'Versioned database schema evolution with checksums, repeatable scripts and automatic validation on startup.' },
   ];
 
   techStack = [
@@ -198,6 +199,7 @@ export class AboutComponent {
     { icon: '🔍', name: 'Zipkin', version: 'B3 tracing' },
     { icon: '📊', name: 'Prometheus', version: 'Metrics' },
     { icon: '🐳', name: 'Docker', version: 'Compose' },
+    { icon: '🗃️', name: 'Flyway', version: 'Schema migrations' },
   ];
 
   links = [
