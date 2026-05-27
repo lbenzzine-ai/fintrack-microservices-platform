@@ -3,11 +3,14 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { tap } from 'rxjs/operators';
 import { AuthResponse, LoginRequest, RegisterRequest } from '../models/models';
+import { AccountService } from './account.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
+  // Lazy inject to avoid circular dependency
+  private get accountService() { return inject(AccountService); }
   private readonly API = '/api/v1/auth';
 
   login(req: LoginRequest) {
