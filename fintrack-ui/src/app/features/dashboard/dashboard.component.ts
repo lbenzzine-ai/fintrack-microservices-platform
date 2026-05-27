@@ -41,7 +41,7 @@ import { Account, Transaction } from '../../core/models/models';
       <div class="stat-card">
         <div class="label">Last activity</div>
         <div class="font-display text-lg">
-          {{ recentTransactions[0]?.createdAt | date:'MMM d' || '—' }}
+          {{ recentTransactions[0]?.createdAt ? (recentTransactions[0].createdAt | date:'MMM d') : '—' }}
         </div>
         <div class="text-xs text-slate-muted mt-1">{{ recentTransactions[0]?.description || 'No activity' }}</div>
       </div>
