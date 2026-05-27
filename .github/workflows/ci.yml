@@ -362,21 +362,16 @@ jobs:
           </body>
           </html>
           JACOCODASHBOARD
-
+          
           # PIT per service — copy both HTML and XML
-          for svc in account-service transaction-service user-service notification-service api-gateway; do
+            for svc in account-service transaction-service user-service notification-service api-gateway; do
             echo "=== PIT debug: $svc ==="
             ls java17/$svc/target/pit-reports/ 2>&1 || echo "no pit-reports folder"
-            latest=$(ls java17/$svc/target/pit-reports/ 2>/dev/null | tail -1)
-            if [ -n "$latest" ]; then
-              cp -r java17/$svc/target/pit-reports/$latest/. \
-                gh-pages/$BRANCH/pit/$svc/ 2>/dev/null || true
-              # Also copy XML to pit root for dashboard to read
-              cp java17/$svc/target/pit-reports/$latest/mutations.xml \
-                gh-pages/$BRANCH/pit/$svc/mutations.xml 2>/dev/null || true
+            if [ -d "java17/$svc/target/pit-reports" ]; then
+            cp -r java17/$svc/target/pit-reports/. \
+            gh-pages/$BRANCH/pit/$svc/ 2>/dev/null || true
             fi
-          done
-
+            done
       # ── PIT aggregate dashboard ────────────────────────────────────────
       - name: Generate PIT aggregate dashboard
         run: |
@@ -660,8 +655,8 @@ jobs:
     needs: [ build-java17, build-java21, quality-gate ]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     permissions:
-        contents: read
-        packages: write
+      contents: read
+      packages: write
     strategy:
       fail-fast: false
       matrix:
