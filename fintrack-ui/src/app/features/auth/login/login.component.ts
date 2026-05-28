@@ -2,6 +2,7 @@ import { Component, inject, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { AccountService } from '../../../core/services/account.service';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -70,7 +71,6 @@ import { CommonModule } from '@angular/common';
                 <input formControlName="password" type="password" placeholder="••••••••" />
               </div>
 
-              <!-- Error message -->
               <div *ngIf="error"
                    class="mb-3 px-3 py-2 rounded-lg border border-red-500/20 bg-red-500/5 text-red-400 text-xs">
                 {{ error }}
@@ -101,6 +101,7 @@ import { CommonModule } from '@angular/common';
 export class LoginComponent {
   private fb = inject(FormBuilder);
   private auth = inject(AuthService);
+  private accountService = inject(AccountService);
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
 
@@ -132,7 +133,11 @@ export class LoginComponent {
     this.cdr.detectChanges();
 
     this.auth.login(this.form.value as any).subscribe({
-      next: () => this.router.navigate(['/dashboard']),
+      next: () => {
+        // Clear cached account from previous session
+        this.accountService.clearCache();
+        this.router.navigate(['/dashboard']);
+      },
       error: err => {
         this.error = err.status === 0
           ? 'Cannot connect to server. Is the backend running?'

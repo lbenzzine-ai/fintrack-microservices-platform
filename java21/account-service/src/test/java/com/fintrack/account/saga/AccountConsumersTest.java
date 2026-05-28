@@ -47,7 +47,7 @@ class AccountConsumersTest {
         return new TransactionInitiatedEvent(
                 "evt", "tx-1", "acc-src", "acc-dst",
                 new BigDecimal("100"), new BigDecimal("0.5"),
-                "USD", Instant.now());
+                "USD",  "type", Instant.now());
     }
 
     @Test

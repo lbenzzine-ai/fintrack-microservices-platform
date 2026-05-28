@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, NgZone, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { AccountService } from '../../core/services/account.service';
@@ -209,6 +209,8 @@ export class TransferComponent implements OnInit {
   private fb = inject(FormBuilder);
   private accountService = inject(AccountService);
   private txService = inject(TransactionService);
+  private ngZone = inject(NgZone);
+  private cdr = inject(ChangeDetectorRef);
 
   accounts: Account[] = [];
   selectedFromAccount: Account | null = null;
@@ -319,12 +321,16 @@ export class TransferComponent implements OnInit {
 
   private animateSaga() {
     this.sagaSteps[0].status = 'pending';
+    this.cdr.detectChanges();
     this.sagaSteps.forEach((_, i) => {
       setTimeout(() => {
+        this.ngZone.run(() => {
         if (this.sagaSteps[i]?.status !== 'failed') {
           if (i > 0) this.sagaSteps[i - 1].status = 'done';
           if (i < this.sagaSteps.length) this.sagaSteps[i].status = 'pending';
+          this.cdr.detectChanges();
         }
+        });
       }, i * 700);
     });
   }
