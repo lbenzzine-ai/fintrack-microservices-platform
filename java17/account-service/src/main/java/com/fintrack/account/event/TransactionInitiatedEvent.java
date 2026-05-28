@@ -21,5 +21,6 @@ public class TransactionInitiatedEvent implements Serializable {
     private BigDecimal amount;
     private BigDecimal fee;
     private String currencyCode;
+    private String type;
     private Instant occurredAt;
 }
