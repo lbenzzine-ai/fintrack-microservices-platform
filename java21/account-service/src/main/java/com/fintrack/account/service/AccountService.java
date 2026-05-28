@@ -22,7 +22,6 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
@@ -46,7 +45,6 @@ public class AccountService {
     @Value("${fintrack.messaging.kafka.topics.account-debited:fintrack.account.debited}")
     private String accountDebitedTopic;
 
-    /** Auto-create a wallet — called from the user-registered saga consumer (idempotent on userUuid). */
     @Transactional
     @CacheEvict(value = "accounts:byUser", key = "#userUuid")
     public AccountResponse createForUser(String userUuid, String currencyCode) {
@@ -85,27 +83,18 @@ public class AccountService {
         return accountMapper.toBalance(a);
     }
 
-    /**
-     * Debit the source account. Called from the transaction-initiated saga consumer. Uses the
-     * pessimistic-write repository lookup so concurrent debits against the same account serialise.
-     * On success emits {@code account-debited}; throws on insufficient funds / frozen account so
-     * the saga consumer can publish a {@code transaction-failed} event.
-     */
     @Transactional
     @CacheEvict(value = {"accounts:byId","accounts:byUser","accounts:balance"}, allEntries = true)
     public AccountDebitedEvent debit(String accountUuid, String transactionUuid, BigDecimal amount, BigDecimal fee) {
         Account a = accountRepository.findByUuidForUpdate(accountUuid)
                 .orElseThrow(() -> new AccountNotFoundException(accountUuid));
         if (a.getStatus() != AccountStatus.ACTIVE) throw new AccountFrozenException(accountUuid);
-
         BigDecimal total = amount.add(fee == null ? BigDecimal.ZERO : fee);
         if (a.getBalance().compareTo(total) < 0) throw new InsufficientFundsException(accountUuid);
-
         a.setBalance(a.getBalance().subtract(total));
         Account saved = accountRepository.save(a);
         log.info("Debited account={} amount={} fee={} newBalance={} txId={}",
                 accountUuid, amount, fee, saved.getBalance(), transactionUuid);
-
         AccountDebitedEvent event = AccountDebitedEvent.builder()
                 .eventId(UUID.randomUUID().toString())
                 .transactionUuid(transactionUuid)
@@ -120,7 +109,21 @@ public class AccountService {
         return event;
     }
 
-    /** Compensation — re-credit on saga rollback. Idempotent at the event level. */
+    /**
+     * Credit the destination account after a successful debit in the saga.
+     * Uses pessimistic-write lock to handle concurrent credits safely.
+     */
+    @Transactional
+    @CacheEvict(value = {"accounts:byId","accounts:byUser","accounts:balance"}, allEntries = true)
+    public void credit(String accountUuid, String transactionUuid, BigDecimal amount) {
+        Account a = accountRepository.findByUuidForUpdate(accountUuid)
+                .orElseThrow(() -> new AccountNotFoundException(accountUuid));
+        a.setBalance(a.getBalance().add(amount));
+        accountRepository.save(a);
+        log.info("[SAGA] Credited account={} amount={} tx={} newBalance={}",
+                accountUuid, amount, transactionUuid, a.getBalance());
+    }
+
     @Transactional
     @CacheEvict(value = {"accounts:byId","accounts:byUser","accounts:balance"}, allEntries = true)
     public void compensateCredit(String accountUuid, BigDecimal amount, BigDecimal fee, String reason) {
@@ -132,10 +135,6 @@ public class AccountService {
         log.warn("Compensation credit account={} amount={} reason={}", accountUuid, total, reason);
     }
 
-    /**
-     * Apply the configured {@link InterestStrategy} to preview interest for the period (no persistence).
-     * Useful for the {@code /interest/preview} endpoint and for batch accruals.
-     */
     @Transactional(readOnly = true)
     public InterestPreview previewInterest(String accountUuid, BigDecimal annualRate, int months, String strategyName) {
         Account a = accountRepository.findByUuid(accountUuid).orElseThrow(() -> new AccountNotFoundException(accountUuid));
