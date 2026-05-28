@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
@@ -85,6 +85,7 @@ interface User { uuid: string; username: string; email: string; status: string; 
   `
 })
 export class UserManagementComponent {
+  private cdr = inject(ChangeDetectorRef);
   private http = inject(HttpClient);
 
   searchQuery = '';
@@ -125,10 +126,13 @@ export class UserManagementComponent {
         );
         if (found) {
           this.searchResult = found;
+        this.cdr.detectChanges();
         } else {
-          this.searchError = `No user found for "${this.searchQuery}"`;
+          this.searchError = `No user found for "${this.searchQuery}"`; 
+        this.cdr.detectChanges();
         }
         this.searching = false;
+        this.cdr.detectChanges();
       }
     });
   }
