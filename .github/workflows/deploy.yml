@@ -128,10 +128,10 @@ jobs:
 
             echo "🐳 Restarting Docker services..."
             docker compose down
-            docker compose build --no-cache account-service transaction-service user-service notification-service
+            docker compose build --no-cache account-service transaction-service user-service notification-service api-gateway
             docker compose up -d
 
-            echo "⏳ Waiting for services to be healthy..."
+            echo "⏳ Waiting for services to be healthy..."api-gateway
             sleep 120
             
             echo "🗑️ Flushing Redis stale cache..."
