@@ -8,6 +8,12 @@
 #   docker compose up -d                                  # everything (default — java21)
 #   JAVA_FLAVOR=java17 docker compose up -d --build       # use the Java 17 builds
 #
+# JMX Profiling ports (for VisualVM):
+#   user-service:         localhost:9081
+#   account-service:      localhost:9082
+#   transaction-service:  localhost:9083
+#   notification-service: localhost:9084
+#
 name: fintrack
 
 x-business-env: &business-env
@@ -31,11 +37,21 @@ x-business-env: &business-env
   SPRING_JPA_HIBERNATE_DDL_AUTO: "none"
   SPRING_JPA_PROPERTIES_HIBERNATE_BOOT_ALLOW_JDBC_METADATA_ACCESS: "false"
 
+# JMX options reused across business services
+x-jmx-opts: &jmx-base
+  -XX:+UseG1GC
+  -XX:MaxRAMPercentage=40.0
+  -Xmx256m
+  -XX:+UseStringDeduplication
+  -Dcom.sun.management.jmxremote
+  -Dcom.sun.management.jmxremote.authenticate=false
+  -Dcom.sun.management.jmxremote.ssl=false
+  -Djava.rmi.server.hostname=${JMX_HOST:-localhost}
+
 x-restart: &restart
   restart: unless-stopped
 
 services:
-
   # ---------- Databases (one per bounded context) ----------
   mysql-users:
     image: mysql:8.0
@@ -313,9 +329,17 @@ services:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql-users:3306/fintrack_users?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
+      JAVA_OPTS: >-
+        -XX:+UseG1GC -XX:MaxRAMPercentage=40.0 -Xmx256m -XX:+UseStringDeduplication
+        -Dcom.sun.management.jmxremote
+        -Dcom.sun.management.jmxremote.port=9081
+        -Dcom.sun.management.jmxremote.rmi.port=9081
+        -Dcom.sun.management.jmxremote.authenticate=false
+        -Dcom.sun.management.jmxremote.ssl=false
+        -Djava.rmi.server.hostname=${JMX_HOST:-localhost}
     entrypoint: []
     command: ["sh", "-c", "sleep 30 && java $$JAVA_OPTS -jar app.jar"]
-    ports: ["8081:8081"]
+    ports: ["8081:8081", "9081:9081"]
     healthcheck:
       test: ["CMD", "true"]
       interval: 60s
@@ -341,10 +365,17 @@ services:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql-accounts:3306/fintrack_accounts?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
-      JAVA_OPTS: "-XX:+UseG1GC -XX:MaxRAMPercentage=40.0 -Xmx256m -XX:+UseStringDeduplication"
+      JAVA_OPTS: >-
+        -XX:+UseG1GC -XX:MaxRAMPercentage=40.0 -Xmx256m -XX:+UseStringDeduplication
+        -Dcom.sun.management.jmxremote
+        -Dcom.sun.management.jmxremote.port=9082
+        -Dcom.sun.management.jmxremote.rmi.port=9082
+        -Dcom.sun.management.jmxremote.authenticate=false
+        -Dcom.sun.management.jmxremote.ssl=false
+        -Djava.rmi.server.hostname=${JMX_HOST:-localhost}
     entrypoint: []
     command: ["sh", "-c", "sleep 30 && java $$JAVA_OPTS -jar app.jar"]
-    ports: ["8082:8082"]
+    ports: ["8082:8082", "9082:9082"]
     healthcheck:
       test: ["CMD", "true"]
       interval: 60s
@@ -370,10 +401,17 @@ services:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql-transactions:3306/fintrack_transactions?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
-      JAVA_OPTS: "-XX:+UseG1GC -XX:MaxRAMPercentage=40.0 -Xmx256m -XX:+UseStringDeduplication"
+      JAVA_OPTS: >-
+        -XX:+UseG1GC -XX:MaxRAMPercentage=40.0 -Xmx256m -XX:+UseStringDeduplication
+        -Dcom.sun.management.jmxremote
+        -Dcom.sun.management.jmxremote.port=9083
+        -Dcom.sun.management.jmxremote.rmi.port=9083
+        -Dcom.sun.management.jmxremote.authenticate=false
+        -Dcom.sun.management.jmxremote.ssl=false
+        -Djava.rmi.server.hostname=${JMX_HOST:-localhost}
     entrypoint: []
     command: ["sh", "-c", "sleep 30 && java $$JAVA_OPTS -jar app.jar"]
-    ports: ["8083:8083"]
+    ports: ["8083:8083", "9083:9083"]
     healthcheck:
       test: ["CMD", "true"]
       interval: 60s
@@ -398,9 +436,17 @@ services:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql-notifications:3306/fintrack_notifications?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
+      JAVA_OPTS: >-
+        -XX:+UseG1GC -XX:MaxRAMPercentage=40.0 -Xmx256m -XX:+UseStringDeduplication
+        -Dcom.sun.management.jmxremote
+        -Dcom.sun.management.jmxremote.port=9084
+        -Dcom.sun.management.jmxremote.rmi.port=9084
+        -Dcom.sun.management.jmxremote.authenticate=false
+        -Dcom.sun.management.jmxremote.ssl=false
+        -Djava.rmi.server.hostname=${JMX_HOST:-localhost}
     entrypoint: []
     command: ["sh", "-c", "sleep 30 && java $$JAVA_OPTS -jar app.jar"]
-    ports: ["8084:8084"]
+    ports: ["8084:8084", "9084:9084"]
     healthcheck:
       test: ["CMD", "true"]
       interval: 60s
