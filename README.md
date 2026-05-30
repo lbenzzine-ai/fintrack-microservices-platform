@@ -1,3 +1,9 @@
+<p align="center">
+  <img src="docs/fintrack-preview/login.jpg" width="49%" alt="FinTrack sign-in page" />
+  &nbsp;
+  <img src="docs/fintrack-preview/dashboard.jpg" width="49%" alt="FinTrack transaction history dashboard" />
+</p>
+
 # FinTrack — Production-Grade Fintech Microservices
 
 A side-by-side **Java 17** and **Java 21** implementation of a financial-transactions
