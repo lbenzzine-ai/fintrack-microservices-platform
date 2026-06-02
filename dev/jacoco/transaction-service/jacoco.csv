@@ -17,8 +17,8 @@ transaction-service,com.fintrack.transaction.risk,RiskRuleRegistry,0,241,6,40,0,
 transaction-service,com.fintrack.transaction.risk,RiskScore,0,101,0,14,0,28,0,13,0,6
 transaction-service,com.fintrack.transaction.risk,RiskEngine,12,126,0,4,5,24,1,7,1,5
 transaction-service,com.fintrack.transaction.mapper,TransactionMapperImpl,77,0,2,0,18,0,3,0,2,0
-transaction-service,com.fintrack.transaction.service,TransactionService,10,606,6,22,0,155,6,25,1,16
-transaction-service,com.fintrack.transaction.service,FeeService,4,85,3,1,0,21,2,4,0,4
+transaction-service,com.fintrack.transaction.service,TransactionService,8,608,5,23,0,155,6,25,1,16
+transaction-service,com.fintrack.transaction.service,FeeService,2,87,2,2,0,21,2,4,0,4
 transaction-service,com.fintrack.transaction.exception,TransactionNotFoundException,0,7,0,0,0,2,0,1,0,1
 transaction-service,com.fintrack.transaction.exception,InvalidTransactionException,0,6,0,0,0,2,0,1,0,1
 transaction-service,com.fintrack.transaction.exception,ApiException,0,10,0,0,0,4,0,1,0,1
