@@ -20,7 +20,7 @@ for O(1) strategy dispatch.
 ## Architecture
 
 <p align="center">
-  <a href="docs/fintrack.drawio">📐 View Architecture Diagram (diagrams.net)</a>
+  <a href="https://app.diagrams.net/#Uhttps://raw.githubusercontent.com/lbenzzine-ai/fintrack-microservices-platform/dev/docs/fintrack.drawio">📐 View Architecture Diagram</a>
 </p>
 
 ---
