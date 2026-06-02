@@ -17,6 +17,14 @@ for O(1) strategy dispatch.
 
 ---
 
+## Architecture
+
+<p align="center">
+  <img src="docs/fintrack-architecture.png" alt="FinTrack architecture diagram" width="100%" />
+</p>
+
+---
+
 ## Repository Layout
 
 ```
