@@ -19,6 +19,10 @@ spring:
       write-dates-as-timestamps: false
   lifecycle:
     timeout-per-shutdown-phase: 30s
+  security:
+    user:
+      name: ${ACTUATOR_USER:actuator}
+      password: ${ACTUATOR_PASSWORD:changeme}
 
 # ── Service discovery ────────────────────────────────────────────────────────
 eureka:
