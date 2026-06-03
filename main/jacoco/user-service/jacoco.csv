@@ -8,7 +8,7 @@ user-service,com.fintrack.user.service,AuthService,0,184,0,8,0,41,0,10,0,6
 user-service,com.fintrack.user.service,UserService,0,99,0,4,0,13,0,10,0,8
 user-service,com.fintrack.user.controller,AuthController,0,10,0,0,0,2,0,2,0,2
 user-service,com.fintrack.user.controller,UserController,0,23,0,0,0,5,0,4,0,4
-user-service,com.fintrack.user.exception,GlobalExceptionHandler,0,108,0,0,0,29,0,6,0,6
+user-service,com.fintrack.user.exception,GlobalExceptionHandler,15,108,0,0,6,29,1,6,1,6
 user-service,com.fintrack.user.exception,InvalidCredentialsException,0,6,0,0,0,2,0,1,0,1
 user-service,com.fintrack.user.exception,UsernameAlreadyExistsException,0,7,0,0,0,2,0,1,0,1
 user-service,com.fintrack.user.exception,EmailAlreadyExistsException,0,7,0,0,0,2,0,1,0,1

@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -12,50 +13,61 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.time.Instant;
 import java.util.List;
 
-<span class="fc" id="L15">@Slf4j</span>
+<span class="fc" id="L16">@Slf4j</span>
 @RestControllerAdvice
-<span class="fc" id="L17">public class GlobalExceptionHandler {</span>
+<span class="fc" id="L18">public class GlobalExceptionHandler {</span>
 
     @ExceptionHandler(ApiException.class)
     public ResponseEntity&lt;ApiError&gt; handleApi(ApiException ex, HttpServletRequest req) {
-<span class="fc" id="L21">        log.warn(&quot;ApiException [{}] {}: {}&quot;, ex.getStatus(), ex.getCode(), ex.getMessage());</span>
-<span class="fc" id="L22">        return ResponseEntity.status(ex.getStatus()).body(ApiError.builder()</span>
-<span class="fc" id="L23">                .timestamp(Instant.now())</span>
-<span class="fc" id="L24">                .status(ex.getStatus().value())</span>
-<span class="fc" id="L25">                .code(ex.getCode())</span>
-<span class="fc" id="L26">                .message(ex.getMessage())</span>
-<span class="fc" id="L27">                .path(req.getRequestURI())</span>
-<span class="fc" id="L28">                .build());</span>
+<span class="fc" id="L22">        log.warn(&quot;ApiException [{}] {}: {}&quot;, ex.getStatus(), ex.getCode(), ex.getMessage());</span>
+<span class="fc" id="L23">        return ResponseEntity.status(ex.getStatus()).body(ApiError.builder()</span>
+<span class="fc" id="L24">                .timestamp(Instant.now())</span>
+<span class="fc" id="L25">                .status(ex.getStatus().value())</span>
+<span class="fc" id="L26">                .code(ex.getCode())</span>
+<span class="fc" id="L27">                .message(ex.getMessage())</span>
+<span class="fc" id="L28">                .path(req.getRequestURI())</span>
+<span class="fc" id="L29">                .build());</span>
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity&lt;ApiError&gt; handleValidation(MethodArgumentNotValidException ex, HttpServletRequest req) {
-<span class="fc" id="L33">        List&lt;ApiError.FieldViolation&gt; violations = ex.getBindingResult().getFieldErrors().stream()</span>
-<span class="fc" id="L34">                .map(this::toViolation).toList();</span>
-<span class="fc" id="L35">        return ResponseEntity.badRequest().body(ApiError.builder()</span>
-<span class="fc" id="L36">                .timestamp(Instant.now())</span>
-<span class="fc" id="L37">                .status(HttpStatus.BAD_REQUEST.value())</span>
-<span class="fc" id="L38">                .code(&quot;VALIDATION_FAILED&quot;)</span>
-<span class="fc" id="L39">                .message(&quot;Request validation failed&quot;)</span>
-<span class="fc" id="L40">                .path(req.getRequestURI())</span>
-<span class="fc" id="L41">                .violations(violations)</span>
-<span class="fc" id="L42">                .build());</span>
+<span class="fc" id="L34">        List&lt;ApiError.FieldViolation&gt; violations = ex.getBindingResult().getFieldErrors().stream()</span>
+<span class="fc" id="L35">                .map(this::toViolation).toList();</span>
+<span class="fc" id="L36">        return ResponseEntity.badRequest().body(ApiError.builder()</span>
+<span class="fc" id="L37">                .timestamp(Instant.now())</span>
+<span class="fc" id="L38">                .status(HttpStatus.BAD_REQUEST.value())</span>
+<span class="fc" id="L39">                .code(&quot;VALIDATION_FAILED&quot;)</span>
+<span class="fc" id="L40">                .message(&quot;Request validation failed&quot;)</span>
+<span class="fc" id="L41">                .path(req.getRequestURI())</span>
+<span class="fc" id="L42">                .violations(violations)</span>
+<span class="fc" id="L43">                .build());</span>
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity&lt;ApiError&gt; handleAny(Exception ex, HttpServletRequest req) {
-<span class="fc" id="L47">        log.error(&quot;Unhandled exception&quot;, ex);</span>
-<span class="fc" id="L48">        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ApiError.builder()</span>
-<span class="fc" id="L49">                .timestamp(Instant.now())</span>
-<span class="fc" id="L50">                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())</span>
-<span class="fc" id="L51">                .code(&quot;INTERNAL_ERROR&quot;)</span>
-<span class="fc" id="L52">                .message(&quot;Unexpected error — see correlationId in logs&quot;)</span>
-<span class="fc" id="L53">                .path(req.getRequestURI())</span>
-<span class="fc" id="L54">                .build());</span>
+<span class="fc" id="L48">        log.error(&quot;Unhandled exception&quot;, ex);</span>
+<span class="fc" id="L49">        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ApiError.builder()</span>
+<span class="fc" id="L50">                .timestamp(Instant.now())</span>
+<span class="fc" id="L51">                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())</span>
+<span class="fc" id="L52">                .code(&quot;INTERNAL_ERROR&quot;)</span>
+<span class="fc" id="L53">                .message(&quot;Unexpected error — see correlationId in logs&quot;)</span>
+<span class="fc" id="L54">                .path(req.getRequestURI())</span>
+<span class="fc" id="L55">                .build());</span>
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity&lt;ApiError&gt; handleAccessDenied(
+            AccessDeniedException ex, HttpServletRequest req) {
+<span class="nc" id="L61">        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiError.builder()</span>
+<span class="nc" id="L62">                .status(403)</span>
+<span class="nc" id="L63">                .code(&quot;ACCESS_DENIED&quot;)</span>
+<span class="nc" id="L64">                .message(&quot;You don't have permission to perform this action&quot;)</span>
+<span class="nc" id="L65">                .path(req.getRequestURI())</span>
+<span class="nc" id="L66">                .build());</span>
     }
 
     private ApiError.FieldViolation toViolation(FieldError fe) {
-<span class="fc" id="L58">        return ApiError.FieldViolation.builder().field(fe.getField()).message(fe.getDefaultMessage()).build();</span>
+<span class="fc" id="L70">        return ApiError.FieldViolation.builder().field(fe.getField()).message(fe.getDefaultMessage()).build();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
