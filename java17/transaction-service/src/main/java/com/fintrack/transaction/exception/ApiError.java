@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.time.Instant;
+import java.util.List;
 
 @Data @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -14,4 +15,12 @@ public class ApiError {
     private String code;
     private String message;
     private String path;
+    private List<FieldViolation> violations;
+
+    @Data
+    @Builder
+    public static class FieldViolation {
+        private String field;
+        private String message;
+}
 }

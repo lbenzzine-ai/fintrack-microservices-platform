@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -20,52 +21,71 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ApiException.class)
     public ResponseEntity<ApiError> handleApi(ApiException ex, HttpServletRequest req) {
         log.warn("ApiException [{}] {}: {}", ex.getStatus(), ex.getCode(), ex.getMessage());
-        return ResponseEntity.status(ex.getStatus()).body(ApiError.builder()
-                .timestamp(Instant.now())
-                .status(ex.getStatus().value())
-                .code(ex.getCode())
-                .message(ex.getMessage())
-                .path(req.getRequestURI())
-                .build());
+        return ResponseEntity.status(ex.getStatus()).body(new ApiError(
+                Instant.now(),
+                ex.getStatus().value(),
+                ex.getCode(),
+                ex.getMessage(),
+                req.getRequestURI(),
+                null
+        ));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiError> handleValidation(MethodArgumentNotValidException ex, HttpServletRequest req) {
-        List<ApiError.FieldViolation> violations = ex.getBindingResult().getFieldErrors().stream()
-                .map(this::toViolation).toList();
-        return ResponseEntity.badRequest().body(ApiError.builder()
-                .timestamp(Instant.now())
-                .status(HttpStatus.BAD_REQUEST.value())
-                .code("VALIDATION_FAILED")
-                .message("Request validation failed")
-                .path(req.getRequestURI())
-                .violations(violations)
-                .build());
+    public ResponseEntity<ApiError> handleValidation(
+            MethodArgumentNotValidException ex, HttpServletRequest req) {
+        List<ApiError.FieldViolation> violations = ex.getBindingResult()
+                .getFieldErrors().stream()
+                .map(fe -> new ApiError.FieldViolation(fe.getField(), fe.getDefaultMessage()))
+                .toList();
+        return ResponseEntity.badRequest().body(new ApiError(
+                Instant.now(),
+                HttpStatus.BAD_REQUEST.value(),
+                "VALIDATION_FAILED",
+                "Request validation failed",
+                req.getRequestURI(),
+                violations
+        ));
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiError> handleAny(Exception ex, HttpServletRequest req) {
-        log.error("Unhandled exception", ex);
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ApiError.builder()
-                .timestamp(Instant.now())
-                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                .code("INTERNAL_ERROR")
-                .message("Unexpected error — see correlationId in logs")
-                .path(req.getRequestURI())
-                .build());
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ApiError> handleMissingParam(
+            MissingServletRequestParameterException ex, HttpServletRequest req) {
+        log.warn("Missing parameter: {}", ex.getParameterName());
+        return ResponseEntity.badRequest().body(new ApiError(
+                Instant.now(),
+                HttpStatus.BAD_REQUEST.value(),
+                "MISSING_PARAMETER",
+                "Required parameter '" + ex.getParameterName() + "' is missing",
+                req.getRequestURI(),
+                null
+        ));
     }
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiError> handleAccessDenied(
             AccessDeniedException ex, HttpServletRequest req) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ApiError.builder()
-                .status(403)
-                .code("ACCESS_DENIED")
-                .message("You don't have permission to perform this action")
-                .path(req.getRequestURI())
-                .build());
+        log.warn("Access denied: {}", req.getRequestURI());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiError(
+                Instant.now(),
+                HttpStatus.FORBIDDEN.value(),
+                "ACCESS_DENIED",
+                "You don't have permission to perform this action",
+                req.getRequestURI(),
+                null
+        ));
     }
-    private ApiError.FieldViolation toViolation(FieldError fe) {
-        return ApiError.FieldViolation.of(fe.getField(), fe.getDefaultMessage());
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiError> handleAny(Exception ex, HttpServletRequest req) {
+        log.error("Unhandled exception", ex);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiError(
+                Instant.now(),
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                "INTERNAL_ERROR",
+                "Unexpected error — see correlationId in logs",
+                req.getRequestURI(),
+                null
+        ));
     }
 }
