@@ -2,11 +2,12 @@ import { Component, inject, HostListener } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../core/services/auth.service';
+import { ToastComponent } from '../toast/toast.component';
 
 @Component({
   selector: 'ft-layout',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, ToastComponent],
   template: `
     <div class="min-h-screen bg-navy-800">
       <nav class="bg-navy-900 border-b border-gold-500/20 px-6 h-14 flex items-center justify-between">
@@ -16,34 +17,22 @@ import { AuthService } from '../../core/services/auth.service';
         <div class="flex gap-1 items-center">
 
           <div class="nav-item">
-            <a routerLink="/about" routerLinkActive="bg-gold-500/10 text-gold-500"
-               class="text-slate-light px-4 py-1.5 rounded-md text-sm hover:text-gold-500 transition-colors block">
-              About
-            </a>
+            <a routerLink="/about" routerLinkActive="bg-gold-500/10 text-gold-500" class="nav-link">About</a>
             <span class="nav-tooltip">Learn about FinTrack architecture & tech stack</span>
           </div>
 
           <div class="nav-item">
-            <a routerLink="/transfer" routerLinkActive="bg-gold-500/10 text-gold-500"
-               class="text-slate-light px-4 py-1.5 rounded-md text-sm hover:text-gold-500 transition-colors block">
-              Transfer
-            </a>
+            <a routerLink="/transfer" routerLinkActive="bg-gold-500/10 text-gold-500" class="nav-link">Transfer</a>
             <span class="nav-tooltip">Send money via Saga pattern</span>
           </div>
 
           <div class="nav-item">
-            <a routerLink="/history" routerLinkActive="bg-gold-500/10 text-gold-500"
-               class="text-slate-light px-4 py-1.5 rounded-md text-sm hover:text-gold-500 transition-colors block">
-              History
-            </a>
+            <a routerLink="/history" routerLinkActive="bg-gold-500/10 text-gold-500" class="nav-link">History</a>
             <span class="nav-tooltip">View your transaction history</span>
           </div>
 
           <div class="nav-item">
-            <a routerLink="/dashboard" routerLinkActive="bg-gold-500/10 text-gold-500"
-               class="text-slate-light px-4 py-1.5 rounded-md text-sm hover:text-gold-500 transition-colors block">
-              Dashboard
-            </a>
+            <a routerLink="/dashboard" routerLinkActive="bg-gold-500/10 text-gold-500" class="nav-link">Dashboard</a>
             <span class="nav-tooltip">Your account overview</span>
           </div>
 
@@ -58,12 +47,10 @@ import { AuthService } from '../../core/services/auth.service';
 
             <div *ngIf="adminMenuOpen"
                  class="absolute top-full left-0 mt-1 w-48 bg-navy-900 border border-gold-500/20 rounded-lg shadow-xl z-50 overflow-hidden">
-              <a routerLink="/admin/infrastructure" (click)="adminMenuOpen = false"
-                 class="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-muted hover:text-gold-500 hover:bg-gold-500/5 transition-colors">
+              <a routerLink="/admin/infrastructure" (click)="adminMenuOpen = false" class="admin-nav-link px-4 py-2.5 border-0">
                 <span>⚙️</span> Infrastructure
               </a>
-              <a routerLink="/admin/users" (click)="adminMenuOpen = false"
-                 class="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-muted hover:text-gold-500 hover:bg-gold-500/5 transition-colors border-t border-gold-500/10">
+              <a routerLink="/admin/users" (click)="adminMenuOpen = false" class="admin-nav-link px-4 py-2.5 border-t border-gold-500/10">
                 <span>👥</span> User Management
               </a>
             </div>
@@ -72,24 +59,26 @@ import { AuthService } from '../../core/services/auth.service';
         </div>
 
         <div class="flex items-center gap-4">
-          <span class="text-sm text-slate-muted">{{ user?.username }}</span>
+          <span class="text-muted">{{ user?.username }}</span>
           <span *ngIf="isAdmin" class="badge-warning text-xs">ADMIN</span>
-          <button (click)="logout()" class="text-sm text-slate-muted hover:text-gold-500 transition-colors">
-            Sign out
-          </button>
+          <button (click)="logout()" class="text-muted hover:text-gold-500 transition-colors text-sm">Sign out</button>
         </div>
 
       </nav>
+
       <main class="p-7">
         <router-outlet />
       </main>
+
+      <ft-toast />
+
     </div>
   `
 })
 export class LayoutComponent {
   private auth: AuthService = inject(AuthService);
-  user = this.auth.getUser();
-  isAdmin = this.user?.roles?.includes('ADMIN') || false;
+  user      = this.auth.getUser();
+  isAdmin   = this.user?.roles?.includes('ADMIN') || false;
   adminMenuOpen = false;
 
   toggleAdminMenu() { this.adminMenuOpen = !this.adminMenuOpen; }
