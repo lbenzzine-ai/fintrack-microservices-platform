@@ -5,7 +5,6 @@ import { Chart, registerables } from 'chart.js';
 import { environment } from '../../../environments/environment';
 
 Chart.register(...registerables);
-
 interface ServiceStatus { name: string; status: 'UP' | 'DOWN' | 'UNKNOWN'; }
 
 @Component({
@@ -15,15 +14,15 @@ interface ServiceStatus { name: string; status: 'UP' | 'DOWN' | 'UNKNOWN'; }
   template: `
     <div class="page-sub-header">Infrastructure</div>
 
-    <div class="two-col-grid mb-5">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
       <div class="card">
         <div class="section-title">Service health</div>
         <div *ngFor="let svc of services" class="table-row">
           <div class="flex items-center gap-2">
-            <span class="w-2 h-2 rounded-full"
+            <span class="w-2 h-2 rounded-full flex-shrink-0"
               [class]="svc.status==='UP' ? 'bg-green-400' : svc.status==='DOWN' ? 'bg-red-400' : 'bg-yellow-400'">
             </span>
-            <span class="text-sm">{{ svc.name }}</span>
+            <span class="text-sm truncate">{{ svc.name }}</span>
           </div>
           <span [ngClass]="{'badge-success':svc.status==='UP','badge-danger':svc.status==='DOWN','badge-warning':svc.status==='UNKNOWN'}">
             {{ svc.status }}
@@ -51,7 +50,7 @@ interface ServiceStatus { name: string; status: 'UP' | 'DOWN' | 'UNKNOWN'; }
       </div>
     </div>
 
-    <div class="two-col-grid">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
       <div class="card">
         <div class="section-title">Request rate (req/s)</div>
         <canvas #requestChart height="140"></canvas>
@@ -91,11 +90,9 @@ export class InfrastructureComponent implements OnInit, AfterViewInit, OnDestroy
   }
 
   private buildCharts() {
-    const gold      = '#C4A352';
-    const gridColor = 'rgba(196,163,82,0.08)';
-    const textColor = '#5A7090';
-    const labels    = Array.from({ length: 20 }, (_, i) => `${i * 3}s`);
-    const reqData   = Array.from({ length: 20 }, () => +(Math.random() * 0.4 + 0.05).toFixed(3));
+    const gold = '#C4A352', gridColor = 'rgba(196,163,82,0.08)', textColor = '#5A7090';
+    const labels  = Array.from({ length: 20 }, (_, i) => `${i * 3}s`);
+    const reqData = Array.from({ length: 20 }, () => +(Math.random() * 0.4 + 0.05).toFixed(3));
 
     this.charts.push(new Chart(this.requestChartRef.nativeElement, {
       type: 'line',
@@ -106,7 +103,7 @@ export class InfrastructureComponent implements OnInit, AfterViewInit, OnDestroy
                   y: { grid: { color: gridColor }, ticks: { color: textColor, font: { size: 10 } } } } }
     }));
 
-    const svcs      = ['gateway', 'user', 'account', 'transaction', 'notification'];
+    const svcs = ['gateway', 'user', 'account', 'tx', 'notify'];
     const latencies = [45, 82, 94, 156, 73];
     this.charts.push(new Chart(this.latencyChartRef.nativeElement, {
       type: 'bar',

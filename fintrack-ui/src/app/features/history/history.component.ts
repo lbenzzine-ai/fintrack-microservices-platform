@@ -12,17 +12,19 @@ Chart.register(...registerables);
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="page-header">
+    <!-- Header — stack on mobile -->
+    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 mb-6">
       <div>
         <div class="page-title mb-0">Transaction history</div>
         <div class="text-muted mt-1">All transactions for your account</div>
       </div>
-      <div class="flex gap-2 items-center">
+      <!-- Filter buttons — scroll on mobile -->
+      <div class="flex gap-2 items-center overflow-x-auto pb-1">
         <button *ngFor="let f of filters"
           (click)="activeFilter = f; page = 0; filterTx()"
           [class]="activeFilter === f
-            ? 'text-xs px-3 py-1 rounded bg-gold-500/10 text-gold-500 border border-gold-500/30'
-            : 'text-xs px-3 py-1 rounded bg-white/5 text-slate-muted border border-white/5'">
+            ? 'text-xs px-3 py-1 rounded bg-gold-500/10 text-gold-500 border border-gold-500/30 whitespace-nowrap'
+            : 'text-xs px-3 py-1 rounded bg-white/5 text-slate-muted border border-white/5 whitespace-nowrap'">
           {{ f }}
         </button>
       </div>
@@ -33,7 +35,8 @@ Chart.register(...registerables);
       <div class="text-muted">No accounts found</div>
     </div>
 
-    <div *ngIf="accounts.length > 0" class="grid grid-cols-3 gap-5 mb-5">
+    <!-- Charts — 1 col mobile, 3 cols desktop -->
+    <div *ngIf="accounts.length > 0" class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-5">
       <div class="card">
         <div class="section-title">Status breakdown</div>
         <canvas #statusChart height="140"></canvas>
@@ -53,12 +56,19 @@ Chart.register(...registerables);
       </div>
     </div>
 
+    <!-- Table — scrollable on mobile -->
     <div *ngIf="accounts.length > 0" class="card overflow-x-auto">
       <table class="tx-table">
         <thead>
           <tr>
-            <th>Description</th><th>Direction</th><th>Amount</th>
-            <th>Fee</th><th>Type</th><th>Risk</th><th>Status</th><th>Date</th>
+            <th>Description</th>
+            <th>Direction</th>
+            <th>Amount</th>
+            <th class="hidden sm:table-cell">Fee</th>
+            <th class="hidden md:table-cell">Type</th>
+            <th class="hidden sm:table-cell">Risk</th>
+            <th>Status</th>
+            <th class="hidden sm:table-cell">Date</th>
           </tr>
         </thead>
         <tbody>
@@ -69,15 +79,16 @@ Chart.register(...registerables);
             <td class="max-w-xs truncate">{{ tx.description || 'Transfer' }}</td>
             <td>
               <span [class]="isDebit(tx) ? 'badge-danger' : 'badge-success'">
-                {{ isDebit(tx) ? '↑ Debit' : '↓ Credit' }}
+                {{ isDebit(tx) ? '↑' : '↓' }}
+                <span class="hidden sm:inline">{{ isDebit(tx) ? ' Debit' : ' Credit' }}</span>
               </span>
             </td>
             <td [class]="isDebit(tx) ? 'tx-debit font-display' : 'tx-credit font-display'">
               {{ isDebit(tx) ? '-' : '+' }}{{ tx.amount | currency }}
             </td>
-            <td class="text-muted-sm">{{ (tx.fee || 0) | currency }}</td>
-            <td class="text-muted-sm">{{ tx.type || '—' }}</td>
-            <td>
+            <td class="text-muted-sm hidden sm:table-cell">{{ (tx.fee || 0) | currency }}</td>
+            <td class="text-muted-sm hidden md:table-cell">{{ tx.type || '—' }}</td>
+            <td class="hidden sm:table-cell">
               <span *ngIf="tx.riskLevel" [ngClass]="{
                 'badge-success': tx.riskLevel === 'LOW',
                 'badge-warning': tx.riskLevel === 'MEDIUM',
@@ -92,7 +103,7 @@ Chart.register(...registerables);
                 'badge-danger':  tx.status === 'FAILED' || tx.status === 'COMPENSATED'
               }">{{ tx.status }}</span>
             </td>
-            <td class="text-muted-sm">{{ tx.createdAt | date:'MM/dd HH:mm' }}</td>
+            <td class="text-muted-sm hidden sm:table-cell">{{ tx.createdAt | date:'MM/dd HH:mm' }}</td>
           </tr>
           <tr *ngIf="!loading && displayedTx.length === 0">
             <td colspan="8" class="empty-state">No transactions found.</td>
@@ -101,15 +112,16 @@ Chart.register(...registerables);
       </table>
     </div>
 
+    <!-- Pagination -->
     <div *ngIf="accounts.length > 0 && filteredTx.length > pageSize"
          class="flex justify-between items-center mt-4">
       <span class="text-muted">
-        Showing {{ page * pageSize + 1 }}–{{ min((page + 1) * pageSize, filteredTx.length) }}
+        {{ page * pageSize + 1 }}–{{ min((page + 1) * pageSize, filteredTx.length) }}
         of {{ filteredTx.length }}
       </span>
       <div class="flex gap-2">
         <button (click)="prevPage()" [disabled]="page === 0"
-          class="btn-pagination" [class.opacity-40]="page === 0">← Previous</button>
+          class="btn-pagination" [class.opacity-40]="page === 0">← Prev</button>
         <button (click)="nextPage()" [disabled]="(page + 1) * pageSize >= filteredTx.length"
           class="btn-pagination" [class.opacity-40]="(page + 1) * pageSize >= filteredTx.length">Next →</button>
       </div>
@@ -186,13 +198,10 @@ export class HistoryComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private buildCharts() {
     if (!this.statusChartRef?.nativeElement || !this.amountChartRef?.nativeElement) return;
-    const navy      = '#0A1628';
-    const gridColor = 'rgba(196,163,82,0.08)';
-    const textColor = '#5A7090';
-
-    const completed   = this.transactions.filter(t => t.status === 'COMPLETED').length;
-    const failed      = this.transactions.filter(t => t.status === 'FAILED').length;
-    const initiated   = this.transactions.filter(t => t.status === 'INITIATED').length;
+    const navy = '#0A1628', gridColor = 'rgba(196,163,82,0.08)', textColor = '#5A7090';
+    const completed = this.transactions.filter(t => t.status === 'COMPLETED').length;
+    const failed    = this.transactions.filter(t => t.status === 'FAILED').length;
+    const initiated = this.transactions.filter(t => t.status === 'INITIATED').length;
     const compensated = this.transactions.filter(t => t.status === 'COMPENSATED').length;
 
     this.charts.push(new Chart(this.statusChartRef.nativeElement, {
@@ -213,11 +222,9 @@ export class HistoryComponent implements OnInit, AfterViewInit, OnDestroy {
       else if (tx.amount < 10000) counts[2]++;
       else counts[3]++;
     });
-
     this.charts.push(new Chart(this.amountChartRef.nativeElement, {
       type: 'bar',
-      data: { labels: buckets, datasets: [{ data: counts, backgroundColor: 'rgba(196,163,82,0.6)',
-        borderColor: '#C4A352', borderWidth: 1, borderRadius: 4 }] },
+      data: { labels: buckets, datasets: [{ data: counts, backgroundColor: 'rgba(196,163,82,0.6)', borderColor: '#C4A352', borderWidth: 1, borderRadius: 4 }] },
       options: { responsive: true, plugins: { legend: { display: false } },
         scales: { x: { grid: { color: gridColor }, ticks: { color: textColor, font: { size: 10 } } },
                   y: { grid: { color: gridColor }, ticks: { color: textColor, font: { size: 10 } } } } }
