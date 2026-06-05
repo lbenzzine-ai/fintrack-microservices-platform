@@ -14,12 +14,12 @@ type SagaStep = { label: string; status: 'done' | 'pending' | 'waiting' | 'faile
   template: `
     <div class="page-title">New Transfer</div>
 
-    <div class="two-col-grid">
+    <!-- Stack on mobile, side by side on desktop -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
       <div class="card">
         <div class="section-title">Transfer details</div>
 
         <form [formGroup]="form" (ngSubmit)="submit()">
-
           <div class="form-group">
             <label class="label">From account</label>
             <select formControlName="fromAccountUuid" (change)="onFromChange($event)">
@@ -29,7 +29,7 @@ type SagaStep = { label: string; status: 'done' | 'pending' | 'waiting' | 'faile
               </option>
             </select>
             <div *ngIf="selectedFromAccount" class="account-card selected">
-              <div class="page-row">
+              <div class="flex justify-between items-center">
                 <div>
                   <div class="text-muted">Account number</div>
                   <div class="text-gold-sm">{{ formatAccountNumber(selectedFromAccount.uuid) }}</div>
@@ -43,10 +43,7 @@ type SagaStep = { label: string; status: 'done' | 'pending' | 'waiting' | 'faile
           </div>
 
           <div class="form-group">
-            <label class="label flex items-center gap-2">
-              To account
-              <span class="text-muted normal-case tracking-normal font-sans">— pick a demo account or enter UUID</span>
-            </label>
+            <label class="label">To account</label>
             <select (change)="onDemoSelect($event)" class="mb-2">
               <option value="">— Select demo account —</option>
               <option *ngFor="let d of demoAccounts" [value]="d.uuid">
@@ -55,7 +52,7 @@ type SagaStep = { label: string; status: 'done' | 'pending' | 'waiting' | 'faile
             </select>
             <input formControlName="toAccountUuid" placeholder="or enter account UUID manually..." />
             <div *ngIf="selectedToDemo" class="balance-float">
-              <div class="page-row">
+              <div class="flex justify-between items-center">
                 <div>
                   <div class="text-muted">{{ selectedToDemo.label }}</div>
                   <div class="text-gold-sm">{{ formatAccountNumber(selectedToDemo.uuid) }}</div>
@@ -83,7 +80,7 @@ type SagaStep = { label: string; status: 'done' | 'pending' | 'waiting' | 'faile
             <input formControlName="amount" type="number" min="0.01" step="0.01" placeholder="0.00" />
             <div *ngIf="form.value.amount" class="text-muted mt-1">
               Fee: <span class="text-gold-500">{{ estimatedFee | currency }}</span>
-              · Total deducted: <span class="text-slate-text">{{ ((form.value.amount || 0) + estimatedFee) | currency }}</span>
+              · Total: <span class="text-slate-text">{{ ((form.value.amount || 0) + estimatedFee) | currency }}</span>
             </div>
           </div>
 
@@ -105,9 +102,9 @@ type SagaStep = { label: string; status: 'done' | 'pending' | 'waiting' | 'faile
         </form>
       </div>
 
+      <!-- Saga panel -->
       <div class="card">
         <div class="section-title">Saga status</div>
-
         <div class="mb-5">
           <div *ngFor="let step of sagaSteps; let i = index"
                class="flex items-center gap-3 py-2.5 border-b border-white/5 last:border-0">
@@ -137,14 +134,14 @@ type SagaStep = { label: string; status: 'done' | 'pending' | 'waiting' | 'faile
         <div *ngIf="completedTx" class="success-card">
           <div class="text-muted-uc mb-1">Transfer complete</div>
           <div class="text-gold-2xl mb-2">{{ completedTx.amount | currency }}</div>
-          <div class="text-muted break-all mb-3">ID: {{ completedTx.uuid }}</div>
+          <div class="text-muted break-all mb-3 text-xs">ID: {{ completedTx.uuid }}</div>
           <div class="grid grid-cols-3 gap-2">
             <div class="stat-card">
-              <div class="text-muted-mb">Fee charged</div>
+              <div class="text-muted-mb">Fee</div>
               <div class="text-gold-sm">{{ (completedTx.fee || 0) | currency }}</div>
             </div>
             <div class="stat-card">
-              <div class="text-muted-mb">Risk level</div>
+              <div class="text-muted-mb">Risk</div>
               <span *ngIf="completedTx.riskLevel" [ngClass]="{
                 'badge-success': completedTx.riskLevel === 'LOW',
                 'badge-warning': completedTx.riskLevel === 'MEDIUM',
@@ -160,17 +157,14 @@ type SagaStep = { label: string; status: 'done' | 'pending' | 'waiting' | 'faile
         </div>
 
         <div *ngIf="!completedTx" class="stat-card mt-4">
-          <div class="text-muted mb-1">Fee estimate (tiered strategy)</div>
+          <div class="text-muted mb-1">Fee estimate</div>
           <div class="text-gold-xl">{{ estimatedFee | currency }}</div>
           <div class="text-muted mt-1">{{ getFeeRange() }}</div>
         </div>
 
         <div class="mt-4 p-3 rounded-lg border border-gold-500/10 bg-gold-500/5">
           <div class="text-xs text-gold-500 mb-1">💡 Demo accounts</div>
-          <div class="text-muted">
-            Pre-seeded demo accounts are available in the dropdown above for quick testing.
-            Each has a human-readable account number derived from its UUID.
-          </div>
+          <div class="text-muted">Pre-seeded demo accounts available in the dropdown above.</div>
         </div>
       </div>
     </div>
@@ -247,8 +241,7 @@ export class TransferComponent implements OnInit {
   }
 
   onFromChange(event: any) {
-    const uuid = event.target.value;
-    this.selectedFromAccount = this.accounts.find(a => a.uuid === uuid) || null;
+    this.selectedFromAccount = this.accounts.find(a => a.uuid === event.target.value) || null;
   }
 
   onDemoSelect(event: any) {
@@ -285,9 +278,7 @@ export class TransferComponent implements OnInit {
     });
   }
 
-  private resetSaga() {
-    this.sagaSteps = this.sagaSteps.map(s => ({ ...s, status: 'waiting' }));
-  }
+  private resetSaga() { this.sagaSteps = this.sagaSteps.map(s => ({ ...s, status: 'waiting' })); }
 
   private animateSaga() {
     this.sagaSteps[0].status = 'pending';
