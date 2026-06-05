@@ -11,10 +11,35 @@ env:
   NODE_VERSION: '22'
 
 jobs:
-  # ── Job 1: Build Java 21 ─────────────────────────────────────────────────────
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # DETECT CHANGES — skip backend or frontend build if unchanged
+  # ─────────────────────────────────────────────────────────────────────────
+  detect-changes:
+    name: Detect Changed Paths
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'java17/**'
+              - 'java21/**'
+              - 'docker-compose.yml'
+            frontend:
+              - 'fintrack-ui/**'
+
+  # ── Job 1: Build Java 21 (only if backend changed) ───────────────────────
   build-java:
     name: Build Java 21 Services
     runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.backend == 'true'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -39,10 +64,12 @@ jobs:
           path: java21/**/target/*.jar
           retention-days: 1
 
-  # ── Job 2: Build Angular UI ──────────────────────────────────────────────────
+  # ── Job 2: Build Angular UI (only if frontend changed) ───────────────────
   build-angular:
     name: Build Angular UI
     runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.frontend == 'true'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -92,22 +119,30 @@ jobs:
           path: fintrack-ui/dist/fintrack-ui/
           retention-days: 1
 
-  # ── Job 3: Deploy (only on push to main) ─────────────────────────────────────
+  # ── Job 3: Deploy (only on push to main) ─────────────────────────────────
   deploy:
     name: Deploy to Oracle Cloud
     runs-on: ubuntu-latest
-    needs: [build-java, build-angular]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: [ detect-changes, build-java, build-angular ]
+    # Run if at least one build job ran — handle skipped jobs gracefully
+    if: |
+      github.ref == 'refs/heads/main' &&
+      github.event_name == 'push' &&
+      always() &&
+      (needs.build-java.result == 'success' || needs.build-java.result == 'skipped') &&
+      (needs.build-angular.result == 'success' || needs.build-angular.result == 'skipped')
     environment: production
 
     steps:
-      - name: Download Angular dist
+      - name: Download Angular dist (if frontend changed)
+        if: needs.detect-changes.outputs.frontend == 'true'
         uses: actions/download-artifact@v4
         with:
           name: angular-dist
           path: angular-dist/
 
-      - name: Deploy Java services to Oracle Cloud
+      - name: Deploy Java services to Oracle Cloud (if backend changed)
+        if: needs.detect-changes.outputs.backend == 'true'
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.ORACLE_HOST }}
@@ -131,11 +166,8 @@ jobs:
             docker compose build --no-cache account-service transaction-service user-service notification-service api-gateway
             docker compose up -d
 
-            echo "⏳ Waiting for services to be healthy..."api-gateway
+            echo "⏳ Waiting for services to be healthy..."
             sleep 120
-            
-            echo "🗑️ Flushing Redis stale cache..."
-            docker exec fintrack-redis redis-cli FLUSHALL
 
             echo "✅ Service status:"
             docker compose ps --format "table {{.Name}}\t{{.Status}}"
@@ -145,7 +177,8 @@ jobs:
             sudo mkdir -p /var/www/fintrack
             sudo chown ubuntu:ubuntu /var/www/fintrack
 
-      - name: Copy Angular files to server
+      - name: Copy Angular files to server (if frontend changed)
+        if: needs.detect-changes.outputs.frontend == 'true'
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.ORACLE_HOST }}
@@ -156,7 +189,8 @@ jobs:
           strip_components: 1
           rm: false
 
-      - name: Fix permissions and reload Nginx
+      - name: Fix permissions and reload Nginx (if frontend changed)
+        if: needs.detect-changes.outputs.frontend == 'true'
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.ORACLE_HOST }}
