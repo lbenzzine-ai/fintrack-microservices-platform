@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: eureka-server
-          image: 692101471621.dkr.ecr.us-east-1.amazonaws.com/fintrack-eureka-server:latest
+          image: 692101471621.dkr.ecr.us-east-1.amazonaws.com/fintrack-eureka-server:648bfcf62e4af12579e821c9ddc4ede755bec24a
           ports:
             - containerPort: 8761
           env:
