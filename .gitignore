@@ -47,7 +47,8 @@ ehthumbs.db
 .env.local
 *.local.yml
 *.local.yaml
-secrets/
+**/secrets.yml
+**/secrets.yaml
 
 # Docker
 docker-compose.override.yml
@@ -64,3 +65,11 @@ coverage/
 
 # Local stack runner state (pid files)
 .run-stack/
+
+# Terraform
+terraform.tfvars
+*.tfvars
+**/.terraform/
+*.tfstate
+*.tfstate.backup
+.terraform.lock.hcl
