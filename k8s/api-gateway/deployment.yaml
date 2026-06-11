@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: api-gateway
-          image: 692101471621.dkr.ecr.us-east-1.amazonaws.com/fintrack-api-gateway:latest
+          image: 692101471621.dkr.ecr.us-east-1.amazonaws.com/fintrack-api-gateway:23252e15e260db78d01f61f4459685c59898e66f
           ports:
             - containerPort: 8080
           envFrom:

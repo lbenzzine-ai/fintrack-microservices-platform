@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: notification-service
-          image: 692101471621.dkr.ecr.us-east-1.amazonaws.com/fintrack-notification-service:latest
+          image: 692101471621.dkr.ecr.us-east-1.amazonaws.com/fintrack-notification-service:23252e15e260db78d01f61f4459685c59898e66f
           ports:
             - containerPort: 8084
           envFrom:
