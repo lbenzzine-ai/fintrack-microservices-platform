@@ -145,62 +145,11 @@ jobs:
 
           echo "✅ Secrets deployed to EKS"
 
-  # ── Job 4: ArgoCD sync ────────────────────────────────────────────
-  argocd-sync:
-    name: ArgoCD Sync
-    runs-on: ubuntu-latest
-    needs: deploy-secrets
-
-    steps:
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region:            ${{ env.AWS_REGION }}
-
-      - name: Update kubeconfig
-        run: |
-          aws eks update-kubeconfig \
-            --region ${{ env.AWS_REGION }} \
-            --name ${{ env.EKS_CLUSTER }}
-
-      - name: Install ArgoCD CLI
-        run: |
-          curl -sSL -o argocd \
-            https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
-          chmod +x argocd
-          sudo mv argocd /usr/local/bin/
-
-      - name: Port forward ArgoCD
-        run: |
-          kubectl port-forward svc/argocd-server -n argocd 8080:443 &
-          sleep 10
-
-      - name: Get ArgoCD password
-        run: |
-          ARGOCD_PASSWORD=$(kubectl get secret argocd-initial-admin-secret \
-            -n argocd \
-            -o jsonpath="{.data.password}" | base64 -d)
-          echo "ARGOCD_PASSWORD=$ARGOCD_PASSWORD" >> $GITHUB_ENV
-
-      - name: Sync ArgoCD application
-        run: |
-          argocd login localhost:8080 \
-            --username admin \
-            --password ${{ env.ARGOCD_PASSWORD }} \
-            --insecure
-
-          argocd app sync fintrack --insecure
-          argocd app wait fintrack --health --insecure --timeout 300
-
-          echo "✅ ArgoCD sync complete"
-
   # ── Job 5: Health check ───────────────────────────────────────────
   health-check:
     name: Health Check
     runs-on: ubuntu-latest
-    needs: argocd-sync
+    needs: deploy-secrets
 
     steps:
       - name: Configure AWS credentials
