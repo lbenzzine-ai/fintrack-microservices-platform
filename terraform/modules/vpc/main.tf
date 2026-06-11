@@ -1,4 +1,3 @@
-# VPC
 resource "aws_vpc" "fintrack" {
   cidr_block           = var.vpc_cidr
   enable_dns_hostnames = true
@@ -7,13 +6,11 @@ resource "aws_vpc" "fintrack" {
   tags = { Name = "${var.project}-vpc" }
 }
 
-# Internet Gateway
 resource "aws_internet_gateway" "fintrack" {
   vpc_id = aws_vpc.fintrack.id
   tags   = { Name = "${var.project}-igw" }
 }
 
-# Public Subnets — ALB lives here
 resource "aws_subnet" "public" {
   count             = 2
   vpc_id            = aws_vpc.fintrack.id
@@ -27,7 +24,6 @@ resource "aws_subnet" "public" {
   }
 }
 
-# Private Subnets — EKS pods live here
 resource "aws_subnet" "private" {
   count             = 2
   vpc_id            = aws_vpc.fintrack.id
@@ -40,7 +36,6 @@ resource "aws_subnet" "private" {
   }
 }
 
-# NAT Gateway — allows private subnets to reach internet
 resource "aws_eip" "nat" {
   domain = "vpc"
   tags   = { Name = "${var.project}-nat-eip" }
@@ -52,7 +47,6 @@ resource "aws_nat_gateway" "fintrack" {
   tags          = { Name = "${var.project}-nat" }
 }
 
-# Route Tables
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.fintrack.id
 
@@ -75,7 +69,6 @@ resource "aws_route_table" "private" {
   tags = { Name = "${var.project}-private-rt" }
 }
 
-# Route Table Associations
 resource "aws_route_table_association" "public" {
   count          = 2
   subnet_id      = aws_subnet.public[count.index].id
@@ -88,7 +81,11 @@ resource "aws_route_table_association" "private" {
   route_table_id = aws_route_table.private.id
 }
 
-# Data source — available AZs
+# Only standard AZs — exclude Local Zones
 data "aws_availability_zones" "available" {
   state = "available"
+  filter {
+    name   = "opt-in-status"
+    values = ["opt-in-not-required"]  # standard AZs only
+  }
 }

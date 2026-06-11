@@ -16,12 +16,11 @@ terraform {
     }
   }
 
-  # Remote state — S3 backend
   backend "s3" {
-    bucket         = "fintrack-terraform-state"
-    key            = "aws/terraform.tfstate"
-    region         = "us-east-1"
-    use_lockfile = true        # ← replaces dynamodb_table
+    bucket       = "fintrack-terraform-state"
+    key          = "aws/terraform.tfstate"
+    region       = "us-east-1"
+    use_lockfile = true
     encrypt      = true
   }
 }
@@ -36,5 +35,23 @@ provider "aws" {
       ManagedBy   = "Terraform"
       Owner       = "Latif Benzzine"
     }
+  }
+}
+
+data "aws_eks_cluster_auth" "fintrack" {
+  name = "${var.project}-cluster"
+}
+
+provider "kubernetes" {
+  host                   = module.eks.cluster_endpoint
+  cluster_ca_certificate = base64decode(module.eks.cluster_ca)
+  token                  = data.aws_eks_cluster_auth.fintrack.token
+}
+
+provider "helm" {
+  kubernetes {
+    host                   = module.eks.cluster_endpoint
+    cluster_ca_certificate = base64decode(module.eks.cluster_ca)
+    token                  = data.aws_eks_cluster_auth.fintrack.token
   }
 }
