@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: account-service
-          image: 692101471621.dkr.ecr.us-east-1.amazonaws.com/fintrack-account-service:latest
+          image: 692101471621.dkr.ecr.us-east-1.amazonaws.com/fintrack-account-service:7f6b238f4052f793b736f1494ade457647741aa9
           ports:
             - containerPort: 8082
           env:
