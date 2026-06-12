@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: api-gateway
-          image: 692101471621.dkr.ecr.us-east-1.amazonaws.com/fintrack-api-gateway:01f49c027d224fce2126fc826fc0b8f824a8dea6
+          image: 692101471621.dkr.ecr.us-east-1.amazonaws.com/fintrack-api-gateway:latest
           ports:
             - containerPort: 8080
           env:
@@ -26,7 +26,7 @@ spec:
             - name: CONFIG_SERVER_PASSWORD
               value: "configpass"
             - name: EUREKA_SERVER_URL
-              value: "http://eureka-server:8761/eureka"
+              value: "http://eureka:eureka123@eureka-server:8761/eureka"
             - name: JWT_SECRET
               valueFrom:
                 secretKeyRef:
@@ -42,11 +42,11 @@ spec:
               value: "6379"
           resources:
             requests:
-              cpu: "256m"
-              memory: "768Mi"
-            limits:
               cpu: "512m"
-              memory: "1.5Gi"
+              memory: "1Gi"
+            limits:
+              cpu: "1000m"
+              memory: "2Gi"
           readinessProbe:
             httpGet:
               path: /actuator/health/readiness
@@ -73,4 +73,29 @@ spec:
   ports:
     - port: 8080
       targetPort: 8080
-  type: LoadBalancer
+      protocol: TCP
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: fintrack-ingress
+  namespace: fintrack
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
+    alb.ingress.kubernetes.io/healthcheck-path: /actuator/health
+    alb.ingress.kubernetes.io/healthcheck-port: "8080"
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: api-gateway
+                port:
+                  number: 8080
