@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: config-server
-          image: 692101471621.dkr.ecr.us-east-1.amazonaws.com/fintrack-config-server:latest
+          image: 692101471621.dkr.ecr.us-east-1.amazonaws.com/fintrack-config-server:59d1983f877ff923b67dde1060255035b3b785a2
           ports:
             - containerPort: 8080
           env:
