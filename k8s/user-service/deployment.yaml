@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: user-service
-          image: 692101471621.dkr.ecr.us-east-1.amazonaws.com/fintrack-user-service:latest
+          image: 692101471621.dkr.ecr.us-east-1.amazonaws.com/fintrack-user-service:01f49c027d224fce2126fc826fc0b8f824a8dea6
           ports:
             - containerPort: 8081
           env:
