@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: transaction-service
-          image: 692101471621.dkr.ecr.us-east-1.amazonaws.com/fintrack-transaction-serviceatest
+          image: 692101471621.dkr.ecr.us-east-1.amazonaws.com/fintrack-transaction-service:latest
           ports:
             - containerPort: 8083
           env:
