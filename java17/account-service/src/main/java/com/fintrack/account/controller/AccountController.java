@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -36,7 +35,7 @@ public class AccountController {
     @Operation(summary = "Open a wallet for the authenticated user (idempotent on userUuid)")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public AccountResponse open(@RequestHeader(value = "X-User-Id") String userUuid,
+    public AccountResponse open(@AuthenticationPrincipal String userUuid,
                                 @Valid @RequestBody CreateAccountRequest req) {
         return accountService.createForUser(userUuid, req.getCurrencyCode());
     }
@@ -49,7 +48,7 @@ public class AccountController {
 
     @Operation(summary = "Get the wallet of the authenticated user")
     @GetMapping("/me")
-    public AccountResponse mine(@RequestHeader("X-User-Id") String userUuid) {
+    public AccountResponse mine(@AuthenticationPrincipal String userUuid){
         return accountService.findByUserUuid(userUuid);
     }
 
