@@ -295,7 +295,7 @@
 </span>
 </span>
 </td>
-<td class=''><pre><span  class=''>import org.springframework.web.bind.annotation.RequestHeader;</span></pre></td></tr>
+<td class=''><pre><span  class=''>import org.springframework.web.bind.annotation.RequestMapping;</span></pre></td></tr>
 
 
 <tr>
@@ -310,7 +310,7 @@
 </span>
 </span>
 </td>
-<td class=''><pre><span  class=''>import org.springframework.web.bind.annotation.RequestMapping;</span></pre></td></tr>
+<td class=''><pre><span  class=''>import org.springframework.web.bind.annotation.RequestParam;</span></pre></td></tr>
 
 
 <tr>
@@ -325,7 +325,7 @@
 </span>
 </span>
 </td>
-<td class=''><pre><span  class=''>import org.springframework.web.bind.annotation.RequestParam;</span></pre></td></tr>
+<td class=''><pre><span  class=''>import org.springframework.web.bind.annotation.ResponseStatus;</span></pre></td></tr>
 
 
 <tr>
@@ -340,7 +340,7 @@
 </span>
 </span>
 </td>
-<td class=''><pre><span  class=''>import org.springframework.web.bind.annotation.ResponseStatus;</span></pre></td></tr>
+<td class=''><pre><span  class=''>import org.springframework.web.bind.annotation.RestController;</span></pre></td></tr>
 
 
 <tr>
@@ -355,7 +355,7 @@
 </span>
 </span>
 </td>
-<td class=''><pre><span  class=''>import org.springframework.web.bind.annotation.RestController;</span></pre></td></tr>
+<td class=''><pre><span  class=''></span></pre></td></tr>
 
 
 <tr>
@@ -370,7 +370,7 @@
 </span>
 </span>
 </td>
-<td class=''><pre><span  class=''></span></pre></td></tr>
+<td class=''><pre><span  class=''>import java.math.BigDecimal;</span></pre></td></tr>
 
 
 <tr>
@@ -385,7 +385,7 @@
 </span>
 </span>
 </td>
-<td class=''><pre><span  class=''>import java.math.BigDecimal;</span></pre></td></tr>
+<td class=''><pre><span  class=''></span></pre></td></tr>
 
 
 <tr>
@@ -400,7 +400,7 @@
 </span>
 </span>
 </td>
-<td class=''><pre><span  class=''></span></pre></td></tr>
+<td class=''><pre><span  class=''>@Tag(name = &#34;Accounts&#34;, description = &#34;User wallets, balances and interest previews&#34;)</span></pre></td></tr>
 
 
 <tr>
@@ -415,7 +415,7 @@
 </span>
 </span>
 </td>
-<td class=''><pre><span  class=''>@Tag(name = &#34;Accounts&#34;, description = &#34;User wallets, balances and interest previews&#34;)</span></pre></td></tr>
+<td class=''><pre><span  class=''>@SecurityRequirement(name = &#34;bearer-jwt&#34;)</span></pre></td></tr>
 
 
 <tr>
@@ -430,7 +430,7 @@
 </span>
 </span>
 </td>
-<td class=''><pre><span  class=''>@SecurityRequirement(name = &#34;bearer-jwt&#34;)</span></pre></td></tr>
+<td class=''><pre><span  class=''>@RestController</span></pre></td></tr>
 
 
 <tr>
@@ -445,11 +445,11 @@
 </span>
 </span>
 </td>
-<td class=''><pre><span  class=''>@RestController</span></pre></td></tr>
+<td class=''><pre><span  class=''>@RequestMapping(&#34;/api/v1/accounts&#34;)</span></pre></td></tr>
 
 
 <tr>
-<td class='na'>
+<td class='covered'>
 <a name='org.pitest.mutationtest.report.html.SourceFile@61c4cebd_30'/>
 30
 </td>
@@ -460,11 +460,11 @@
 </span>
 </span>
 </td>
-<td class=''><pre><span  class=''>@RequestMapping(&#34;/api/v1/accounts&#34;)</span></pre></td></tr>
+<td class='covered'><pre><span  class=''>@RequiredArgsConstructor</span></pre></td></tr>
 
 
 <tr>
-<td class='covered'>
+<td class='na'>
 <a name='org.pitest.mutationtest.report.html.SourceFile@61c4cebd_31'/>
 31
 </td>
@@ -475,7 +475,7 @@
 </span>
 </span>
 </td>
-<td class='covered'><pre><span  class=''>@RequiredArgsConstructor</span></pre></td></tr>
+<td class=''><pre><span  class=''>public class AccountController {</span></pre></td></tr>
 
 
 <tr>
@@ -490,7 +490,7 @@
 </span>
 </span>
 </td>
-<td class=''><pre><span  class=''>public class AccountController {</span></pre></td></tr>
+<td class=''><pre><span  class=''></span></pre></td></tr>
 
 
 <tr>
@@ -505,7 +505,7 @@
 </span>
 </span>
 </td>
-<td class=''><pre><span  class=''></span></pre></td></tr>
+<td class=''><pre><span  class=''>    private final AccountService accountService;</span></pre></td></tr>
 
 
 <tr>
@@ -520,7 +520,7 @@
 </span>
 </span>
 </td>
-<td class=''><pre><span  class=''>    private final AccountService accountService;</span></pre></td></tr>
+<td class=''><pre><span  class=''></span></pre></td></tr>
 
 
 <tr>
@@ -535,7 +535,7 @@
 </span>
 </span>
 </td>
-<td class=''><pre><span  class=''></span></pre></td></tr>
+<td class=''><pre><span  class=''>    @Operation(summary = &#34;Open a wallet for the authenticated user (idempotent on userUuid)&#34;)</span></pre></td></tr>
 
 
 <tr>
@@ -550,7 +550,7 @@
 </span>
 </span>
 </td>
-<td class=''><pre><span  class=''>    @Operation(summary = &#34;Open a wallet for the authenticated user (idempotent on userUuid)&#34;)</span></pre></td></tr>
+<td class=''><pre><span  class=''>    @PostMapping</span></pre></td></tr>
 
 
 <tr>
@@ -565,7 +565,7 @@
 </span>
 </span>
 </td>
-<td class=''><pre><span  class=''>    @PostMapping</span></pre></td></tr>
+<td class=''><pre><span  class=''>    @ResponseStatus(HttpStatus.CREATED)</span></pre></td></tr>
 
 
 <tr>
@@ -580,7 +580,7 @@
 </span>
 </span>
 </td>
-<td class=''><pre><span  class=''>    @ResponseStatus(HttpStatus.CREATED)</span></pre></td></tr>
+<td class=''><pre><span  class=''>    public AccountResponse open(@AuthenticationPrincipal String userUuid,</span></pre></td></tr>
 
 
 <tr>
@@ -595,32 +595,17 @@
 </span>
 </span>
 </td>
-<td class=''><pre><span  class=''>    public AccountResponse open(@RequestHeader(value = &#34;X-User-Id&#34;) String userUuid,</span></pre></td></tr>
-
-
-<tr>
-<td class='na'>
-<a name='org.pitest.mutationtest.report.html.SourceFile@61c4cebd_40'/>
-40
-</td>
-<td class=''>
-<span class='pop'>
-<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@61c4cebd_40'></a>
-<span>
-</span>
-</span>
-</td>
 <td class=''><pre><span  class=''>                                @Valid @RequestBody CreateAccountRequest req) {</span></pre></td></tr>
 
 
 <tr>
 <td class='uncovered'>
-<a name='org.pitest.mutationtest.report.html.SourceFile@61c4cebd_41'/>
-41
+<a name='org.pitest.mutationtest.report.html.SourceFile@61c4cebd_40'/>
+40
 </td>
 <td class='survived'>
 <span class='pop'>
-<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@61c4cebd_41'>1</a>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@61c4cebd_40'>1</a>
 <span>
 1. open : replaced return value with null for com/fintrack/account/controller/AccountController::open &rarr; NO_COVERAGE<br/>
 
@@ -628,6 +613,21 @@
 </span>
 </td>
 <td class='uncovered'><pre><span  class='survived'>        return accountService.createForUser(userUuid, req.getCurrencyCode());</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@61c4cebd_41'/>
+41
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@61c4cebd_41'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    }</span></pre></td></tr>
 
 
 <tr>
@@ -642,7 +642,7 @@
 </span>
 </span>
 </td>
-<td class=''><pre><span  class=''>    }</span></pre></td></tr>
+<td class=''><pre><span  class=''></span></pre></td></tr>
 
 
 <tr>
@@ -657,7 +657,7 @@
 </span>
 </span>
 </td>
-<td class=''><pre><span  class=''></span></pre></td></tr>
+<td class=''><pre><span  class=''>    @Operation(summary = &#34;Get an account by its UUID&#34;)</span></pre></td></tr>
 
 
 <tr>
@@ -672,7 +672,7 @@
 </span>
 </span>
 </td>
-<td class=''><pre><span  class=''>    @Operation(summary = &#34;Get an account by its UUID&#34;)</span></pre></td></tr>
+<td class=''><pre><span  class=''>    @GetMapping(&#34;/{uuid}&#34;)</span></pre></td></tr>
 
 
 <tr>
@@ -687,32 +687,17 @@
 </span>
 </span>
 </td>
-<td class=''><pre><span  class=''>    @GetMapping(&#34;/{uuid}&#34;)</span></pre></td></tr>
-
-
-<tr>
-<td class='na'>
-<a name='org.pitest.mutationtest.report.html.SourceFile@61c4cebd_46'/>
-46
-</td>
-<td class=''>
-<span class='pop'>
-<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@61c4cebd_46'></a>
-<span>
-</span>
-</span>
-</td>
 <td class=''><pre><span  class=''>    public AccountResponse get(@PathVariable String uuid) {</span></pre></td></tr>
 
 
 <tr>
 <td class='covered'>
-<a name='org.pitest.mutationtest.report.html.SourceFile@61c4cebd_47'/>
-47
+<a name='org.pitest.mutationtest.report.html.SourceFile@61c4cebd_46'/>
+46
 </td>
 <td class='survived'>
 <span class='pop'>
-<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@61c4cebd_47'>1</a>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@61c4cebd_46'>1</a>
 <span>
 1. get : replaced return value with null for com/fintrack/account/controller/AccountController::get &rarr; SURVIVED<br/>
 
@@ -720,6 +705,21 @@
 </span>
 </td>
 <td class='covered'><pre><span  class='survived'>        return accountService.findByUuid(uuid);</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@61c4cebd_47'/>
+47
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@61c4cebd_47'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    }</span></pre></td></tr>
 
 
 <tr>
@@ -734,7 +734,7 @@
 </span>
 </span>
 </td>
-<td class=''><pre><span  class=''>    }</span></pre></td></tr>
+<td class=''><pre><span  class=''></span></pre></td></tr>
 
 
 <tr>
@@ -749,7 +749,7 @@
 </span>
 </span>
 </td>
-<td class=''><pre><span  class=''></span></pre></td></tr>
+<td class=''><pre><span  class=''>    @Operation(summary = &#34;Get the wallet of the authenticated user&#34;)</span></pre></td></tr>
 
 
 <tr>
@@ -764,7 +764,7 @@
 </span>
 </span>
 </td>
-<td class=''><pre><span  class=''>    @Operation(summary = &#34;Get the wallet of the authenticated user&#34;)</span></pre></td></tr>
+<td class=''><pre><span  class=''>    @GetMapping(&#34;/me&#34;)</span></pre></td></tr>
 
 
 <tr>
@@ -779,32 +779,17 @@
 </span>
 </span>
 </td>
-<td class=''><pre><span  class=''>    @GetMapping(&#34;/me&#34;)</span></pre></td></tr>
-
-
-<tr>
-<td class='na'>
-<a name='org.pitest.mutationtest.report.html.SourceFile@61c4cebd_52'/>
-52
-</td>
-<td class=''>
-<span class='pop'>
-<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@61c4cebd_52'></a>
-<span>
-</span>
-</span>
-</td>
-<td class=''><pre><span  class=''>    public AccountResponse mine(@RequestHeader(&#34;X-User-Id&#34;) String userUuid) {</span></pre></td></tr>
+<td class=''><pre><span  class=''>    public AccountResponse mine(@AuthenticationPrincipal String userUuid){</span></pre></td></tr>
 
 
 <tr>
 <td class='uncovered'>
-<a name='org.pitest.mutationtest.report.html.SourceFile@61c4cebd_53'/>
-53
+<a name='org.pitest.mutationtest.report.html.SourceFile@61c4cebd_52'/>
+52
 </td>
 <td class='survived'>
 <span class='pop'>
-<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@61c4cebd_53'>1</a>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@61c4cebd_52'>1</a>
 <span>
 1. mine : replaced return value with null for com/fintrack/account/controller/AccountController::mine &rarr; NO_COVERAGE<br/>
 
@@ -812,6 +797,21 @@
 </span>
 </td>
 <td class='uncovered'><pre><span  class='survived'>        return accountService.findByUserUuid(userUuid);</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@61c4cebd_53'/>
+53
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@61c4cebd_53'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    }</span></pre></td></tr>
 
 
 <tr>
@@ -826,7 +826,7 @@
 </span>
 </span>
 </td>
-<td class=''><pre><span  class=''>    }</span></pre></td></tr>
+<td class=''><pre><span  class=''></span></pre></td></tr>
 
 
 <tr>
@@ -841,7 +841,7 @@
 </span>
 </span>
 </td>
-<td class=''><pre><span  class=''></span></pre></td></tr>
+<td class=''><pre><span  class=''>    @Operation(summary = &#34;Balance only &#8212; cached aggressively&#34;)</span></pre></td></tr>
 
 
 <tr>
@@ -856,7 +856,7 @@
 </span>
 </span>
 </td>
-<td class=''><pre><span  class=''>    @Operation(summary = &#34;Balance only &#8212; cached aggressively&#34;)</span></pre></td></tr>
+<td class=''><pre><span  class=''>    @GetMapping(&#34;/{uuid}/balance&#34;)</span></pre></td></tr>
 
 
 <tr>
@@ -871,32 +871,17 @@
 </span>
 </span>
 </td>
-<td class=''><pre><span  class=''>    @GetMapping(&#34;/{uuid}/balance&#34;)</span></pre></td></tr>
-
-
-<tr>
-<td class='na'>
-<a name='org.pitest.mutationtest.report.html.SourceFile@61c4cebd_58'/>
-58
-</td>
-<td class=''>
-<span class='pop'>
-<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@61c4cebd_58'></a>
-<span>
-</span>
-</span>
-</td>
 <td class=''><pre><span  class=''>    public BalanceResponse balance(@PathVariable String uuid) {</span></pre></td></tr>
 
 
 <tr>
 <td class='uncovered'>
-<a name='org.pitest.mutationtest.report.html.SourceFile@61c4cebd_59'/>
-59
+<a name='org.pitest.mutationtest.report.html.SourceFile@61c4cebd_58'/>
+58
 </td>
 <td class='survived'>
 <span class='pop'>
-<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@61c4cebd_59'>1</a>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@61c4cebd_58'>1</a>
 <span>
 1. balance : replaced return value with null for com/fintrack/account/controller/AccountController::balance &rarr; NO_COVERAGE<br/>
 
@@ -904,6 +889,21 @@
 </span>
 </td>
 <td class='uncovered'><pre><span  class='survived'>        return accountService.balance(uuid);</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@61c4cebd_59'/>
+59
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@61c4cebd_59'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    }</span></pre></td></tr>
 
 
 <tr>
@@ -918,7 +918,7 @@
 </span>
 </span>
 </td>
-<td class=''><pre><span  class=''>    }</span></pre></td></tr>
+<td class=''><pre><span  class=''></span></pre></td></tr>
 
 
 <tr>
@@ -933,7 +933,7 @@
 </span>
 </span>
 </td>
-<td class=''><pre><span  class=''></span></pre></td></tr>
+<td class=''><pre><span  class=''>    @Operation(summary = &#34;Preview interest using a chosen Strategy (defaults to fintrack.account.interest.strategy)&#34;)</span></pre></td></tr>
 
 
 <tr>
@@ -948,7 +948,7 @@
 </span>
 </span>
 </td>
-<td class=''><pre><span  class=''>    @Operation(summary = &#34;Preview interest using a chosen Strategy (defaults to fintrack.account.interest.strategy)&#34;)</span></pre></td></tr>
+<td class=''><pre><span  class=''>    @GetMapping(&#34;/{uuid}/interest/preview&#34;)</span></pre></td></tr>
 
 
 <tr>
@@ -963,7 +963,7 @@
 </span>
 </span>
 </td>
-<td class=''><pre><span  class=''>    @GetMapping(&#34;/{uuid}/interest/preview&#34;)</span></pre></td></tr>
+<td class=''><pre><span  class=''>    public InterestPreview interestPreview(@PathVariable String uuid,</span></pre></td></tr>
 
 
 <tr>
@@ -978,7 +978,7 @@
 </span>
 </span>
 </td>
-<td class=''><pre><span  class=''>    public InterestPreview interestPreview(@PathVariable String uuid,</span></pre></td></tr>
+<td class=''><pre><span  class=''>                                           @RequestParam(defaultValue = &#34;0.025&#34;) BigDecimal annualRate,</span></pre></td></tr>
 
 
 <tr>
@@ -993,7 +993,7 @@
 </span>
 </span>
 </td>
-<td class=''><pre><span  class=''>                                           @RequestParam(defaultValue = &#34;0.025&#34;) BigDecimal annualRate,</span></pre></td></tr>
+<td class=''><pre><span  class=''>                                           @RequestParam(defaultValue = &#34;12&#34;) int months,</span></pre></td></tr>
 
 
 <tr>
@@ -1008,32 +1008,17 @@
 </span>
 </span>
 </td>
-<td class=''><pre><span  class=''>                                           @RequestParam(defaultValue = &#34;12&#34;) int months,</span></pre></td></tr>
-
-
-<tr>
-<td class='na'>
-<a name='org.pitest.mutationtest.report.html.SourceFile@61c4cebd_67'/>
-67
-</td>
-<td class=''>
-<span class='pop'>
-<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@61c4cebd_67'></a>
-<span>
-</span>
-</span>
-</td>
 <td class=''><pre><span  class=''>                                           @RequestParam(required = false) String strategy) {</span></pre></td></tr>
 
 
 <tr>
 <td class='uncovered'>
-<a name='org.pitest.mutationtest.report.html.SourceFile@61c4cebd_68'/>
-68
+<a name='org.pitest.mutationtest.report.html.SourceFile@61c4cebd_67'/>
+67
 </td>
 <td class='survived'>
 <span class='pop'>
-<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@61c4cebd_68'>1</a>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@61c4cebd_67'>1</a>
 <span>
 1. interestPreview : replaced return value with null for com/fintrack/account/controller/AccountController::interestPreview &rarr; NO_COVERAGE<br/>
 
@@ -1041,6 +1026,21 @@
 </span>
 </td>
 <td class='uncovered'><pre><span  class='survived'>        return accountService.previewInterest(uuid, annualRate, months, strategy);</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@61c4cebd_68'/>
+68
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@61c4cebd_68'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    }</span></pre></td></tr>
 
 
 <tr>
@@ -1055,21 +1055,6 @@
 </span>
 </span>
 </td>
-<td class=''><pre><span  class=''>    }</span></pre></td></tr>
-
-
-<tr>
-<td class='na'>
-<a name='org.pitest.mutationtest.report.html.SourceFile@61c4cebd_70'/>
-70
-</td>
-<td class=''>
-<span class='pop'>
-<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@61c4cebd_70'></a>
-<span>
-</span>
-</span>
-</td>
 <td class=''><pre><span  class=''>}</span></pre></td></tr>
 
 
@@ -1077,51 +1062,51 @@
 <tr><td></td><td></td><td><h2>Mutations</h2></td></tr>
 
 <tr>
-<td><a href='#org.pitest.mutationtest.report.html.SourceFile@61c4cebd_41'>41</a></td> 
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@61c4cebd_40'>40</a></td> 
 <td></td>
 <td>
 
-<a name='grouporg.pitest.mutationtest.report.html.SourceFile@61c4cebd_41'/> 
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@61c4cebd_40'/> 
 
 <p class='NO_COVERAGE'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>open<br/><b>Killed by : </b>none</span></span> replaced return value with null for com/fintrack/account/controller/AccountController::open &rarr; NO_COVERAGE</p> 
 </td>
 </tr>
 <tr>
-<td><a href='#org.pitest.mutationtest.report.html.SourceFile@61c4cebd_47'>47</a></td> 
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@61c4cebd_46'>46</a></td> 
 <td></td>
 <td>
 
-<a name='grouporg.pitest.mutationtest.report.html.SourceFile@61c4cebd_47'/> 
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@61c4cebd_46'/> 
 
 <p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>get<br/><b>Killed by : </b>none</span></span> replaced return value with null for com/fintrack/account/controller/AccountController::get &rarr; SURVIVED</p> 
 </td>
 </tr>
 <tr>
-<td><a href='#org.pitest.mutationtest.report.html.SourceFile@61c4cebd_53'>53</a></td> 
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@61c4cebd_52'>52</a></td> 
 <td></td>
 <td>
 
-<a name='grouporg.pitest.mutationtest.report.html.SourceFile@61c4cebd_53'/> 
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@61c4cebd_52'/> 
 
 <p class='NO_COVERAGE'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>mine<br/><b>Killed by : </b>none</span></span> replaced return value with null for com/fintrack/account/controller/AccountController::mine &rarr; NO_COVERAGE</p> 
 </td>
 </tr>
 <tr>
-<td><a href='#org.pitest.mutationtest.report.html.SourceFile@61c4cebd_59'>59</a></td> 
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@61c4cebd_58'>58</a></td> 
 <td></td>
 <td>
 
-<a name='grouporg.pitest.mutationtest.report.html.SourceFile@61c4cebd_59'/> 
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@61c4cebd_58'/> 
 
 <p class='NO_COVERAGE'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>balance<br/><b>Killed by : </b>none</span></span> replaced return value with null for com/fintrack/account/controller/AccountController::balance &rarr; NO_COVERAGE</p> 
 </td>
 </tr>
 <tr>
-<td><a href='#org.pitest.mutationtest.report.html.SourceFile@61c4cebd_68'>68</a></td> 
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@61c4cebd_67'>67</a></td> 
 <td></td>
 <td>
 
-<a name='grouporg.pitest.mutationtest.report.html.SourceFile@61c4cebd_68'/> 
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@61c4cebd_67'/> 
 
 <p class='NO_COVERAGE'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>interestPreview<br/><b>Killed by : </b>none</span></span> replaced return value with null for com/fintrack/account/controller/AccountController::interestPreview &rarr; NO_COVERAGE</p> 
 </td>
@@ -1148,7 +1133,7 @@
 
 <h2>Tests examined</h2>
 <ul>
-<li>com.fintrack.account.controller.AccountControllerSecurityTest.[engine:junit-jupiter]/[class:com.fintrack.account.controller.AccountControllerSecurityTest]/[method:shouldAllowAuthenticatedGetAccount()] (114 ms)</li>
+<li>com.fintrack.account.controller.AccountControllerSecurityTest.[engine:junit-jupiter]/[class:com.fintrack.account.controller.AccountControllerSecurityTest]/[method:shouldAllowAuthenticatedGetAccount()] (110 ms)</li>
 </ul>
 
 <br/>
