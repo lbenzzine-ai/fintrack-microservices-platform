@@ -166,6 +166,12 @@
             <artifactId>spring-security-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.fintrack</groupId>
+            <artifactId>account-service</artifactId>
+            <version>1.0.0-jdk21</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
