@@ -141,8 +141,7 @@ jobs:
 
             echo "✅ Java services deployed"
 
-      - name: Prepare Nginx folder (if frontend changed)
-        if: needs.detect-changes.outputs.frontend == 'true'
+      - name: Prepare Nginx folder
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.ORACLE_HOST }}
