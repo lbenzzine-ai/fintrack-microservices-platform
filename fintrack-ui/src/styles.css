@@ -182,4 +182,390 @@
   .infra-card {
     @apply rounded-lg p-2 text-center border border-white/5;
   }
+
+  /* ═══════════════════════════════════════════════════════════════
+     HISTORY COMPONENT — tx-table
+     ═══════════════════════════════════════════════════════════════ */
+  .tx-table { width: 100%; border-collapse: collapse; }
+  .tx-table th {
+    text-align: left; font-size: 11px; color: #5A7090;
+    text-transform: uppercase; letter-spacing: 0.8px;
+    padding: 8px 12px; border-bottom: 1px solid rgba(196,163,82,0.1);
+  }
+  .tx-table td {
+    padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-size: 13px; vertical-align: middle;
+  }
+  .tx-table tr:last-child td { border-bottom: none; }
+  .tx-table tr:hover td { background: rgba(196,163,82,0.03); }
+  .tx-debit  { color: #E07070; }
+  .tx-credit { color: #4CAF80; }
+
+  /* ═══════════════════════════════════════════════════════════════
+     TRANSFER COMPONENT — account cards
+     ═══════════════════════════════════════════════════════════════ */
+  .account-card {
+    background: rgba(15,30,53,0.8);
+    border: 1px solid rgba(196,163,82,0.15);
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-top: 6px;
+  }
+  .account-card.selected {
+    border-color: rgba(196,163,82,0.4);
+    background: rgba(196,163,82,0.05);
+  }
+  .balance-float {
+    background: rgba(15,30,53,0.95);
+    border: 1px solid rgba(196,163,82,0.2);
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-top: 6px;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+     ABOUT COMPONENT
+     ═══════════════════════════════════════════════════════════════ */
+  .node-badge {
+    width: 52px; height: 52px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 500;
+  }
+  .pattern-card {
+    background: linear-gradient(135deg, rgba(15,30,53,0.8), rgba(10,22,40,0.8));
+    @apply rounded-xl p-4 border border-white/5 hover:border-gold-500/20 transition-colors;
+  }
+  .tech-card {
+    background: rgba(15,30,53,0.5);
+    @apply rounded-lg p-3 text-center border border-white/5 hover:border-gold-500/20 transition-colors;
+  }
+  .link-card {
+    background: rgba(15,30,53,0.5);
+    @apply rounded-xl p-4 border border-white/5 hover:border-gold-500/30 transition-all cursor-pointer;
+  }
+  .arch-node-highlight { border-color: rgba(196,163,82,0.5); }
+
+  .service-badge {
+    @apply bg-navy-900 border border-white/10 rounded px-2 py-1 text-center;
+  }
+  .coming-soon-card {
+    @apply rounded-xl p-3 border border-white/5 border-dashed flex items-start gap-3;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+     LOGIN COMPONENT — left panel
+     ═══════════════════════════════════════════════════════════════ */
+  .login-left-panel {
+    background: linear-gradient(135deg, #040D1A 0%, #071020 60%, #0A1628 100%);
+  }
+  .login-grid-bg {
+    background-image:
+      linear-gradient(rgba(196,163,82,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(196,163,82,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+     BUTTON VARIANTS
+     ═══════════════════════════════════════════════════════════════ */
+  .btn-pagination  { @apply btn-outline; width: auto; padding: 6px 16px; }
+  .btn-refresh     { @apply btn-outline; padding: 8px; }
+  .btn-search      { @apply btn-primary; width: auto; padding: 10px 24px; }
+  .btn-grant-admin { @apply text-sm px-4 py-2 rounded-lg border border-gold-500/30 text-gold-500 hover:bg-gold-500/10 transition-colors; }
+  .btn-revoke-admin{ @apply text-sm px-4 py-2 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-colors; }
+
+  /* ═══════════════════════════════════════════════════════════════
+     TOAST NOTIFICATIONS
+     ═══════════════════════════════════════════════════════════════ */
+  .toast-container { @apply fixed bottom-6 right-6 flex flex-col gap-3 z-50 pointer-events-none; max-width: 380px; }
+  .toast           { @apply flex items-center gap-3 px-4 py-3 rounded-xl border shadow-xl pointer-events-auto cursor-pointer; backdrop-filter: blur(12px); }
+  .toast-success   { @apply bg-green-500/10 border-green-500/30 text-green-400; }
+  .toast-error     { @apply bg-red-500/10 border-red-500/30 text-red-400; }
+  .toast-warning   { @apply bg-gold-500/10 border-gold-500/30 text-gold-400; }
+  .toast-info      { @apply bg-blue-500/10 border-blue-500/30 text-blue-400; }
+  .toast-icon      { @apply flex-shrink-0 text-base; }
+  .toast-message   { @apply flex-1 text-sm font-medium; }
+  .toast-close     { @apply flex-shrink-0 text-xs opacity-50 hover:opacity-100 transition-opacity ml-2; }
+
+  /* ═══════════════════════════════════════════════════════════════
+     SEMANTIC UTILITY CLASSES — replaces repeated inline Tailwind
+     ═══════════════════════════════════════════════════════════════ */
+
+  /* Auth pages */
+  .auth-page          { @apply min-h-screen bg-navy-800 flex; }
+  .auth-page-centered { @apply min-h-screen bg-navy-800 flex items-center justify-center; }
+  .auth-container     { @apply w-full max-w-sm; }
+
+  /* Navigation */
+  .nav-link      { @apply text-slate-light px-4 py-1.5 rounded-md text-sm hover:text-gold-500 transition-colors block; }
+  .admin-nav-link{ @apply flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-slate-muted hover:text-gold-500 hover:bg-gold-500/5 transition-colors; }
+  .link-gold     { @apply text-gold-500 text-xs hover:text-gold-400; }
+
+  /* Layout helpers */
+  .page-header   { @apply flex justify-between items-start mb-7; }
+  .page-row      { @apply flex justify-between items-center; }
+  .card-section  { @apply card mb-5; }
+  .page-sub-header { @apply font-display text-xl mb-5; }
+  .two-col-grid  { @apply grid grid-cols-2 gap-5; }
+  .z-content     { @apply relative z-10; }
+  .avatar-wrap   { @apply avatar mb-4; }
+
+  /* Typography */
+  .text-muted    { @apply text-xs text-slate-muted; }
+  .text-muted-sm { @apply text-slate-muted text-xs; }
+  .text-muted-mt { @apply text-xs text-slate-muted mt-1; }
+  .text-muted-mb { @apply text-xs text-slate-muted mb-0.5; }
+  .text-muted-rw { @apply text-xs text-slate-muted leading-relaxed; }
+  .text-muted-uc { @apply text-xs text-slate-muted mb-1 uppercase tracking-widest; }
+  .text-body     { @apply text-xs text-slate-text; }
+  .text-gold-sm  { @apply font-display text-gold-500 text-sm; }
+  .text-gold-xl  { @apply font-display text-xl text-gold-500; }
+  .text-gold-2xl { @apply font-display text-2xl text-gold-500; }
+  .text-gold-lg  { @apply text-gold-500 text-lg mb-1; }
+  .section-mb1   { @apply section-title mb-1; }
+
+  /* Empty states */
+  .empty-state   { @apply text-center text-slate-muted py-6; }
+  .empty-icon    { @apply text-4xl mb-3; }
+
+  /* Spinner */
+  .spinner-btn   { @apply spinner text-navy-900; }
+
+  /* Opacity helpers (chart.js SVG) */
+  .op-25         { @apply opacity-25; }
+  .op-75         { @apply opacity-75; }
+
+  /* User management */
+  .action-success { @apply mt-4 text-xs text-green-400 p-2 rounded border border-green-500/20 bg-green-500/5; }
+
+  /* ═══════════════════════════════════════════════════════════════
+     HISTORY COMPONENT — tx-table
+     ═══════════════════════════════════════════════════════════════ */
+  .tx-table { width: 100%; border-collapse: collapse; }
+  .tx-table th {
+    text-align: left; font-size: 11px; color: #5A7090;
+    text-transform: uppercase; letter-spacing: 0.8px;
+    padding: 8px 12px; border-bottom: 1px solid rgba(196,163,82,0.1);
+  }
+  .tx-table td {
+    padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-size: 13px; vertical-align: middle;
+  }
+  .tx-table tr:last-child td { border-bottom: none; }
+  .tx-table tr:hover td { background: rgba(196,163,82,0.03); }
+  .tx-debit  { color: #E07070; }
+  .tx-credit { color: #4CAF80; }
+
+  /* ═══════════════════════════════════════════════════════════════
+     TRANSFER COMPONENT — account cards
+     ═══════════════════════════════════════════════════════════════ */
+  .account-card {
+    background: rgba(15,30,53,0.8);
+    border: 1px solid rgba(196,163,82,0.15);
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-top: 6px;
+  }
+  .account-card.selected {
+    border-color: rgba(196,163,82,0.4);
+    background: rgba(196,163,82,0.05);
+  }
+  .balance-float {
+    background: rgba(15,30,53,0.95);
+    border: 1px solid rgba(196,163,82,0.2);
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-top: 6px;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+     ABOUT COMPONENT
+     ═══════════════════════════════════════════════════════════════ */
+  .node-badge {
+    width: 52px; height: 52px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 500;
+  }
+  .pattern-card {
+    background: linear-gradient(135deg, rgba(15,30,53,0.8), rgba(10,22,40,0.8));
+    @apply rounded-xl p-4 border border-white/5 hover:border-gold-500/20 transition-colors;
+  }
+  .tech-card {
+    background: rgba(15,30,53,0.5);
+    @apply rounded-lg p-3 text-center border border-white/5 hover:border-gold-500/20 transition-colors;
+  }
+  .link-card {
+    background: rgba(15,30,53,0.5);
+    @apply rounded-xl p-4 border border-white/5 hover:border-gold-500/30 transition-all cursor-pointer;
+  }
+  .arch-node-highlight { border-color: rgba(196,163,82,0.5); }
+
+  /* ═══════════════════════════════════════════════════════════════
+     LOGIN COMPONENT — left panel
+     ═══════════════════════════════════════════════════════════════ */
+  .login-left-panel {
+    background: linear-gradient(135deg, #040D1A 0%, #071020 60%, #0A1628 100%);
+  }
+  .login-grid-bg {
+    background-image:
+      linear-gradient(rgba(196,163,82,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(196,163,82,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+     BUTTON VARIANTS
+     ═══════════════════════════════════════════════════════════════ */
+  .btn-pagination  { @apply btn-outline; width: auto; padding: 6px 16px; }
+  .btn-refresh     { @apply btn-outline; padding: 8px; }
+  .btn-search      { @apply btn-primary; width: auto; padding: 10px 24px; }
+  .btn-grant-admin { @apply text-sm px-4 py-2 rounded-lg border border-gold-500/30 text-gold-500 hover:bg-gold-500/10 transition-colors; }
+  .btn-revoke-admin{ @apply text-sm px-4 py-2 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-colors; }
+
+  /* ═══════════════════════════════════════════════════════════════
+     TOAST NOTIFICATIONS
+     ═══════════════════════════════════════════════════════════════ */
+  .toast-container { @apply fixed bottom-6 right-6 flex flex-col gap-3 z-50 pointer-events-none; max-width: 380px; }
+  .toast           { @apply flex items-center gap-3 px-4 py-3 rounded-xl border shadow-xl pointer-events-auto cursor-pointer; backdrop-filter: blur(12px); }
+  .toast-success   { @apply bg-green-500/10 border-green-500/30 text-green-400; }
+  .toast-error     { @apply bg-red-500/10 border-red-500/30 text-red-400; }
+  .toast-warning   { @apply bg-gold-500/10 border-gold-500/30 text-gold-400; }
+  .toast-info      { @apply bg-blue-500/10 border-blue-500/30 text-blue-400; }
+  .toast-icon      { @apply flex-shrink-0 text-base; }
+  .toast-message   { @apply flex-1 text-sm font-medium; }
+  .toast-close     { @apply flex-shrink-0 text-xs opacity-50 hover:opacity-100 transition-opacity ml-2; }
+
+  /* ═══════════════════════════════════════════════════════════════
+     SEMANTIC UTILITY CLASSES — replaces repeated inline Tailwind
+     ═══════════════════════════════════════════════════════════════ */
+
+  /* Auth pages */
+  .auth-page          { @apply min-h-screen bg-navy-800 flex; }
+  .auth-page-centered { @apply min-h-screen bg-navy-800 flex items-center justify-center; }
+  .auth-container     { @apply w-full max-w-sm; }
+
+  /* Navigation */
+  .nav-link      { @apply text-slate-light px-4 py-1.5 rounded-md text-sm hover:text-gold-500 transition-colors block; }
+  .admin-nav-link{ @apply flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-slate-muted hover:text-gold-500 hover:bg-gold-500/5 transition-colors; }
+  .link-gold     { @apply text-gold-500 text-xs hover:text-gold-400; }
+
+  /* Layout helpers */
+  .page-header   { @apply flex justify-between items-start mb-7; }
+  .page-row      { @apply flex justify-between items-center; }
+  .card-section  { @apply card mb-5; }
+  .page-sub-header { @apply font-display text-xl mb-5; }
+  .two-col-grid  { @apply grid grid-cols-2 gap-5; }
+  .z-content     { @apply relative z-10; }
+  .avatar-wrap   { @apply avatar mb-4; }
+
+  /* Typography */
+  .text-muted    { @apply text-xs text-slate-muted; }
+  .text-muted-sm { @apply text-slate-muted text-xs; }
+  .text-muted-mt { @apply text-xs text-slate-muted mt-1; }
+  .text-muted-mb { @apply text-xs text-slate-muted mb-0.5; }
+  .text-muted-rw { @apply text-xs text-slate-muted leading-relaxed; }
+  .text-muted-uc { @apply text-xs text-slate-muted mb-1 uppercase tracking-widest; }
+  .text-body     { @apply text-xs text-slate-text; }
+  .text-gold-sm  { @apply font-display text-gold-500 text-sm; }
+  .text-gold-xl  { @apply font-display text-xl text-gold-500; }
+  .text-gold-2xl { @apply font-display text-2xl text-gold-500; }
+  .text-gold-lg  { @apply text-gold-500 text-lg mb-1; }
+  .section-mb1   { @apply section-title mb-1; }
+
+  /* Empty states */
+  .empty-state   { @apply text-center text-slate-muted py-6; }
+  .empty-icon    { @apply text-4xl mb-3; }
+
+  /* Spinner */
+  .spinner-btn   { @apply spinner text-navy-900; }
+
+  /* Opacity helpers (chart.js SVG) */
+  .op-25         { @apply opacity-25; }
+  .op-75         { @apply opacity-75; }
+
+  /* User management */
+  .action-success { @apply mt-4 text-xs text-green-400 p-2 rounded border border-green-500/20 bg-green-500/5; }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LIGHT THEME — html.light-theme activates light mode
+   Warm cream palette that retains the gold accent identity.
+   Specificity (0,2,1) beats Tailwind's (0,1,0) without !important
+   on class selectors, but !important is used for inline-style
+   overrides in component CSS blocks.
+   ═══════════════════════════════════════════════════════════════ */
+
+html.light-theme body {
+  background-color: #F5F2EC;
+  color: #0F1E35;
+}
+
+/* ── Background surfaces ─────────────────────────────────────── */
+html.light-theme .bg-navy-950 { background-color: #E8E4DA !important; }
+html.light-theme .bg-navy-900 { background-color: #FFFFFF !important; }
+html.light-theme .bg-navy-800 { background-color: #F5F2EC !important; }
+html.light-theme .bg-navy-700 { background-color: #EDE9E0 !important; }
+html.light-theme .bg-navy-600 { background-color: #E2DDD3 !important; }
+html.light-theme .bg-navy-500 { background-color: #D4CFC5 !important; }
+
+/* ── Text colours ────────────────────────────────────────────── */
+html.light-theme .text-slate-text  { color: #0F1E35 !important; }
+html.light-theme .text-slate-light { color: #374355 !important; }
+/* slate-muted (#5A7090) reads fine on both themes — no override needed */
+
+/* ── Borders that use white/opacity ──────────────────────────── */
+html.light-theme .border-white\/5  { border-color: rgba(15,30,53,0.07)  !important; }
+html.light-theme .border-white\/10 { border-color: rgba(15,30,53,0.10)  !important; }
+
+/* ── Form inputs ─────────────────────────────────────────────── */
+html.light-theme input,
+html.light-theme select,
+html.light-theme textarea {
+  background-color: #FFFFFF !important;
+  color: #0F1E35 !important;
+  border-color: rgba(196,163,82,0.35) !important;
+}
+html.light-theme input::placeholder,
+html.light-theme textarea::placeholder { color: #8A9BB5 !important; }
+
+/* ── Nav-specific ─────────────────────────────────────────────── */
+html.light-theme .nav-link         { color: #374355 !important; }
+html.light-theme .nav-tooltip      { background-color: #FFFFFF; color: #374355; border-color: rgba(196,163,82,0.25); }
+html.light-theme .admin-nav-link   { color: #374355 !important; }
+
+/* ── Cards & surfaces (hardcoded backgrounds) ────────────────── */
+html.light-theme .account-card  { background: rgba(237,233,224,0.9) !important; }
+html.light-theme .balance-float { background: rgba(255,255,255,0.95) !important; }
+html.light-theme .pattern-card  { background: linear-gradient(135deg, rgba(237,233,224,0.8), rgba(245,242,236,0.8)) !important; }
+html.light-theme .tech-card,
+html.light-theme .link-card     { background: rgba(237,233,224,0.6) !important; }
+html.light-theme .service-badge { background-color: #EDE9E0 !important; color: #374355 !important; }
+html.light-theme .arch-node     { background-color: #FFFFFF !important; color: #0F1E35 !important; }
+html.light-theme .infra-card    { background-color: #EDE9E0 !important; }
+
+/* ── Hero banner ─────────────────────────────────────────────── */
+html.light-theme .hero-banner {
+  background: linear-gradient(135deg, #E2DDD3 0%, #EDE9E0 50%, #F5F2EC 100%);
+}
+html.light-theme .hero-grid {
+  background-image:
+    linear-gradient(rgba(196,163,82,0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(196,163,82,0.08) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* ── Transaction table ───────────────────────────────────────── */
+html.light-theme .tx-table th { color: #374355; border-color: rgba(196,163,82,0.15); }
+html.light-theme .tx-table td { color: #0F1E35; border-color: rgba(15,30,53,0.06); }
+html.light-theme .tx-table tr:hover td { background: rgba(196,163,82,0.05); }
+
+/* ── Login panel — keep the left panel slightly warm dark ────── */
+html.light-theme .login-left-panel {
+  background: linear-gradient(135deg, #C4B89A 0%, #D4C8A8 60%, #E2D8C0 100%);
+}
+html.light-theme .login-grid-bg {
+  background-image:
+    linear-gradient(rgba(196,163,82,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(196,163,82,0.06) 1px, transparent 1px);
+  background-size: 40px 40px;
 }

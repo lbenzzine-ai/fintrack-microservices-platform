@@ -19,6 +19,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
@@ -62,6 +63,7 @@ class TransactionControllerWebMvcTest {
     }
 
     // ── create() ─────────────────────────────────────────────────────────────────
+
     @Test
     void shouldReturn201CreatedOnValidCreateRequest() throws Exception {
         TransactionResponse response = TransactionResponse.builder()
@@ -78,16 +80,15 @@ class TransactionControllerWebMvcTest {
 
     @Test
     void shouldRejectCreateWithMissingAmount() throws Exception {
-        // GlobalExceptionHandler.handleAny(Exception) catches MethodArgumentNotValidException
-        // before Spring's default 400 mapping → ends up as 500. The point is that the
-        // request was rejected (not 201/200) and the service was never invoked.
         CreateTransactionRequest req = validRequest();
         req.setAmount(null);
 
         mockMvc.perform(post("/api/v1/transactions")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
-                .andExpect(status().is5xxServerError());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_FAILED"))
+                .andExpect(jsonPath("$.violations").isArray());
     }
 
     @Test
@@ -98,10 +99,13 @@ class TransactionControllerWebMvcTest {
         mockMvc.perform(post("/api/v1/transactions")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
-                .andExpect(status().is5xxServerError());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_FAILED"))
+                .andExpect(jsonPath("$.violations").isArray());
     }
 
     // ── get() ────────────────────────────────────────────────────────────────────
+
     @Test
     void shouldReturn200WithTransactionWhenFound() throws Exception {
         TransactionResponse response = TransactionResponse.builder()
@@ -125,7 +129,18 @@ class TransactionControllerWebMvcTest {
                 .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("ghost")));
     }
 
+    @Test
+    void shouldReturn403WhenAccessDenied() throws Exception {
+        when(transactionService.findByUuid("tx-1"))
+                .thenThrow(new AccessDeniedException("forbidden"));
+
+        mockMvc.perform(get("/api/v1/transactions/tx-1"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("ACCESS_DENIED"));
+    }
+
     // ── byAccount() ──────────────────────────────────────────────────────────────
+
     @Test
     void shouldReturn200WithListOfTransactionsByAccount() throws Exception {
         TransactionResponse t1 = TransactionResponse.builder().uuid("tx-1").build();
@@ -152,6 +167,7 @@ class TransactionControllerWebMvcTest {
     }
 
     // ── quote() ──────────────────────────────────────────────────────────────────
+
     @Test
     void shouldReturn200WithFeeQuoteOnValidParams() throws Exception {
         FeeQuote q = FeeQuote.builder()
@@ -171,17 +187,15 @@ class TransactionControllerWebMvcTest {
 
     @Test
     void shouldRejectQuoteWhenAmountMissing() throws Exception {
-        // MissingServletRequestParameterException is also caught by GlobalExceptionHandler's
-        // generic Exception handler → 500. Verifies the handler doesn't pass through to fee service.
         mockMvc.perform(get("/api/v1/transactions/fee/quote")
                         .param("type", "DOMESTIC_TRANSFER"))
-                .andExpect(status().is5xxServerError());
+                .andExpect(status().isBadRequest());
     }
 
     @Test
     void shouldRejectQuoteWhenTypeMissing() throws Exception {
         mockMvc.perform(get("/api/v1/transactions/fee/quote")
                         .param("amount", "100"))
-                .andExpect(status().is5xxServerError());
+                .andExpect(status().isBadRequest());
     }
 }

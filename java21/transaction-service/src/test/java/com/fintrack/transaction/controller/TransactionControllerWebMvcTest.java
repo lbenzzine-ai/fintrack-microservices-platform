@@ -19,6 +19,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
@@ -59,8 +60,11 @@ class TransactionControllerWebMvcTest {
     }
 
     private static TransactionResponse anyResponse(String uuid) {
-        return new TransactionResponse(uuid, null, null, new BigDecimal("100"), null, null, null, null,null, null, null, null, null);
+        return new TransactionResponse(uuid, null, null, new BigDecimal("100"),
+                null, null, null, null, null, null, null, null, null);
     }
+
+    // ── create() ─────────────────────────────────────────────────────────────────
 
     @Test
     void shouldReturn201CreatedOnValidCreateRequest() throws Exception {
@@ -76,8 +80,6 @@ class TransactionControllerWebMvcTest {
 
     @Test
     void shouldRejectCreateWithMissingAmount() throws Exception {
-        // Records don't allow null amount through Jackson with @NotNull validation if validator runs.
-        // GlobalExceptionHandler catches the validation exception → 500.
         CreateTransactionRequest req = new CreateTransactionRequest(
                 "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
                 "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
@@ -86,7 +88,9 @@ class TransactionControllerWebMvcTest {
         mockMvc.perform(post("/api/v1/transactions")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
-                .andExpect(status().is5xxServerError());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_FAILED"))
+                .andExpect(jsonPath("$.violations").isArray());
     }
 
     @Test
@@ -100,8 +104,12 @@ class TransactionControllerWebMvcTest {
         mockMvc.perform(post("/api/v1/transactions")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
-                .andExpect(status().is5xxServerError());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_FAILED"))
+                .andExpect(jsonPath("$.violations").isArray());
     }
+
+    // ── get() ────────────────────────────────────────────────────────────────────
 
     @Test
     void shouldReturn200WithTransactionWhenFound() throws Exception {
@@ -123,8 +131,21 @@ class TransactionControllerWebMvcTest {
     }
 
     @Test
+    void shouldReturn403WhenAccessDenied() throws Exception {
+        when(transactionService.findByUuid("tx-1"))
+                .thenThrow(new AccessDeniedException("forbidden"));
+
+        mockMvc.perform(get("/api/v1/transactions/tx-1"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("ACCESS_DENIED"));
+    }
+
+    // ── byAccount() ──────────────────────────────────────────────────────────────
+
+    @Test
     void shouldReturn200WithListOfTransactionsByAccount() throws Exception {
-        Page<TransactionResponse> page = new PageImpl<>(List.of(anyResponse("tx-1"), anyResponse("tx-2")));
+        Page<TransactionResponse> page = new PageImpl<>(
+                List.of(anyResponse("tx-1"), anyResponse("tx-2")));
         when(transactionService.findByAccount(eq("acc-1"), any())).thenReturn(page);
 
         mockMvc.perform(get("/api/v1/transactions/by-account/acc-1"))
@@ -142,6 +163,8 @@ class TransactionControllerWebMvcTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.length()").value(0));
     }
+
+    // ── quote() ──────────────────────────────────────────────────────────────────
 
     @Test
     void shouldReturn200WithFeeQuoteOnValidParams() throws Exception {
@@ -162,13 +185,13 @@ class TransactionControllerWebMvcTest {
     void shouldRejectQuoteWhenAmountMissing() throws Exception {
         mockMvc.perform(get("/api/v1/transactions/fee/quote")
                         .param("type", "DOMESTIC_TRANSFER"))
-                .andExpect(status().is5xxServerError());
+                .andExpect(status().isBadRequest());
     }
 
     @Test
     void shouldRejectQuoteWhenTypeMissing() throws Exception {
         mockMvc.perform(get("/api/v1/transactions/fee/quote")
                         .param("amount", "100"))
-                .andExpect(status().is5xxServerError());
+                .andExpect(status().isBadRequest());
     }
 }

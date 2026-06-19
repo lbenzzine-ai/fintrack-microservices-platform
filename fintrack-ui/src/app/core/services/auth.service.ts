@@ -2,12 +2,15 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { tap } from 'rxjs/operators';
-import { AuthResponse, LoginRequest, RegisterRequest } from '../models/models';
+import { AuthResponse, LoginRequest, RegisterRequest, UserInfo } from '../models/models';
+import { AccountService } from './account.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
+  // Lazy inject to avoid circular dependency
+  private get accountService() { return inject(AccountService); }
   private readonly API = '/api/v1/auth';
 
   login(req: LoginRequest) {
@@ -26,13 +29,9 @@ export class AuthService {
     );
   }
 
-  register(req: RegisterRequest) {
-    return this.http.post<any>(`${this.API}/register`, req).pipe(
-      tap(res => {
-        localStorage.setItem('fintrack_user_registered', JSON.stringify(res));
-      })
-    );
-  }
+register(req: RegisterRequest) {
+  return this.http.post<UserInfo>(`${this.API}/register`, req);
+}
 
   logout() {
     localStorage.removeItem('fintrack_token');

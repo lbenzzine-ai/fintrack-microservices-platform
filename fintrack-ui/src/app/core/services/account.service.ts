@@ -19,8 +19,7 @@ export class AccountService {
     if (!this.accountCache$) {
       this.accountCache$ = this.http.get<Account>(`${this.API}/me`).pipe(
         tap(account => this.accountSubject.next(account)),
-        map(account => [account]),
-        shareReplay(1)
+        map(account => [account])
       );
     }
     return this.accountCache$;

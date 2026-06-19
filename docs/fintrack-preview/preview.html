@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1440">
+  <title>FinTrack — Financial Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0A1628;
+      --bg-soft: #0F1D33;
+      --border: rgba(212, 168, 71, 0.18);
+      --border-soft: rgba(212, 168, 71, 0.08);
+      --gold: #D4A847;
+      --gold-bright: #E5BC5F;
+      --text: #F5F0E1;
+      --text-dim: #8295AC;
+      --text-faint: #4D5F78;
+    }
+
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', system-ui, sans-serif;
+      font-weight: 400;
+      min-height: 100vh;
+      background-image:
+        radial-gradient(ellipse 90% 50% at 50% -10%, rgba(212, 168, 71, 0.07), transparent 60%),
+        linear-gradient(rgba(212, 168, 71, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(212, 168, 71, 0.025) 1px, transparent 1px);
+      background-size: auto, 56px 56px, 56px 56px;
+      background-position: center top, center top, center top;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    .container {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 56px 64px 64px;
+      position: relative;
+    }
+
+    .container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 64px;
+      right: 64px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border) 20%, var(--border) 80%, transparent);
+    }
+
+    .brand {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      padding-bottom: 40px;
+    }
+
+    .brand-left {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .wordmark {
+      font-family: 'Playfair Display', serif;
+      font-size: 32px;
+      font-weight: 500;
+      color: var(--gold);
+      letter-spacing: -0.015em;
+      line-height: 1;
+    }
+
+    .tagline {
+      font-size: 11px;
+      letter-spacing: 0.28em;
+      color: var(--text-faint);
+      margin-top: 8px;
+      font-weight: 500;
+    }
+
+    .brand-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--gold);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--gold);
+    }
+
+    .version {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--text-dim);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .hero {
+      padding: 64px 0 56px;
+      max-width: 920px;
+      position: relative;
+    }
+
+    .eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--gold);
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .eyebrow::before {
+      content: '';
+      width: 32px;
+      height: 1px;
+      background: var(--gold);
+    }
+
+    .headline {
+      font-family: 'Playfair Display', serif;
+      font-weight: 400;
+      font-size: 64px;
+      line-height: 1.05;
+      letter-spacing: -0.025em;
+      color: var(--text);
+    }
+
+    .headline em {
+      font-style: italic;
+      color: var(--gold);
+      font-weight: 500;
+    }
+
+    .subhead {
+      font-size: 17px;
+      color: var(--text-dim);
+      margin-top: 28px;
+      max-width: 620px;
+      line-height: 1.55;
+    }
+
+    .panes {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      margin-top: 24px;
+    }
+
+    .pane {
+      position: relative;
+    }
+
+    .pane-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 20px;
+      padding: 0 2px;
+    }
+
+    .pane-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--gold);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+    }
+
+    .pane-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      color: var(--text);
+      font-style: italic;
+      font-weight: 400;
+    }
+
+    .frame {
+      position: relative;
+      border-radius: 10px;
+      overflow: hidden;
+      background: var(--bg-soft);
+      border: 1px solid var(--border);
+      box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.5),
+        0 32px 64px -20px rgba(0, 0, 0, 0.7),
+        0 12px 32px -8px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    }
+
+    .frame::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 10px;
+      pointer-events: none;
+      box-shadow: inset 0 0 0 1px rgba(212, 168, 71, 0.08);
+    }
+
+    .screenshot {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .pane-caption {
+      margin-top: 20px;
+      padding: 0 2px;
+      font-size: 13px;
+      color: var(--text-dim);
+      line-height: 1.6;
+      max-width: 90%;
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+      margin-top: 88px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+    }
+
+    .feature {
+      padding: 0 24px;
+      border-left: 1px solid var(--border-soft);
+    }
+
+    .feature:first-child {
+      border-left: none;
+      padding-left: 2px;
+    }
+
+    .feature-icon {
+      color: var(--gold);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      margin-bottom: 14px;
+      font-weight: 500;
+    }
+
+    .feature h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 19px;
+      font-weight: 400;
+      color: var(--text);
+      margin-bottom: 8px;
+      letter-spacing: -0.01em;
+    }
+
+    .feature p {
+      font-size: 13px;
+      color: var(--text-dim);
+      line-height: 1.55;
+    }
+
+    .footer {
+      margin-top: 72px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: var(--text-faint);
+    }
+
+    .footer-left {
+      letter-spacing: 0.03em;
+    }
+
+    .footer-left strong {
+      color: var(--text-dim);
+      font-weight: 500;
+    }
+
+    .footer-stats {
+      display: flex;
+      gap: 40px;
+    }
+
+    .footer-stat {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 2px;
+    }
+
+    .footer-stat-value {
+      color: var(--gold);
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+      line-height: 1;
+    }
+
+    .footer-stat-label {
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+    }
+
+    .lock {
+      display: inline-block;
+      margin-right: 6px;
+      color: var(--gold);
+      font-size: 11px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <header class="brand">
+      <div class="brand-left">
+        <div class="wordmark">FinTrack</div>
+        <div class="tagline">FINANCIAL PLATFORM</div>
+      </div>
+      <div class="brand-right">
+        <span class="status-dot"></span>
+        <span class="version">Production · v2026.5</span>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div class="eyebrow">Product preview</div>
+      <h1 class="headline">
+        Banking-grade<br>
+        <em>financial management</em><br>
+        for everyone.
+      </h1>
+      <p class="subhead">
+        Secure authentication, real-time transaction insights, and risk-scored history.
+        Engineered for clarity, built on JWT over TLS 1.3.
+      </p>
+    </section>
+
+    <section class="panes">
+      <article class="pane">
+        <div class="pane-label">
+          <span class="pane-num">01 / Authentication</span>
+          <span class="pane-title">Sign in</span>
+        </div>
+        <div class="frame">
+          <img src="login.jpg" alt="FinTrack sign-in page with email and password fields, branded with the gold FinTrack wordmark on a navy background." class="screenshot">
+        </div>
+        <p class="pane-caption">
+          Welcome flow with credential autofill, password manager integration, and JWT-protected
+          session handshake. Feature callouts surface the platform's instant transfers, risk
+          scoring, transaction history, and multi-channel notifications.
+        </p>
+      </article>
+
+      <article class="pane">
+        <div class="pane-label">
+          <span class="pane-num">02 / Dashboard</span>
+          <span class="pane-title">Transaction history</span>
+        </div>
+        <div class="frame">
+          <img src="dashboard.jpg" alt="FinTrack transaction history dashboard showing a donut chart of status breakdown, a bar chart of amount distribution, an account summary card, and a table of recent transfers." class="screenshot">
+        </div>
+        <p class="pane-caption">
+          Status breakdown, amount distribution, and complete transaction ledger — every
+          entry risk-scored, filterable by state, and traceable to the second. Built for
+          users who want to actually understand their money.
+        </p>
+      </article>
+    </section>
+
+    <section class="features">
+      <div class="feature">
+        <div class="feature-icon">— 01</div>
+        <h3>Instant transfers</h3>
+        <p>Send funds with real-time confirmation in under one second.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">— 02</div>
+        <h3>Risk-scored</h3>
+        <p>Every transaction is automatically evaluated and flagged for unusual activity.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">— 03</div>
+        <h3>Full history</h3>
+        <p>Track every transfer, fee, and notification across one auditable ledger.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">— 04</div>
+        <h3>Multi-channel alerts</h3>
+        <p>Email, SMS, and push notifications for every account event you care about.</p>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <div class="footer-left">
+        <span class="lock">●</span>© 2026 <strong>FinTrack</strong> &nbsp;·&nbsp; Secure &nbsp;·&nbsp; Reliable &nbsp;·&nbsp; Fast
+      </div>
+      <div class="footer-stats">
+        <div class="footer-stat">
+          <div class="footer-stat-value">10K+</div>
+          <div class="footer-stat-label">Transactions</div>
+        </div>
+        <div class="footer-stat">
+          <div class="footer-stat-value">99.9%</div>
+          <div class="footer-stat-label">Uptime</div>
+        </div>
+        <div class="footer-stat">
+          <div class="footer-stat-value">&lt;1s</div>
+          <div class="footer-stat-label">Avg. transfer</div>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+</body>
+</html>

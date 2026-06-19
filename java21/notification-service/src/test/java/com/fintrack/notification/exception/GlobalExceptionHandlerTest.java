@@ -56,7 +56,7 @@ class GlobalExceptionHandlerTest {
         assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
         assertThat(resp.getBody().getStatus()).isEqualTo(500);
         assertThat(resp.getBody().getCode()).isEqualTo("INTERNAL_ERROR");
-        assertThat(resp.getBody().getMessage()).isEqualTo("Unexpected error");
+        assertThat(resp.getBody().getMessage()).isEqualTo("Unexpected error — see correlationId in logs");
         assertThat(resp.getBody().getPath()).isEqualTo("/anything");
     }
 }
