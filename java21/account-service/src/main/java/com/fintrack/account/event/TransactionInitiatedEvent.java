@@ -15,5 +15,6 @@ public record TransactionInitiatedEvent(
         BigDecimal amount,
         BigDecimal fee,
         String currencyCode,
+        String type,
         Instant occurredAt
 ) implements Serializable {}

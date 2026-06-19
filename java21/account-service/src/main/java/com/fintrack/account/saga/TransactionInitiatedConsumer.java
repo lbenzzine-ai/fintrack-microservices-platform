@@ -1,7 +1,7 @@
 package com.fintrack.account.saga;
 
-import com.fintrack.account.event.TransactionFailedEvent;
 import com.fintrack.account.event.TransactionInitiatedEvent;
+import com.fintrack.account.event.TransactionFailedEvent;
 import com.fintrack.account.exception.AccountFrozenException;
 import com.fintrack.account.exception.AccountNotFoundException;
 import com.fintrack.account.exception.InsufficientFundsException;
@@ -13,16 +13,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
-
 import java.time.Instant;
 import java.util.UUID;
 
-/**
- * Saga step 4 — on {@code transaction-initiated}, attempt to debit the source account.
- * On success, {@link AccountService#debit} publishes {@code account-debited}.
- * On business failure (insufficient funds / frozen / unknown), we publish {@code transaction-failed}
- * with {@code alreadyDebited=false} so transaction-service marks the tx as FAILED without compensation.
- */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -40,11 +33,19 @@ public class TransactionInitiatedConsumer {
         containerFactory = "kafkaListenerContainerFactory"
     )
     public void onTransactionInitiated(@Payload TransactionInitiatedEvent event) {
-        log.info("[SAGA] transaction-initiated tx={} from={} amount={}",
-                event.transactionUuid(), event.fromAccountUuid(), event.amount());
+        log.info("[SAGA] transaction-initiated tx={} from={} to={} amount={}",
+                event.transactionUuid(), event.fromAccountUuid(), event.toAccountUuid(), event.amount());
         try {
+            // Step 1 — debit source account
             accountService.debit(event.fromAccountUuid(), event.transactionUuid(),
                     event.amount(), event.fee());
+
+            // Step 2 — credit destination account
+            if (event.toAccountUuid() != null && !event.toAccountUuid().isBlank()) {
+                accountService.credit(event.toAccountUuid(), event.transactionUuid(),
+                        event.amount());
+            }
+
         } catch (InsufficientFundsException ex) {
             publishFailure(event, "INSUFFICIENT_FUNDS", ex.getMessage(), false);
         } catch (AccountFrozenException ex) {

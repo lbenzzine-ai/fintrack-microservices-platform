@@ -6,25 +6,27 @@ import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
   standalone: true,
   imports: [RouterOutlet, RouterLink, RouterLinkActive],
   template: `
-    <div class="flex gap-6">
-      <!-- Sidebar -->
-      <div class="w-48 flex-shrink-0">
+    <div class="flex flex-col sm:flex-row gap-4 sm:gap-6">
+
+      <!-- Sidebar — horizontal on mobile, vertical on desktop -->
+      <div class="sm:w-48 flex-shrink-0">
         <div class="card p-3">
-          <div class="text-xs text-slate-muted uppercase tracking-widest mb-3 px-2">Admin</div>
-          <nav class="flex flex-col gap-1">
+          <div class="text-muted-uc mb-2 sm:mb-3 px-2">Admin</div>
+          <nav class="flex flex-row sm:flex-col gap-1">
             <a routerLink="/admin/infrastructure" routerLinkActive="bg-gold-500/10 text-gold-500"
-               class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-slate-muted hover:text-gold-500 hover:bg-gold-500/5 transition-colors">
-              <span>⚙️</span> Infrastructure
+               class="admin-nav-link flex-1 sm:flex-none justify-center sm:justify-start">
+              <span>⚙️</span>
+              <span class="hidden sm:inline">Infrastructure</span>
             </a>
             <a routerLink="/admin/users" routerLinkActive="bg-gold-500/10 text-gold-500"
-               class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-slate-muted hover:text-gold-500 hover:bg-gold-500/5 transition-colors">
-              <span>👥</span> User Management
+               class="admin-nav-link flex-1 sm:flex-none justify-center sm:justify-start">
+              <span>👥</span>
+              <span class="hidden sm:inline">User Management</span>
             </a>
           </nav>
         </div>
       </div>
 
-      <!-- Content -->
       <div class="flex-1 min-w-0">
         <router-outlet />
       </div>

@@ -9,18 +9,18 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [ReactiveFormsModule, CommonModule, RouterLink],
   template: `
-    <div class="min-h-screen bg-navy-800 flex items-center justify-center">
-      <div class="w-full max-w-sm">
+    <div class="auth-page-centered">
+      <div class="auth-container">
         <div class="font-display text-gold-500 text-4xl text-center mb-2">FinTrack</div>
-        <div class="text-slate-muted text-sm text-center mb-8">Create your account</div>
+        <div class="text-muted text-center mb-8">Create your account</div>
 
         <div class="card">
-          <div class="text-xs text-slate-muted uppercase tracking-widest mb-5">New account</div>
+          <div class="text-muted-uc mb-5">New account</div>
 
           <form [formGroup]="form" (ngSubmit)="submit()">
             <div class="grid grid-cols-2 gap-3 mb-3">
               <input formControlName="firstName" placeholder="First name" />
-              <input formControlName="lastName" placeholder="Last name" />
+              <input formControlName="lastName"  placeholder="Last name" />
             </div>
             <div class="mb-3">
               <input formControlName="username" placeholder="Username" />
@@ -39,7 +39,7 @@ import { CommonModule } from '@angular/common';
             </button>
           </form>
 
-          <div class="border-t border-gold-500/10 pt-4 mt-2 text-center">
+          <div class="divider pt-4 mt-2 text-center">
             <a routerLink="/login" class="text-gold-500 text-sm hover:text-gold-400">
               Already have an account? Sign in →
             </a>
@@ -50,29 +50,31 @@ import { CommonModule } from '@angular/common';
   `
 })
 export class RegisterComponent {
-  private fb = inject(FormBuilder);
+  private fb   = inject(FormBuilder);
   private auth = inject(AuthService);
   private router = inject(Router);
 
   form = this.fb.group({
     firstName: ['', Validators.required],
-    lastName: ['', Validators.required],
-    username: ['', Validators.required],
-    email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(8)]]
+    lastName:  ['', Validators.required],
+    username:  ['', Validators.required],
+    email:     ['', [Validators.required, Validators.email]],
+    password:  ['', [Validators.required, Validators.minLength(8)]]
   });
 
   loading = false;
-  error = '';
+  error   = '';
 
   submit() {
     if (this.form.invalid) return;
     this.loading = true;
-    this.error = '';
+    this.error   = '';
     this.auth.register(this.form.value as any).subscribe({
-      next: () => this.router.navigate(['/login']),
+      next:  () => this.router.navigate(['/login']),
       error: err => {
-        this.error = err.status === 0 ? "Cannot connect to server. Is the backend running?" : (err.error?.message || "Registration failed");
+        this.error = err.status === 0
+          ? 'Cannot connect to server. Is the backend running?'
+          : (err.error?.message || 'Registration failed');
         this.loading = false;
       }
     });
