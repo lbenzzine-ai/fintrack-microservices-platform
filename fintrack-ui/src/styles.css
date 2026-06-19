@@ -183,3 +183,86 @@
     @apply rounded-lg p-2 text-center border border-white/5;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   LIGHT THEME — html.light-theme activates light mode
+   Warm cream palette that retains the gold accent identity.
+   Specificity (0,2,1) beats Tailwind's (0,1,0) without !important
+   on class selectors, but !important is used for inline-style
+   overrides in component CSS blocks.
+   ═══════════════════════════════════════════════════════════════ */
+
+html.light-theme body {
+  background-color: #F5F2EC;
+  color: #0F1E35;
+}
+
+/* ── Background surfaces ─────────────────────────────────────── */
+html.light-theme .bg-navy-950 { background-color: #E8E4DA !important; }
+html.light-theme .bg-navy-900 { background-color: #FFFFFF !important; }
+html.light-theme .bg-navy-800 { background-color: #F5F2EC !important; }
+html.light-theme .bg-navy-700 { background-color: #EDE9E0 !important; }
+html.light-theme .bg-navy-600 { background-color: #E2DDD3 !important; }
+html.light-theme .bg-navy-500 { background-color: #D4CFC5 !important; }
+
+/* ── Text colours ────────────────────────────────────────────── */
+html.light-theme .text-slate-text  { color: #0F1E35 !important; }
+html.light-theme .text-slate-light { color: #374355 !important; }
+/* slate-muted (#5A7090) reads fine on both themes — no override needed */
+
+/* ── Borders that use white/opacity ──────────────────────────── */
+html.light-theme .border-white\/5  { border-color: rgba(15,30,53,0.07)  !important; }
+html.light-theme .border-white\/10 { border-color: rgba(15,30,53,0.10)  !important; }
+
+/* ── Form inputs ─────────────────────────────────────────────── */
+html.light-theme input,
+html.light-theme select,
+html.light-theme textarea {
+  background-color: #FFFFFF !important;
+  color: #0F1E35 !important;
+  border-color: rgba(196,163,82,0.35) !important;
+}
+html.light-theme input::placeholder,
+html.light-theme textarea::placeholder { color: #8A9BB5 !important; }
+
+/* ── Nav-specific ─────────────────────────────────────────────── */
+html.light-theme .nav-link         { color: #374355 !important; }
+html.light-theme .nav-tooltip      { background-color: #FFFFFF; color: #374355; border-color: rgba(196,163,82,0.25); }
+html.light-theme .admin-nav-link   { color: #374355 !important; }
+
+/* ── Cards & surfaces (hardcoded backgrounds) ────────────────── */
+html.light-theme .account-card  { background: rgba(237,233,224,0.9) !important; }
+html.light-theme .balance-float { background: rgba(255,255,255,0.95) !important; }
+html.light-theme .pattern-card  { background: linear-gradient(135deg, rgba(237,233,224,0.8), rgba(245,242,236,0.8)) !important; }
+html.light-theme .tech-card,
+html.light-theme .link-card     { background: rgba(237,233,224,0.6) !important; }
+html.light-theme .service-badge { background-color: #EDE9E0 !important; color: #374355 !important; }
+html.light-theme .arch-node     { background-color: #FFFFFF !important; color: #0F1E35 !important; }
+html.light-theme .infra-card    { background-color: #EDE9E0 !important; }
+
+/* ── Hero banner ─────────────────────────────────────────────── */
+html.light-theme .hero-banner {
+  background: linear-gradient(135deg, #E2DDD3 0%, #EDE9E0 50%, #F5F2EC 100%);
+}
+html.light-theme .hero-grid {
+  background-image:
+    linear-gradient(rgba(196,163,82,0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(196,163,82,0.08) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* ── Transaction table ───────────────────────────────────────── */
+html.light-theme .tx-table th { color: #374355; border-color: rgba(196,163,82,0.15); }
+html.light-theme .tx-table td { color: #0F1E35; border-color: rgba(15,30,53,0.06); }
+html.light-theme .tx-table tr:hover td { background: rgba(196,163,82,0.05); }
+
+/* ── Login panel — keep the left panel slightly warm dark ────── */
+html.light-theme .login-left-panel {
+  background: linear-gradient(135deg, #C4B89A 0%, #D4C8A8 60%, #E2D8C0 100%);
+}
+html.light-theme .login-grid-bg {
+  background-image:
+    linear-gradient(rgba(196,163,82,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(196,163,82,0.06) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
