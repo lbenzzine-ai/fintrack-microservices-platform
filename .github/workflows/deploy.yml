@@ -172,7 +172,15 @@ jobs:
             echo "✅ Service status:"
             docker compose ps --format "table {{.Name}}\t{{.Status}}"
 
-            echo "🧹 Preparing Nginx folder..."
+            echo "✅ Java services deployed"
+
+      - name: Prepare Nginx folder
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.ORACLE_HOST }}
+          username: ubuntu
+          key: ${{ secrets.ORACLE_SSH_KEY }}
+          script: |
             sudo rm -rf /var/www/fintrack
             sudo mkdir -p /var/www/fintrack
             sudo chown ubuntu:ubuntu /var/www/fintrack
