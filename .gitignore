@@ -62,6 +62,7 @@ coverage/
 **/surefire-reports/
 **/failsafe-reports/
 .claude/
+CLAUDE.md
 
 # Local stack runner state (pid files)
 .run-stack/
