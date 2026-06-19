@@ -19,8 +19,7 @@ import { Account, Transaction } from '../../core/models/models';
         <div class="text-muted hidden sm:block">Manage your accounts, send money and track your transaction history.</div>
       </div>
       <div class="text-right shrink-0 ml-4 hidden sm:block whitespace-nowrap">
-        <div class="text-muted">{{ today | date:'EEEE, MMMM d' }}</div>
-        <div class="text-xs text-slate-muted/60 mt-0.5">{{ today | date:'y' }}</div>
+        <div class="text-muted">{{ today | date:'EEEE, MMMM d, y' }}</div>
       </div>
     </div>
 
